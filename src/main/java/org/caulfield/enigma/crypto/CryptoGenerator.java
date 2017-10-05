@@ -147,7 +147,7 @@ public class CryptoGenerator {
         File f = new File(fileName);
 
         try {
-            if (quickCheckPrivateKey(f)) {
+            if (!quickCheckPrivateKey(f)) {
                 throw new EnigmaException(fileName + " is not a private key file.");
             }
             fis = new FileInputStream(f);
@@ -686,21 +686,22 @@ public class CryptoGenerator {
         }
         return "Private key " + directory + fileOutName + " successfully created" + (hasPassword ? " with password " + privateKeyPassword + "." : " without password.");
     }
-// cg.generateCertificateFromPublicKeyAndPrivateKey(jTextFieldCertCN.getText(),jTextFieldCertTargetPubFile.getText(),jTextFieldCertPkPw.getText(),jTextFieldCertTargetPkFile.getText(), jTextFieldCertTargetDirectory.getText(), jTextFieldPubTargetFilename.getText());
 
     public boolean quickCheckPublicKey(File publicKeyFile) throws FileNotFoundException, IOException {
-        FileInputStream fis = new FileInputStream(publicKeyFile);
+        File publicFile = publicKeyFile;
+        FileInputStream fis = new FileInputStream(publicFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         return br.readLine().contains("PUBLIC");
     }
 
     public boolean quickCheckPrivateKey(File privateKeyFile) throws FileNotFoundException, IOException {
-        FileInputStream fis = new FileInputStream(privateKeyFile);
+        File privateFile = privateKeyFile;
+        FileInputStream fis = new FileInputStream(privateFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         return br.readLine().contains("PRIVATE");
     }
 
-    public String generateCertificateFromPublicKeyAndPrivateKey(String CN, String pubFile, String privFile, String privPassword, String targetDirectory, String targetFilename) {
+    public String generateCertificateFromPublicKeyAndPrivateKey(String CN, String pubFile, String privFile, String privPassword, String targetDirectory, String targetFilename, Date expiryDate) {
 
         PrivateKey privateKey = null;
         try {
@@ -723,8 +724,7 @@ public class CryptoGenerator {
 
             Date startDate = new Date(System.currentTimeMillis() - 24 * 60 * 60
                     * 1000);
-            Date endDate = new Date(System.currentTimeMillis() + 365 * 24 * 60
-                    * 60 * 1000);
+            Date endDate = expiryDate;
 
             X509v1CertificateBuilder v1CertGen = new X509v1CertificateBuilder(
                     new X500Name(CN), BigInteger.ONE, startDate, endDate,
@@ -736,6 +736,16 @@ public class CryptoGenerator {
             X509CertificateHolder certHolder = v1CertGen.build(sigGen);
             System.out.println(certHolder.getSubject().toString() + " - "
                     + certHolder.getNotAfter());
+
+            // Save the public key to the file system, in the webapp this should
+            // get saved to some directory configurable via a properties file
+            final File publicKeyFile = new File(targetDirectory + targetFilename);
+            final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
+                    new FileWriter(publicKeyFile));
+            publicPemWriter.writeObject(certHolder);
+            publicPemWriter.flush();
+            publicPemWriter.close();
+
             X509Certificate pubCert = new JcaX509CertificateConverter()
                     .setProvider("BC").getCertificate(certHolder);
             return "Certificate successfully generated with " + pubCert.getSubjectDN().getName() + " and expiry date : " + pubCert.getNotAfter();
@@ -743,6 +753,9 @@ public class CryptoGenerator {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
             return "Certificate generation failed : " + ex;
         } catch (CertificateException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "Certificate generation failed : " + ex;
+        } catch (IOException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
             return "Certificate generation failed : " + ex;
         }
@@ -754,7 +767,7 @@ public class CryptoGenerator {
 
             FileInputStream fis = null;
             File f = new File(pubFile);
-            if (quickCheckPublicKey(f)) {
+            if (!quickCheckPublicKey(f)) {
                 throw new EnigmaException(pubFile + " is not a public key file.");
             }
             fis = new FileInputStream(f);
@@ -768,14 +781,16 @@ public class CryptoGenerator {
                     if (line.startsWith("-----BEGIN ")
                             && line.endsWith(" PUBLIC KEY-----")) {
                         inKey = true;
-                        builder.append("-----BEGIN RSA PUBLIC KEY-----");
+                        //builder.append(line);
+                        //builder.append("-----BEGIN RSA PUBLIC KEY-----\n");
                     }
                     continue;
                 } else {
                     if (line.startsWith("-----END ")
                             && line.endsWith(" PUBLIC KEY-----")) {
                         inKey = false;
-                        builder.append("-----END RSA PUBLIC KEY-----");
+                        //builder.append("\n-----END RSA PUBLIC KEY-----");
+                        //  builder.append(line);
                         break;
                     }
                     builder.append(line);
@@ -785,7 +800,14 @@ public class CryptoGenerator {
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             X509EncodedKeySpec spec
                     = new X509EncodedKeySpec(encoded);
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.getPublicKeyV2() : " + builder.toString());
             KeyFactory kf = KeyFactory.getInstance("RSA");
+            
+             
+            SubjectPublicKeyInfo subjectPublicKeyInfo = new SubjectPublicKeyInfo(
+                    ASN1Sequence.getInstance(encoded));
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.getPublicKeyV2()" + subjectPublicKeyInfo.parsePublicKey().toASN1Primitive().toString());
+            
             return kf.generatePublic(spec);
 
         } catch (IOException ex) {
