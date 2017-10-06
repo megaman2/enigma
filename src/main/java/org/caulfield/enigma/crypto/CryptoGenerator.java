@@ -64,6 +64,7 @@ import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -102,31 +103,39 @@ public class CryptoGenerator {
         return g.generateKeyPair();
     }
 
-    public static PKCS10CertificationRequest CreateCSRfromKeyPair(KeyPair pair) {
+    public String buildCSRfromKeyPair(String CN, String pkFileName, String pkPassword, String pubFileName, String outputFileName, String outputDirectory) {
+        try {
+            PKCS10CertificationRequest csr = CreateCSRfromKeyPair(CN, getPrivateKey(pkFileName, pkPassword), getPublicKeyV2(pubFileName));
+            final File csrFile = new File(outputDirectory + outputFileName);
+            final JcaPEMWriter publicPemWriter;
+            publicPemWriter = new JcaPEMWriter(new FileWriter(csrFile));
+            publicPemWriter.writeObject(csr);
+            publicPemWriter.flush();
+            publicPemWriter.close();
 
-        PrivateKey privateKey = pair.getPrivate();
-        PublicKey publicKey = pair.getPublic();
+        } catch (EnigmaException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "PKCS#10 generation failed : " + ex.getMsg();
+        } catch (IOException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "PKCS#10 generation failed : " + ex.getMessage();
+        }
+        return "PKCS#10 file "+outputFileName+" successfully generated with " + CN;
+    }
 
-        // import javax.security.auth.x500.X500Principal
-        X500Principal subject = new X500Principal(
-                "C=NO, ST=Trondheim, L=Trondheim, O=Senthadev, OU=Innovation, CN=www.senthadev.com, EMAILADDRESS=senthadev@gmail.com");
+    private PKCS10CertificationRequest CreateCSRfromKeyPair(String CN, PrivateKey privateKey, PublicKey publicKey) {
 
-        // import org.bouncycastle.operator.ContentSigner
+        X500Principal subject = new X500Principal(CN);
+
         ContentSigner signGen = null;
         try {
             signGen = new JcaContentSignerBuilder("SHA1withRSA")
                     .build(privateKey);
         } catch (OperatorCreationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        // import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-        // import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
-        // import
-        // org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
-        PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(
-                subject, publicKey);
+        PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subject, publicKey);
         PKCS10CertificationRequest csr = builder.build(signGen);
         return csr;
 
