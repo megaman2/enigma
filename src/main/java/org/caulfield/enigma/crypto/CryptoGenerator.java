@@ -95,10 +95,10 @@ import org.caulfield.enigma.crypto.x509.PrivateKeyReader;
 
 public class CryptoGenerator {
 
-    private static AsymmetricCipherKeyPair CreateRSAKey(int size) {
+    private static AsymmetricCipherKeyPair CreateRSAKey(int size, String publicExponent, int certainty) {
         RSAKeyPairGenerator g = new RSAKeyPairGenerator();
-        g.init(new RSAKeyGenerationParameters(new BigInteger("65537"),
-                new SecureRandom(), size, 8));
+        g.init(new RSAKeyGenerationParameters(new BigInteger(publicExponent),
+                new SecureRandom(), size, certainty));
         return g.generateKeyPair();
     }
 
@@ -297,9 +297,9 @@ public class CryptoGenerator {
         return writePublicKey(myPublicKey, targetDirectory, fileOutName);
     }
 
-    public static String generatePKCS12(int size, String CN, String p12Password, String keyPassword, String directory) {
+    public static String generatePKCS12(int size, String CN, String p12Password, String keyPassword, String directory, String publicExponent, int certainty, Date expiryDate) {
         String returnString = "OK";
-        AsymmetricCipherKeyPair pair = CryptoGenerator.CreateRSAKey(1024);
+        AsymmetricCipherKeyPair pair = CryptoGenerator.CreateRSAKey(size, publicExponent, certainty);
         AsymmetricKeyParameter privateKey = pair.getPrivate();
         AsymmetricKeyParameter publicKey = pair.getPublic();
 
@@ -320,8 +320,7 @@ public class CryptoGenerator {
 
             Date startDate = new Date(System.currentTimeMillis() - 24 * 60 * 60
                     * 1000);
-            Date endDate = new Date(System.currentTimeMillis() + 365 * 24 * 60
-                    * 60 * 1000);
+            Date endDate = expiryDate;
 
             X509v1CertificateBuilder v1CertGen = new X509v1CertificateBuilder(
                     new X500Name(CN), BigInteger.ONE, startDate, endDate,
@@ -634,9 +633,9 @@ public class CryptoGenerator {
 //        System.out.println(generatePKCS12(1024, "CN=TEST PBA", "password",
 //                "keypassword", "F:\\Certificates\\"));
 //    }
-    public String buildPrivateKey(String directory, String privateKeyPassword, String fileOutName) {
+    public String buildPrivateKey(String directory, String privateKeyPassword, String fileOutName, int size, String publicExponent, int certainty) {
 
-        AsymmetricCipherKeyPair pair = CryptoGenerator.CreateRSAKey(1024);
+        AsymmetricCipherKeyPair pair = CryptoGenerator.CreateRSAKey(size, publicExponent, certainty);
         AsymmetricKeyParameter privateKey = pair.getPrivate();
         PrivateKey privkey = null;
         boolean hasPassword = false;
@@ -802,12 +801,11 @@ public class CryptoGenerator {
                     = new X509EncodedKeySpec(encoded);
             System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.getPublicKeyV2() : " + builder.toString());
             KeyFactory kf = KeyFactory.getInstance("RSA");
-            
-             
+
             SubjectPublicKeyInfo subjectPublicKeyInfo = new SubjectPublicKeyInfo(
                     ASN1Sequence.getInstance(encoded));
             System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.getPublicKeyV2()" + subjectPublicKeyInfo.parsePublicKey().toASN1Primitive().toString());
-            
+
             return kf.generatePublic(spec);
 
         } catch (IOException ex) {
