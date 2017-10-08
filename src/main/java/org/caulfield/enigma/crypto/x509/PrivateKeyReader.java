@@ -198,7 +198,7 @@ public class PrivateKeyReader {
 
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException ex) {
             Logger.getLogger(PrivateKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-            return "not a X509 file";
+            return "Not a private key";
         }
     }
 

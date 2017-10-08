@@ -54,15 +54,15 @@ public class PublicKeyReader {
 
     // Private key file using PKCS #1 encoding
     public static final String P1_BEGIN_MARKER
-            = "-----BEGIN RSA PRIVATE KEY"; //$NON-NLS-1$
+            = "-----BEGIN RSA PUBLIC KEY"; //$NON-NLS-1$
     public static final String P1_END_MARKER
-            = "-----END RSA PRIVATE KEY"; //$NON-NLS-1$
+            = "-----END RSA PUBLIC KEY"; //$NON-NLS-1$
 
     // Private key file using PKCS #8 encoding
     public static final String P8_BEGIN_MARKER
-            = "-----BEGIN PRIVATE KEY"; //$NON-NLS-1$
+            = "-----BEGIN PUBLIC KEY"; //$NON-NLS-1$
     public static final String P8_END_MARKER
-            = "-----END PRIVATE KEY"; //$NON-NLS-1$
+            = "-----END PUBLIC KEY"; //$NON-NLS-1$
 
     private static Map<String, PrivateKey> keyCache
             = Collections.synchronizedMap(new HashMap<String, PrivateKey>());
@@ -150,7 +150,7 @@ public class PublicKeyReader {
 
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException ex) {
             Logger.getLogger(PublicKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-            return "Not a public key.";
+            return "Not a public key";
         }
     }
 

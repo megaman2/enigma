@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,11 +31,14 @@ public class FileAnalyzer {
 
     public FileAnalyzer(String file) {
         results = new ArrayList<String>();
+        long startTime = System.nanoTime();
         File f = new File(file);
         results.add("Starting analysis of " + f.getName() + "...");
         results.add("File type : " + identifyFileTypeUsingFilesProbeContentType(f));
         results.add("PGP detection : " + tryPGP(f));
         results.add("X509 detection : " + tryX509(f));
+        long endTime = System.nanoTime();
+        results.add("Analysis completed in "+(endTime - startTime)/1000000 +" ms.");
     }
 
     /**
@@ -83,12 +87,12 @@ public class FileAnalyzer {
         Scenario scenario = new Scenario();
         scenario.addStep(X509Manager.class, xmng, file, "detectPrivateKey");
         scenario.addStep(X509Manager.class, xmng, file, "detectPublicKey");
-
+        scenario.addStep(X509Manager.class, xmng, file, "detectCSR");
         String tryResult = "";
         while (scenario.hasNextStep() && !tryResult.contains("detected")) {
-            tryResult = ((String) scenario.runNextStep())+" | ";
+            tryResult += ((String) scenario.runNextStep()) + " > ";
         }
-        return tryResult;
+        return tryResult.substring(0, tryResult.length()-3);
 
     }
 }
