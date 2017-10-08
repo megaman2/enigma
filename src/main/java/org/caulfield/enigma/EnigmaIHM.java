@@ -5,7 +5,6 @@
  */
 package org.caulfield.enigma;
 
-import org.caulfield.enigma.analyzer.FileAnalyzer;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -20,6 +19,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.ACManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 
@@ -87,8 +87,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jFileChooserDirectoriesOnly = new javax.swing.JFileChooser();
         jFrame1 = new javax.swing.JFrame();
         jFileChooserFileOnly = new javax.swing.JFileChooser();
-        jProgressBar1 = new javax.swing.JProgressBar();
-        jTabbedPane3 = new javax.swing.JTabbedPane();
+        jTabbedPaneScreens = new javax.swing.JTabbedPane();
+        jTabbedPaneGenerate = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jTextFieldKeystorePW = new javax.swing.JTextField();
@@ -170,16 +170,21 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jButtonCSRGenerate = new javax.swing.JButton();
         jLabel32 = new javax.swing.JLabel();
         jLabel33 = new javax.swing.JLabel();
-        jTextFieldCertTargetPkFile1 = new javax.swing.JTextField();
-        jTextFieldCertTargetPkFile2 = new javax.swing.JTextField();
-        jButtonBrowseCertPk1 = new javax.swing.JButton();
-        jButtonBrowseCertPub1 = new javax.swing.JButton();
+        jTextFieldP10Pub = new javax.swing.JTextField();
+        jTextFieldP10Pk = new javax.swing.JTextField();
+        jButtonBrowseP10Pk = new javax.swing.JButton();
+        jButtonBrowseP10Pub = new javax.swing.JButton();
         jLabel34 = new javax.swing.JLabel();
-        jTextFieldCertPkPw1 = new javax.swing.JTextField();
+        jTextFieldP10PkPw = new javax.swing.JTextField();
         jLabel35 = new javax.swing.JLabel();
-        jTextFieldCertTargetDirectory1 = new javax.swing.JTextField();
-        jButtonBrowseCertTargetDir1 = new javax.swing.JButton();
-        jPanel10 = new javax.swing.JPanel();
+        jTextFieldP10TargetDirectory = new javax.swing.JTextField();
+        jButtonBrowseP10TargetDir = new javax.swing.JButton();
+        jLabel36 = new javax.swing.JLabel();
+        jTextFieldP10CN = new javax.swing.JTextField();
+        jLabel37 = new javax.swing.JLabel();
+        jTextFieldP10TargetFilename = new javax.swing.JTextField();
+        jPanel14 = new javax.swing.JPanel();
+        jPanelAnalyze = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jTextFieldDrop = new javax.swing.JTextField();
         jButton7 = new javax.swing.JButton();
@@ -190,22 +195,24 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         jTextAreaDrop = new javax.swing.JTextArea();
         jButton8 = new javax.swing.JButton();
-        jPanel7 = new javax.swing.JPanel();
-        jPanel9 = new javax.swing.JPanel();
+        jPanelTransform = new javax.swing.JPanel();
+        jPanelACManagement = new javax.swing.JPanel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
-        jPanel13 = new javax.swing.JPanel();
-        jPanel11 = new javax.swing.JPanel();
+        jPanelPGPKeyring = new javax.swing.JPanel();
+        jPanelScenarios = new javax.swing.JPanel();
         jLabel18 = new javax.swing.JLabel();
         jButton10 = new javax.swing.JButton();
         jButton11 = new javax.swing.JButton();
         jButton12 = new javax.swing.JButton();
         jButton13 = new javax.swing.JButton();
         jButton14 = new javax.swing.JButton();
-        jScrollPane5 = new javax.swing.JScrollPane();
+        jPanelEvents = new javax.swing.JPanel();
+        jProgressBarEnigma = new javax.swing.JProgressBar();
+        jScrollPaneForEvents = new javax.swing.JScrollPane();
         jListEvents = new javax.swing.JList<>();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
@@ -240,7 +247,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTabbedPane3.setPreferredSize(new java.awt.Dimension(1239, 550));
+        jTabbedPaneScreens.setPreferredSize(new java.awt.Dimension(1239, 550));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "PKCS#12", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
@@ -836,22 +843,27 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jButtonCSRGenerate.setForeground(new java.awt.Color(255, 255, 255));
         jButtonCSRGenerate.setText("Générer un CSR (PKCS#10)");
         jButtonCSRGenerate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButtonCSRGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCSRGenerateActionPerformed(evt);
+            }
+        });
 
         jLabel32.setText("Private Key File : ");
 
         jLabel33.setText("Public Key File :");
 
-        jButtonBrowseCertPk1.setText("Parcourir...");
-        jButtonBrowseCertPk1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonBrowseP10Pk.setText("Parcourir...");
+        jButtonBrowseP10Pk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowseCertPk1ActionPerformed(evt);
+                jButtonBrowseP10PkActionPerformed(evt);
             }
         });
 
-        jButtonBrowseCertPub1.setText("Parcourir...");
-        jButtonBrowseCertPub1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonBrowseP10Pub.setText("Parcourir...");
+        jButtonBrowseP10Pub.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowseCertPub1ActionPerformed(evt);
+                jButtonBrowseP10PubActionPerformed(evt);
             }
         });
 
@@ -859,12 +871,16 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jLabel35.setText("Target Directory : ");
 
-        jButtonBrowseCertTargetDir1.setText("Parcourir...");
-        jButtonBrowseCertTargetDir1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonBrowseP10TargetDir.setText("Parcourir...");
+        jButtonBrowseP10TargetDir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowseCertTargetDir1ActionPerformed(evt);
+                jButtonBrowseP10TargetDirActionPerformed(evt);
             }
         });
+
+        jLabel36.setText("Requested CN :");
+
+        jLabel37.setText("Target Filename : ");
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -874,60 +890,79 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel33)
-                    .addComponent(jLabel32))
+                    .addComponent(jLabel32)
+                    .addComponent(jLabel36))
                 .addGap(35, 35, 35)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jTextFieldCertTargetPkFile2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonBrowseCertPk1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addComponent(jTextFieldP10Pk, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonBrowseP10Pk, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addComponent(jTextFieldP10Pub, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonBrowseP10Pub, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(32, 32, 32))
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jTextFieldCertTargetPkFile1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonBrowseCertPub1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(32, 32, 32)
+                        .addComponent(jTextFieldP10CN)
+                        .addGap(133, 133, 133)))
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel34)
-                    .addComponent(jLabel35))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jTextFieldCertTargetDirectory1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonBrowseCertTargetDir1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(205, 205, 205)
-                        .addComponent(jButtonCSRGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel34)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jTextFieldP10PkPw, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jTextFieldCertPkPw1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel35)
+                            .addComponent(jLabel37))
+                        .addGap(35, 35, 35)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextFieldP10TargetDirectory)
+                            .addComponent(jTextFieldP10TargetFilename))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonBrowseP10TargetDir, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(205, 205, 205)
+                .addComponent(jButtonCSRGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel32)
-                    .addComponent(jTextFieldCertTargetPkFile2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonBrowseCertPk1)
-                    .addComponent(jLabel34)
-                    .addComponent(jTextFieldCertPkPw1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonCSRGenerate)
+                .addGap(22, 22, 22))
+            .addGroup(jPanel6Layout.createSequentialGroup()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
-                        .addComponent(jButtonCSRGenerate)
-                        .addGap(22, 22, 22))
+                        .addGap(4, 4, 4)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel36)
+                            .addComponent(jTextFieldP10CN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel33)
-                            .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jTextFieldCertTargetPkFile1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jButtonBrowseCertPub1)
-                                .addComponent(jLabel35)
-                                .addComponent(jTextFieldCertTargetDirectory1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jButtonBrowseCertTargetDir1)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(3, 3, 3)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel34)
+                            .addComponent(jTextFieldP10PkPw, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel32)
+                    .addComponent(jTextFieldP10Pk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBrowseP10Pk)
+                    .addComponent(jLabel35)
+                    .addComponent(jTextFieldP10TargetDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBrowseP10TargetDir))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel33)
+                    .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jTextFieldP10Pub, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonBrowseP10Pub))
+                    .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel37)
+                        .addComponent(jTextFieldP10TargetFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -952,10 +987,25 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addGap(0, 6, Short.MAX_VALUE))
         );
 
-        jTabbedPane3.addTab("Générer", jPanel2);
+        jTabbedPaneGenerate.addTab("X509", jPanel2);
+
+        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
+        jPanel14.setLayout(jPanel14Layout);
+        jPanel14Layout.setHorizontalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1234, Short.MAX_VALUE)
+        );
+        jPanel14Layout.setVerticalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 643, Short.MAX_VALUE)
+        );
+
+        jTabbedPaneGenerate.addTab("PGP", jPanel14);
+
+        jTabbedPaneScreens.addTab("Générer", jTabbedPaneGenerate);
 
         jLabel7.setText("Analyze file : ");
 
@@ -1000,36 +1050,36 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10.setLayout(jPanel10Layout);
-        jPanel10Layout.setHorizontalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout jPanelAnalyzeLayout = new javax.swing.GroupLayout(jPanelAnalyze);
+        jPanelAnalyze.setLayout(jPanelAnalyzeLayout);
+        jPanelAnalyzeLayout.setHorizontalGroup(
+            jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane3)
-            .addGroup(jPanel10Layout.createSequentialGroup()
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel10Layout.createSequentialGroup()
+            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
                         .addGap(534, 534, 534)
                         .addComponent(jButton8))
-                    .addGroup(jPanel10Layout.createSequentialGroup()
+                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
                         .addGap(390, 390, 390)
-                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel10Layout.createSequentialGroup()
+                            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
                                 .addComponent(jLabel7)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jTextFieldDrop)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton7))))
-                    .addGroup(jPanel10Layout.createSequentialGroup()
+                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel8)))
-                .addContainerGap(461, Short.MAX_VALUE))
+                .addContainerGap(466, Short.MAX_VALUE))
         );
-        jPanel10Layout.setVerticalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
+        jPanelAnalyzeLayout.setVerticalGroup(
+            jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
                 .addGap(40, 40, 40)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(jTextFieldDrop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton7))
@@ -1040,23 +1090,23 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGap(9, 9, 9)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
         );
 
-        jTabbedPane3.addTab("Analyser", jPanel10);
+        jTabbedPaneScreens.addTab("Analyser", jPanelAnalyze);
 
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1234, Short.MAX_VALUE)
+        javax.swing.GroupLayout jPanelTransformLayout = new javax.swing.GroupLayout(jPanelTransform);
+        jPanelTransform.setLayout(jPanelTransformLayout);
+        jPanelTransformLayout.setHorizontalGroup(
+            jPanelTransformLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1239, Short.MAX_VALUE)
         );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 661, Short.MAX_VALUE)
+        jPanelTransformLayout.setVerticalGroup(
+            jPanelTransformLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 668, Short.MAX_VALUE)
         );
 
-        jTabbedPane3.addTab("Transformer", jPanel7);
+        jTabbedPaneScreens.addTab("Transformer", jPanelTransform);
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1100,35 +1150,35 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jTabbedPane2.addTab("Remote AC", jScrollPane2);
 
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1224, Short.MAX_VALUE)
+        javax.swing.GroupLayout jPanelACManagementLayout = new javax.swing.GroupLayout(jPanelACManagement);
+        jPanelACManagement.setLayout(jPanelACManagementLayout);
+        jPanelACManagementLayout.setHorizontalGroup(
+            jPanelACManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelACManagementLayout.createSequentialGroup()
+                .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1229, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+        jPanelACManagementLayout.setVerticalGroup(
+            jPanelACManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelACManagementLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jTabbedPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 635, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jTabbedPane3.addTab("Gestion ACs", jPanel9);
+        jTabbedPaneScreens.addTab("Gestion ACs", jPanelACManagement);
 
-        javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
-        jPanel13.setLayout(jPanel13Layout);
-        jPanel13Layout.setHorizontalGroup(
-            jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1234, Short.MAX_VALUE)
+        javax.swing.GroupLayout jPanelPGPKeyringLayout = new javax.swing.GroupLayout(jPanelPGPKeyring);
+        jPanelPGPKeyring.setLayout(jPanelPGPKeyringLayout);
+        jPanelPGPKeyringLayout.setHorizontalGroup(
+            jPanelPGPKeyringLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1239, Short.MAX_VALUE)
         );
-        jPanel13Layout.setVerticalGroup(
-            jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 661, Short.MAX_VALUE)
+        jPanelPGPKeyringLayout.setVerticalGroup(
+            jPanelPGPKeyringLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 668, Short.MAX_VALUE)
         );
 
-        jTabbedPane3.addTab("Gestion trousseau PGP", jPanel13);
+        jTabbedPaneScreens.addTab("Gestion trousseau PGP", jPanelPGPKeyring);
 
         jLabel18.setText("What do you want to do ?");
 
@@ -1142,25 +1192,25 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButton14.setText("I want to create a Certificate");
 
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelScenariosLayout = new javax.swing.GroupLayout(jPanelScenarios);
+        jPanelScenarios.setLayout(jPanelScenariosLayout);
+        jPanelScenariosLayout.setHorizontalGroup(
+            jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelScenariosLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jButton13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jButton10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton11, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jButton14, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(1003, Short.MAX_VALUE))
+                .addContainerGap(1008, Short.MAX_VALUE))
         );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
+        jPanelScenariosLayout.setVerticalGroup(
+            jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelScenariosLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel18)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1173,13 +1223,29 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addComponent(jButton13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton14)
-                .addContainerGap(466, Short.MAX_VALUE))
+                .addContainerGap(473, Short.MAX_VALUE))
         );
 
-        jTabbedPane3.addTab("Scenarios", jPanel11);
+        jTabbedPaneScreens.addTab("Scenarios", jPanelScenarios);
 
         jListEvents.setModel(new DefaultListModel<String>());
-        jScrollPane5.setViewportView(jListEvents);
+        jScrollPaneForEvents.setViewportView(jListEvents);
+
+        javax.swing.GroupLayout jPanelEventsLayout = new javax.swing.GroupLayout(jPanelEvents);
+        jPanelEvents.setLayout(jPanelEventsLayout);
+        jPanelEventsLayout.setHorizontalGroup(
+            jPanelEventsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jProgressBarEnigma, javax.swing.GroupLayout.DEFAULT_SIZE, 1244, Short.MAX_VALUE)
+            .addComponent(jScrollPaneForEvents)
+        );
+        jPanelEventsLayout.setVerticalGroup(
+            jPanelEventsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelEventsLayout.createSequentialGroup()
+                .addComponent(jScrollPaneForEvents, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jProgressBarEnigma, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
 
         menuBar.setVerifyInputWhenFocusTarget(false);
 
@@ -1250,18 +1316,16 @@ public class EnigmaIHM extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane5)
-            .addComponent(jTabbedPane3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.DEFAULT_SIZE, 1244, Short.MAX_VALUE)
+            .addComponent(jPanelEvents, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jTabbedPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 686, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.PREFERRED_SIZE, 693, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanelEvents, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0))
         );
 
         pack();
@@ -1290,6 +1354,44 @@ public class EnigmaIHM extends javax.swing.JFrame {
                     getAbsolutePath());
         }        // TODO add your handling code here:
     }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButtonBrowseP10TargetDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseP10TargetDirActionPerformed
+        // TODO add your handling code here:
+        //jFileChooser1.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int retour = jFileChooserDirectoriesOnly.showOpenDialog(this);
+        if (retour == JFileChooser.APPROVE_OPTION) {
+            // un fichier a été choisi (sortie par OK)
+            // nom du fichier  choisi
+            //            jFileChooser1.getSelectedFile().getName();
+            // chemin absolu du fichier choisi
+            jTextFieldP10TargetDirectory.setText(jFileChooserDirectoriesOnly.getSelectedFile().
+                    getAbsolutePath() + "\\");
+        }
+    }//GEN-LAST:event_jButtonBrowseP10TargetDirActionPerformed
+
+    private void jButtonBrowseP10PubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseP10PubActionPerformed
+        int retour = jFileChooserFileOnly.showOpenDialog(this);
+        if (retour == JFileChooser.APPROVE_OPTION) {
+            // un fichier a été choisi (sortie par OK)
+            // nom du fichier  choisi
+            //            jFileChooser1.getSelectedFile().getName();
+            // chemin absolu du fichier choisi
+            jTextFieldP10Pub.setText(jFileChooserFileOnly.getSelectedFile().
+                    getAbsolutePath());
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseP10PubActionPerformed
+
+    private void jButtonBrowseP10PkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseP10PkActionPerformed
+        int retour = jFileChooserFileOnly.showOpenDialog(this);
+        if (retour == JFileChooser.APPROVE_OPTION) {
+            // un fichier a été choisi (sortie par OK)
+            // nom du fichier  choisi
+            //            jFileChooser1.getSelectedFile().getName();
+            // chemin absolu du fichier choisi
+            jTextFieldP10Pk.setText(jFileChooserFileOnly.getSelectedFile().
+                    getAbsolutePath());
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseP10PkActionPerformed
 
     private void jButtonPubTargetDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPubTargetDirActionPerformed
         // TODO add your handling code here:
@@ -1368,68 +1470,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonCertGenerateActionPerformed
 
-    private void jButtonPKCS12GenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPKCS12GenerateActionPerformed
-        // TODO add your handling code here:
-        String pubExpo = (String) jSpinnerP12Expo.getValue();
-        if (!jSpinnerP12Expo.isEnabled()) {
-            pubExpo = props.getProperty("defaultPublicExponent");
-        }
-        int certainty = jSliderP12Certainty.getValue();
-        if (!jSliderP12Certainty.isEnabled()) {
-            certainty = Integer.parseInt(props.getProperty("defaultCertainty"));
-        }
-        CryptoGenerator.generatePKCS12((int) jSpinnerKeySize.getValue(), jTextFieldCN.getText(), jTextFieldKeystorePW.getText(), jTextFieldPKCS8PW.getText(), jTextFieldDirectory.getText(), pubExpo, certainty, jDateChooserP12Expiry.getDate());
-        ((DefaultListModel) jListEvents.getModel()).addElement("PKCS#12 successfully generated for " + jTextFieldCN.getText() + " in directory " + jTextFieldDirectory.getText() + ".");
-    }//GEN-LAST:event_jButtonPKCS12GenerateActionPerformed
-
-    private void jLabel10MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseEntered
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jLabel10MouseEntered
-
-    private void jComboBoxAlgoP12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxAlgoP12ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBoxAlgoP12ActionPerformed
-
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton6ActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-        //jFileChooser1.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int retour = jFileChooserDirectoriesOnly.showOpenDialog(this);
-        if (retour == JFileChooser.APPROVE_OPTION) {
-            // un fichier a été choisi (sortie par OK)
-            // nom du fichier  choisi
-            //            jFileChooser1.getSelectedFile().getName();
-            // chemin absolu du fichier choisi
-            jTextFieldDirectory.setText(jFileChooserDirectoriesOnly.getSelectedFile().
-                    getAbsolutePath() + "\\");
-        }
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jTextFieldKeystorePWActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldKeystorePWActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldKeystorePWActionPerformed
-
-    private void jCheckBoxP12ExpoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxP12ExpoActionPerformed
-        JCheckBox cbLog = (JCheckBox) evt.getSource();
-        if (cbLog.isSelected()) {
-            jSpinnerP12Expo.setEnabled(false);
-        } else {
-            jSpinnerP12Expo.setEnabled(true);
-        }
-    }//GEN-LAST:event_jCheckBoxP12ExpoActionPerformed
-
-    private void jCheckBoxP12CertaintyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxP12CertaintyActionPerformed
-        JCheckBox cbLog = (JCheckBox) evt.getSource();
-        if (cbLog.isSelected()) {
-            jSliderP12Certainty.setEnabled(false);
-        } else {
-            jSliderP12Certainty.setEnabled(true);
-        }
-    }//GEN-LAST:event_jCheckBoxP12CertaintyActionPerformed
-
     private void jButtonBrowsePkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowsePkActionPerformed
         // TODO add your handling code here:
         //jFileChooser1.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -1440,8 +1480,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
             //            jFileChooser1.getSelectedFile().getName();
             // chemin absolu du fichier choisi
             jTextFieldPkTargetDirectory.setText(jFileChooserDirectoriesOnly.getSelectedFile().
-                getAbsolutePath() + "\\");
-            }
+                    getAbsolutePath() + "\\");
+        }
     }//GEN-LAST:event_jButtonBrowsePkActionPerformed
 
     private void jComboBoxAlgoPkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxAlgoPkActionPerformed
@@ -1476,17 +1516,73 @@ public class EnigmaIHM extends javax.swing.JFrame {
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonPkGenerateActionPerformed
 
-    private void jButtonBrowseCertPk1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseCertPk1ActionPerformed
+    private void jButtonPKCS12GenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPKCS12GenerateActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonBrowseCertPk1ActionPerformed
+        String pubExpo = (String) jSpinnerP12Expo.getValue();
+        if (!jSpinnerP12Expo.isEnabled()) {
+            pubExpo = props.getProperty("defaultPublicExponent");
+        }
+        int certainty = jSliderP12Certainty.getValue();
+        if (!jSliderP12Certainty.isEnabled()) {
+            certainty = Integer.parseInt(props.getProperty("defaultCertainty"));
+        }
+        CryptoGenerator.generatePKCS12((int) jSpinnerKeySize.getValue(), jTextFieldCN.getText(), jTextFieldKeystorePW.getText(), jTextFieldPKCS8PW.getText(), jTextFieldDirectory.getText(), pubExpo, certainty, jDateChooserP12Expiry.getDate());
+        ((DefaultListModel) jListEvents.getModel()).addElement("PKCS#12 successfully generated for " + jTextFieldCN.getText() + " in directory " + jTextFieldDirectory.getText() + ".");
+    }//GEN-LAST:event_jButtonPKCS12GenerateActionPerformed
 
-    private void jButtonBrowseCertPub1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseCertPub1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonBrowseCertPub1ActionPerformed
+    private void jCheckBoxP12CertaintyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxP12CertaintyActionPerformed
+        JCheckBox cbLog = (JCheckBox) evt.getSource();
+        if (cbLog.isSelected()) {
+            jSliderP12Certainty.setEnabled(false);
+        } else {
+            jSliderP12Certainty.setEnabled(true);
+        }
+    }//GEN-LAST:event_jCheckBoxP12CertaintyActionPerformed
 
-    private void jButtonBrowseCertTargetDir1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseCertTargetDir1ActionPerformed
+    private void jCheckBoxP12ExpoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxP12ExpoActionPerformed
+        JCheckBox cbLog = (JCheckBox) evt.getSource();
+        if (cbLog.isSelected()) {
+            jSpinnerP12Expo.setEnabled(false);
+        } else {
+            jSpinnerP12Expo.setEnabled(true);
+        }
+    }//GEN-LAST:event_jCheckBoxP12ExpoActionPerformed
+
+    private void jLabel10MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseEntered
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonBrowseCertTargetDir1ActionPerformed
+    }//GEN-LAST:event_jLabel10MouseEntered
+
+    private void jComboBoxAlgoP12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxAlgoP12ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxAlgoP12ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        //jFileChooser1.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int retour = jFileChooserDirectoriesOnly.showOpenDialog(this);
+        if (retour == JFileChooser.APPROVE_OPTION) {
+            // un fichier a été choisi (sortie par OK)
+            // nom du fichier  choisi
+            //            jFileChooser1.getSelectedFile().getName();
+            // chemin absolu du fichier choisi
+            jTextFieldDirectory.setText(jFileChooserDirectoriesOnly.getSelectedFile().
+                    getAbsolutePath() + "\\");
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jTextFieldKeystorePWActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldKeystorePWActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldKeystorePWActionPerformed
+
+    private void jButtonCSRGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCSRGenerateActionPerformed
+        CryptoGenerator cg = new CryptoGenerator();
+        String outRet = cg.buildCSRfromKeyPair(jTextFieldP10CN.getText(), jTextFieldP10Pk.getText(), jTextFieldP10PkPw.getText(), jTextFieldP10Pub.getText(), jTextFieldP10TargetFilename.getText(), jTextFieldP10TargetDirectory.getText());
+        ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+    }//GEN-LAST:event_jButtonCSRGenerateActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1544,11 +1640,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButtonBrowseCertPk;
-    private javax.swing.JButton jButtonBrowseCertPk1;
     private javax.swing.JButton jButtonBrowseCertPub;
-    private javax.swing.JButton jButtonBrowseCertPub1;
     private javax.swing.JButton jButtonBrowseCertTargetDir;
-    private javax.swing.JButton jButtonBrowseCertTargetDir1;
+    private javax.swing.JButton jButtonBrowseP10Pk;
+    private javax.swing.JButton jButtonBrowseP10Pub;
+    private javax.swing.JButton jButtonBrowseP10TargetDir;
     private javax.swing.JButton jButtonBrowsePk;
     private javax.swing.JButton jButtonCSRGenerate;
     private javax.swing.JButton jButtonCertGenerate;
@@ -1599,6 +1695,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1607,23 +1705,25 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JList<String> jListEvents;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel10;
-    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
-    private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel9;
-    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JPanel jPanelACManagement;
+    private javax.swing.JPanel jPanelAnalyze;
+    private javax.swing.JPanel jPanelEvents;
+    private javax.swing.JPanel jPanelPGPKeyring;
+    private javax.swing.JPanel jPanelScenarios;
+    private javax.swing.JPanel jPanelTransform;
+    private javax.swing.JProgressBar jProgressBarEnigma;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPaneForEvents;
     private javax.swing.JSlider jSliderP12Certainty;
     private javax.swing.JSlider jSliderPkCertainty;
     private javax.swing.JSpinner jSpinnerKeySize;
@@ -1631,24 +1731,27 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JSpinner jSpinnerP12Expo;
     private javax.swing.JSpinner jSpinnerPkExpo;
     private javax.swing.JTabbedPane jTabbedPane2;
-    private javax.swing.JTabbedPane jTabbedPane3;
+    private javax.swing.JTabbedPane jTabbedPaneGenerate;
+    private javax.swing.JTabbedPane jTabbedPaneScreens;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTextArea jTextAreaDrop;
     private javax.swing.JTextField jTextFieldCN;
     private javax.swing.JTextField jTextFieldCertCN;
     private javax.swing.JTextField jTextFieldCertPkPw;
-    private javax.swing.JTextField jTextFieldCertPkPw1;
     private javax.swing.JTextField jTextFieldCertTargetDirectory;
-    private javax.swing.JTextField jTextFieldCertTargetDirectory1;
     private javax.swing.JTextField jTextFieldCertTargetFilename;
     private javax.swing.JTextField jTextFieldCertTargetPkFile;
-    private javax.swing.JTextField jTextFieldCertTargetPkFile1;
-    private javax.swing.JTextField jTextFieldCertTargetPkFile2;
     private javax.swing.JTextField jTextFieldCertTargetPubFile;
     private javax.swing.JTextField jTextFieldDirectory;
     private javax.swing.JTextField jTextFieldDrop;
     private javax.swing.JTextField jTextFieldKeystorePW;
+    private javax.swing.JTextField jTextFieldP10CN;
+    private javax.swing.JTextField jTextFieldP10Pk;
+    private javax.swing.JTextField jTextFieldP10PkPw;
+    private javax.swing.JTextField jTextFieldP10Pub;
+    private javax.swing.JTextField jTextFieldP10TargetDirectory;
+    private javax.swing.JTextField jTextFieldP10TargetFilename;
     private javax.swing.JTextField jTextFieldPKCS8PW;
     private javax.swing.JTextField jTextFieldPkPw;
     private javax.swing.JTextField jTextFieldPkTargetDirectory;

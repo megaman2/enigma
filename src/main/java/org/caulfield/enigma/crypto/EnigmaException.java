@@ -10,9 +10,11 @@ package org.caulfield.enigma.crypto;
  * @author Ender
  */
 public class EnigmaException extends Exception {
-private String msg;
+
+    private String msg;
+
     public EnigmaException(String msg) {
-        this.msg=msg;
+        this.msg = msg;
     }
 
     public String getMsg() {
@@ -22,5 +24,5 @@ private String msg;
     public void setMsg(String msg) {
         this.msg = msg;
     }
-    
+
 }

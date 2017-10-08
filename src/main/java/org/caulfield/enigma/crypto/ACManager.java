@@ -7,15 +7,14 @@ package org.caulfield.enigma.crypto;
 
 import java.util.ArrayList;
 
-
 /**
  *
  * @author Ender
  */
-public class ACManager {  
+public class ACManager {
 
     public Iterable<String> getFullACList() {
         return new ArrayList<String>();
     }
-    
+
 }

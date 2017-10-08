@@ -62,7 +62,7 @@ public class FileAnalyzer {
     }
 
     private String tryPGP(final File file) {
-       
+
         boolean b = false;
         try {
             InputStream ff = new FileInputStream(file);

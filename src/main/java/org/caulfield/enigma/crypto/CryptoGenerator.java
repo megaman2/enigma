@@ -120,7 +120,7 @@ public class CryptoGenerator {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
             return "PKCS#10 generation failed : " + ex.getMessage();
         }
-        return "PKCS#10 file "+outputFileName+" successfully generated with " + CN;
+        return "PKCS#10 file " + outputFileName + " successfully generated with " + CN;
     }
 
     private PKCS10CertificationRequest CreateCSRfromKeyPair(String CN, PrivateKey privateKey, PublicKey publicKey) {

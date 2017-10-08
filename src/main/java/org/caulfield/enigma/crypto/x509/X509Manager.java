@@ -40,7 +40,6 @@ public class X509Manager {
 //                return false;
 //            }
 
-       
             Logger.getLogger(X509Manager.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "No X509 detected.";
