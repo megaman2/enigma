@@ -34,6 +34,7 @@ public class FileAnalyzer {
         results = new ArrayList<>();
         long startTime = System.nanoTime();
         File f = new File(file);
+        results.add("------------------------------------");
         results.add("Starting analysis of " + f.getName() + "...");
         results.add("Java File Type Detection : " + identifyFileTypeUsingFilesProbeContentType(f));
         results.add("MIME Cache Magic Detection : " + identifyFileMIMETypeUsingMimeCache(f));
@@ -41,6 +42,7 @@ public class FileAnalyzer {
         results.add("X509 detection : " + tryX509(f));
         long endTime = System.nanoTime();
         results.add("Analysis completed in " + (endTime - startTime) / 1000000 + " ms.");
+        results.add("------------------------------------");
     }
 
     /**
@@ -75,7 +77,7 @@ public class FileAnalyzer {
         Collection<?> mimeTypes = MimeUtil.getMimeTypes(file);
         String mimeType = MimeUtil.getFirstMimeType(mimeTypes.toString()).toString();
         String subMimeType = MimeUtil.getSubType(mimeTypes.toString());
-        return "The Mime type is: " + mimeTypes + ", " + mimeType + ", " + subMimeType;
+        return mimeTypes + ", " + mimeType + ", " + subMimeType;
     }
 
     private String tryPGP(File file) {
@@ -91,7 +93,7 @@ public class FileAnalyzer {
         } catch (IOException ioException) {
             Logger.getLogger(FileAnalyzer.class.getName()).log(Level.SEVERE, null, ioException);
         }
-        return (b ? "PGP file detected !" : "not a PGP file");
+        return (b ? "PGP file detected !" : "Not a PGP file");
     }
 
     private String tryX509(File file) {
