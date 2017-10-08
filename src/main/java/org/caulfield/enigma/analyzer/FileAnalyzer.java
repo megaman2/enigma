@@ -5,6 +5,7 @@
  */
 package org.caulfield.enigma.analyzer;
 
+import eu.medsea.mimeutil.MimeUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.nio.file.Files;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,15 +31,16 @@ public class FileAnalyzer {
     private List<String> results;
 
     public FileAnalyzer(String file) {
-        results = new ArrayList<String>();
+        results = new ArrayList<>();
         long startTime = System.nanoTime();
         File f = new File(file);
         results.add("Starting analysis of " + f.getName() + "...");
-        results.add("File type : " + identifyFileTypeUsingFilesProbeContentType(f));
+        results.add("Java File Type Detection : " + identifyFileTypeUsingFilesProbeContentType(f));
+        results.add("MIME Cache Magic Detection : " + identifyFileMIMETypeUsingMimeCache(f));
         results.add("PGP detection : " + tryPGP(f));
         results.add("X509 detection : " + tryX509(f));
         long endTime = System.nanoTime();
-        results.add("Analysis completed in "+(endTime - startTime)/1000000 +" ms.");
+        results.add("Analysis completed in " + (endTime - startTime) / 1000000 + " ms.");
     }
 
     /**
@@ -55,14 +57,25 @@ public class FileAnalyzer {
         this.results = results;
     }
 
-    private String identifyFileTypeUsingFilesProbeContentType(final File file) {
-        String fileType = "Undetermined";
+    private String identifyFileTypeUsingFilesProbeContentType(File file) {
+        String fileType = null;
         try {
             fileType = Files.probeContentType(file.toPath());
-        } catch (IOException ioException) {
-
+        } catch (IOException ex) {
+            Logger.getLogger(FileAnalyzer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (fileType == null) {
+            fileType = "No match.";
         }
         return fileType;
+    }
+
+    private String identifyFileMIMETypeUsingMimeCache(File file) {
+        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+        Collection<?> mimeTypes = MimeUtil.getMimeTypes(file);
+        String mimeType = MimeUtil.getFirstMimeType(mimeTypes.toString()).toString();
+        String subMimeType = MimeUtil.getSubType(mimeTypes.toString());
+        return "The Mime type is: " + mimeTypes + ", " + mimeType + ", " + subMimeType;
     }
 
     private String tryPGP(File file) {
@@ -92,7 +105,7 @@ public class FileAnalyzer {
         while (scenario.hasNextStep() && !tryResult.contains("detected")) {
             tryResult += ((String) scenario.runNextStep()) + " > ";
         }
-        return tryResult.substring(0, tryResult.length()-3);
+        return tryResult.substring(0, tryResult.length() - 3);
 
     }
 }

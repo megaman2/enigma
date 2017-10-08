@@ -65,13 +65,14 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+                jComboBoxAC.addItem("None");
+                ACManager acm = new ACManager();
+                for (String AC : acm.getFullACList()) {
+                    jComboBoxAC.addItem(AC);
+                }
+
             }
         });
-        jComboBoxAC.addItem("None");
-        ACManager acm = new ACManager();
-        for (String AC : acm.getFullACList()) {
-            jComboBoxAC.addItem(AC);
-        }
 
     }
 
