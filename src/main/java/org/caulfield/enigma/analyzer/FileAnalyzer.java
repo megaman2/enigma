@@ -78,9 +78,15 @@ public class FileAnalyzer {
     }
 
     private String tryX509(final File file) {
-
+        String output = null;
         X509Manager xmng = new X509Manager();
-        return xmng.detectX509(file);
+        
+        // Tries
+        String tryResult = xmng.detectPrivateKey(file);
+        if (!tryResult.contains("detected")) {
+            tryResult = xmng.detectPublicKey(file);
+        }
+        return output;
 
     }
 }

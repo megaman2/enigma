@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class X509Manager {
 
-    public String detectX509(File f) {
+    public String detectPrivateKey(File f) {
         byte[] keyBytes;
 
         try {
@@ -44,4 +44,31 @@ public class X509Manager {
         }
         return "No X509 detected.";
     }
+        public String detectPublicKey(File f) {
+        byte[] keyBytes;
+
+        try {
+            keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
+            String publicKey = new String(keyBytes, "UTF-8");
+            System.out.println(publicKey);
+            PublicKeyReader pbr = new PublicKeyReader(f.getAbsolutePath());
+            return pbr.getPublicKey();
+
+        } catch (IOException ex) {
+//            try {
+//                keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
+//                PKCS8EncodedKeySpec spec
+//                        = new PKCS8EncodedKeySpec(keyBytes);
+//                kf = KeyFactory.getInstance("RSA");
+//                kf.generatePublic(spec);
+//            } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException exx) {
+//                System.out.println("org.caulfield.enigma.crypto.x509.X509Manager.detectX509()" + exx.getMessage());
+//                return false;
+//            }
+
+            Logger.getLogger(X509Manager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "No X509 detected.";
+    }
+    
 }

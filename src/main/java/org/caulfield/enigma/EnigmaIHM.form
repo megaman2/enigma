@@ -147,7 +147,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jTabbedPaneScreens" pref="1244" max="32767" attributes="0"/>
+          <Component id="jTabbedPaneScreens" pref="1357" max="32767" attributes="0"/>
           <Component id="jPanelEvents" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
@@ -197,7 +197,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jPanel1" max="32767" attributes="0"/>
                       <Component id="jPanel3" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jPanel4" alignment="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="jPanel4" alignment="0" pref="1347" max="32767" attributes="0"/>
                       <Component id="jPanel5" alignment="0" max="32767" attributes="0"/>
                       <Component id="jPanel6" alignment="0" max="32767" attributes="0"/>
                   </Group>
@@ -214,7 +214,7 @@
                           <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jPanel6" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="0" pref="6" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -297,11 +297,14 @@
                                   <Group type="102" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="jCheckBoxP12Expo" min="-2" max="-2" attributes="0"/>
+                                          <Group type="102" attributes="0">
+                                              <Component id="jCheckBoxP12Expo" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          </Group>
                                           <Group type="102" attributes="0">
                                               <Component id="jCheckBoxP12Certainty" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                                              <Component id="jButtonPKCS12Generate" max="32767" attributes="0"/>
+                                              <EmptySpace max="32767" attributes="0"/>
+                                              <Component id="jButtonPKCS12Generate" min="-2" pref="220" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                       <EmptySpace max="-2" attributes="0"/>
@@ -311,7 +314,7 @@
                                       <Component id="jLabel31" min="-2" pref="77" max="-2" attributes="0"/>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Component id="jDateChooserP12Expiry" min="-2" pref="120" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="85" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -602,34 +605,36 @@
                                   <Component id="jLabel14" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="jLabel12" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="jSpinnerPkExpo" max="32767" attributes="0"/>
-                                          <Component id="jSliderPkCertainty" min="-2" pref="135" max="-2" attributes="0"/>
-                                      </Group>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="jCheckBoxPkCertainty" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jCheckBoxPkExpo" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                  </Group>
-                                  <Component id="jSpinnerKeySizePkSize" alignment="0" min="-2" pref="147" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="1" attributes="0">
-                                      <EmptySpace min="-2" pref="288" max="-2" attributes="0"/>
-                                      <Component id="jButtonPkGenerate" min="-2" pref="220" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Component id="jSpinnerKeySizePkSize" min="-2" pref="150" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="82" max="-2" attributes="0"/>
                                       <Component id="jLabel16" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="jComboBoxAlgoPk" min="-2" pref="150" max="-2" attributes="0"/>
+                                      <EmptySpace max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="jSliderPkCertainty" min="-2" pref="135" max="-2" attributes="0"/>
+                                          <Component id="jSpinnerPkExpo" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="jCheckBoxPkCertainty" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace max="32767" attributes="0"/>
+                                              <Component id="jButtonPkGenerate" min="-2" pref="220" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="jCheckBoxPkExpo" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          </Group>
+                                      </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -642,8 +647,10 @@
                                       <Group type="103" groupAlignment="3" attributes="0">
                                           <Component id="jLabel12" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="jSpinnerKeySizePkSize" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jComboBoxAlgoPk" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
+                                          <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
                                           <Component id="jLabel15" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="jSpinnerPkExpo" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -652,20 +659,17 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="1" attributes="0">
                                           <Component id="jSliderPkCertainty" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jCheckBoxPkCertainty" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                                              <Component id="jCheckBoxPkCertainty" alignment="3" min="-2" max="-2" attributes="0"/>
+                                              <Component id="jButtonPkGenerate" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          </Group>
                                           <Component id="jLabel14" alignment="0" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <Group type="102" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="103" alignment="1" groupAlignment="3" attributes="0">
-                                              <Component id="jLabel27" alignment="3" min="-2" max="-2" attributes="0"/>
-                                              <Component id="jTextFieldPkTargetFilename" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          </Group>
-                                          <Group type="103" alignment="1" groupAlignment="3" attributes="0">
-                                              <Component id="jComboBoxAlgoPk" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
-                                              <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          </Group>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="jLabel27" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jTextFieldPkTargetFilename" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
@@ -674,16 +678,13 @@
                                           <Component id="jTextFieldPkTargetDirectory" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="1" attributes="0">
-                                          <Component id="jButtonPkGenerate" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                                              <Component id="jLabel17" alignment="3" min="-2" max="-2" attributes="0"/>
-                                              <Component id="jTextFieldPkPw" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          </Group>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="jLabel17" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jTextFieldPkPw" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace min="-2" pref="51" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="52" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -875,17 +876,17 @@
                                       <Component id="jButtonBrowseCertTargetDir" min="-2" pref="95" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="-2" pref="104" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="113" max="-2" attributes="0"/>
                                       <Component id="jLabel30" min="-2" pref="77" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="jDateChooserExpiry" min="-2" pref="120" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="-2" pref="299" max="-2" attributes="0"/>
-                                      <Component id="jButtonCertGenerate" min="-2" pref="224" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="413" max="-2" attributes="0"/>
+                                      <Component id="jButtonCertGenerate" min="-2" pref="220" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace min="-2" pref="590" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="480" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1066,8 +1067,8 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="jTextFieldPubPrivkey" pref="150" max="32767" attributes="0"/>
-                                  <Component id="jTextFieldPubPrivkeyPW" max="32767" attributes="0"/>
+                                  <Component id="jTextFieldPubPrivkeyPW" pref="150" max="32767" attributes="0"/>
+                                  <Component id="jTextFieldPubPrivkey" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
                               <Component id="jButtonPubPrivkey" min="-2" pref="95" max="-2" attributes="0"/>
@@ -1076,20 +1077,19 @@
                                   <Component id="jLabel26" min="-2" max="-2" attributes="0"/>
                                   <Component id="jLabel25" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="jTextFieldPublTargetDirectory" max="32767" attributes="0"/>
+                                      <Component id="jTextFieldPubTargetFilename" min="-2" pref="150" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="415" max="-2" attributes="0"/>
+                                      <Component id="jButtonPubGenerate" min="-2" pref="220" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="jTextFieldPublTargetDirectory" min="-2" pref="150" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="jButtonPubTargetDir" min="-2" pref="95" max="-2" attributes="0"/>
                                   </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="jTextFieldPubTargetFilename" max="32767" attributes="0"/>
-                                      <EmptySpace min="-2" pref="101" max="-2" attributes="0"/>
-                                  </Group>
                               </Group>
-                              <EmptySpace min="-2" pref="211" max="-2" attributes="0"/>
-                              <Component id="jButtonPubGenerate" min="-2" pref="220" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -1205,53 +1205,50 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jLabel33" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jLabel32" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jLabel36" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="jLabel32" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jLabel36" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="jTextFieldP10CN" min="-2" pref="150" max="-2" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="jTextFieldP10Pk" min="-2" pref="150" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Component id="jButtonBrowseP10Pk" min="-2" pref="95" max="-2" attributes="0"/>
                                           </Group>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="jTextFieldP10Pub" min="-2" pref="150" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="jButtonBrowseP10Pub" min="-2" pref="95" max="-2" attributes="0"/>
-                                          </Group>
                                       </Group>
-                                      <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <Component id="jTextFieldP10CN" max="32767" attributes="0"/>
-                                      <EmptySpace min="-2" pref="133" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
-                                      <Component id="jLabel34" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="jTextFieldP10PkPw" min="-2" pref="150" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="jLabel35" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jLabel37" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="jTextFieldP10TargetDirectory" max="32767" attributes="0"/>
-                                          <Component id="jTextFieldP10TargetFilename" max="32767" attributes="0"/>
-                                      </Group>
+                                      <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                                      <Component id="jLabel34" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTextFieldP10PkPw" min="-2" pref="150" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jButtonBrowseP10TargetDir" min="-2" pref="95" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="205" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="jLabel37" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jLabel35" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" attributes="0">
+                                          <Component id="jTextFieldP10TargetDirectory" min="-2" pref="150" max="-2" attributes="0"/>
+                                          <Component id="jTextFieldP10Pub" min="-2" pref="150" max="-2" attributes="0"/>
+                                          <Component id="jTextFieldP10TargetFilename" min="-2" pref="150" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="jButtonBrowseP10TargetDir" min="-2" pref="95" max="-2" attributes="0"/>
+                                          <Component id="jButtonBrowseP10Pub" min="-2" pref="95" max="-2" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                                  <Component id="jCheckBoxP10PubKey" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="32767" attributes="0"/>
                               <Component id="jButtonCSRGenerate" min="-2" pref="220" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -1264,45 +1261,50 @@
                               <Component id="jButtonCSRGenerate" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
                           </Group>
-                          <Group type="102" alignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="1" attributes="0">
-                                          <Component id="jLabel36" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jTextFieldP10CN" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="jLabel34" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jTextFieldP10PkPw" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jLabel36" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jTextFieldP10CN" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                              </Group>
-                              <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="jLabel32" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jTextFieldP10Pk" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButtonBrowseP10Pk" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jLabel35" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jTextFieldP10TargetDirectory" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButtonBrowseP10TargetDir" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="jTextFieldP10TargetFilename" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jLabel37" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                  </Group>
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jLabel33" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="jButtonBrowseP10Pk" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jLabel35" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jTextFieldP10TargetDirectory" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jButtonBrowseP10TargetDir" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                                      <Component id="jLabel32" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jTextFieldP10Pk" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="jCheckBoxP10PubKey" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jTextFieldP10Pub" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jButtonBrowseP10Pub" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                                      <Component id="jLabel37" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="jTextFieldP10TargetFilename" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+                                      <Component id="jTextFieldP10PkPw" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <Component id="jLabel34" alignment="1" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1332,12 +1334,10 @@
                         <Property name="text" type="java.lang.String" value="Private Key File : "/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JLabel" name="jLabel33">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Public Key File :"/>
-                      </Properties>
-                    </Component>
                     <Component class="javax.swing.JTextField" name="jTextFieldP10Pub">
+                      <Properties>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="jTextFieldP10Pk">
                     </Component>
@@ -1352,6 +1352,7 @@
                     <Component class="javax.swing.JButton" name="jButtonBrowseP10Pub">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Parcourir..."/>
+                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonBrowseP10PubActionPerformed"/>
@@ -1393,6 +1394,14 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="jTextFieldP10TargetFilename">
                     </Component>
+                    <Component class="javax.swing.JCheckBox" name="jCheckBoxP10PubKey">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Use a specific Public Key ?"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCheckBoxP10PubKeyActionPerformed"/>
+                      </Events>
+                    </Component>
                   </SubComponents>
                 </Container>
               </SubComponents>
@@ -1409,7 +1418,7 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="1234" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="1347" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
@@ -1458,7 +1467,7 @@
                               <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="466" max="32767" attributes="0"/>
+                      <EmptySpace pref="579" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1592,7 +1601,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="1239" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="1352" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -1615,7 +1624,7 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jTabbedPane2" pref="1229" max="32767" attributes="0"/>
+                      <Component id="jTabbedPane2" pref="1342" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -1743,7 +1752,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="1239" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="1352" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -1777,7 +1786,7 @@
                           </Group>
                           <Component id="jButton14" alignment="0" min="-2" pref="221" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="1008" max="32767" attributes="0"/>
+                      <EmptySpace pref="1121" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1841,7 +1850,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="jProgressBarEnigma" pref="1244" max="32767" attributes="0"/>
+              <Component id="jProgressBarEnigma" pref="1357" max="32767" attributes="0"/>
               <Component id="jScrollPaneForEvents" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>

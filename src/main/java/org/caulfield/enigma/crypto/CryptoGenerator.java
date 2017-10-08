@@ -105,7 +105,15 @@ public class CryptoGenerator {
 
     public String buildCSRfromKeyPair(String CN, String pkFileName, String pkPassword, String pubFileName, String outputFileName, String outputDirectory) {
         try {
-            PKCS10CertificationRequest csr = CreateCSRfromKeyPair(CN, getPrivateKey(pkFileName, pkPassword), getPublicKeyV2(pubFileName));
+            PublicKey pubK = null;
+            if ("".equals(pubFileName)) {
+                pubK = buildPublicKeyFromPrivateKey(pkFileName, pkPassword);
+            } else {
+                pubK = getPublicKeyV2(pubFileName);
+            }
+            PrivateKey privK = getPrivateKey(pkFileName, pkPassword);
+
+            PKCS10CertificationRequest csr = CreateCSRfromKeyPair(CN, privK, pubK);
             final File csrFile = new File(outputDirectory + outputFileName);
             final JcaPEMWriter publicPemWriter;
             publicPemWriter = new JcaPEMWriter(new FileWriter(csrFile));

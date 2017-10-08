@@ -18,11 +18,12 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,16 +31,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
-import org.bouncycastle.operator.InputDecryptorProvider;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
-import org.bouncycastle.pkcs.PKCSException;
 
 /**
  * Class for reading RSA private key from PEM file. It uses the JMeter
@@ -55,7 +50,7 @@ import org.bouncycastle.pkcs.PKCSException;
  * encrypted PEM files.
  *
  */
-public class PrivateKeyReader {
+public class PublicKeyReader {
 
     // Private key file using PKCS #1 encoding
     public static final String P1_BEGIN_MARKER
@@ -79,7 +74,7 @@ public class PrivateKeyReader {
      *
      * @param fileName The name of the PEM file
      */
-    public PrivateKeyReader(String fileName) {
+    public PublicKeyReader(String fileName) {
         this.fileName = fileName;
     }
 
@@ -89,12 +84,12 @@ public class PrivateKeyReader {
      * @return Private key
      * @throws IOException
      */
-    public String getPrivateKey() {
+    public String getPublicKey() {
         String output = null;
-        PrivateKey key = null;
+        PublicKey key = null;
         FileInputStream fis = null;
         boolean isRSAKey = false;
-        boolean isEncryptedRSAKey = false;
+
         File f = new File(fileName);
         try {
             fis = new FileInputStream(f);
@@ -105,18 +100,18 @@ public class PrivateKeyReader {
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 if (!inKey) {
                     if (line.startsWith("-----BEGIN ")
-                            && line.endsWith(" PRIVATE KEY-----")) {
+                            && line.endsWith(" PUBLIC KEY-----")) {
                         inKey = true;
                         isRSAKey = line.contains("RSA");
-                        isEncryptedRSAKey = line.contains("ENCRYPTED");
+
                     }
                     continue;
                 } else {
                     if (line.startsWith("-----END ")
-                            && line.endsWith(" PRIVATE KEY-----")) {
+                            && line.endsWith(" PUBLIC KEY-----")) {
                         inKey = false;
                         isRSAKey = line.contains("RSA");
-                        isEncryptedRSAKey = line.contains("ENCRYPTED");
+
                         break;
                     }
                     builder.append(line);
@@ -125,80 +120,37 @@ public class PrivateKeyReader {
             KeySpec keySpec = null;
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             Security.addProvider(new BouncyCastleProvider());
-            if (isEncryptedRSAKey) {
-                FileInputStream fiss = null;
+            if (isRSAKey) {
                 File fs = new File(fileName);
-                fiss = new FileInputStream(fs);
-
-                BufferedReader brs = new BufferedReader(new InputStreamReader(fiss));
-
-                PEMParser parser = new PEMParser(brs);
-                PKCS8EncryptedPrivateKeyInfo pair = (PKCS8EncryptedPrivateKeyInfo) parser.readObject();
-                JceOpenSSLPKCS8DecryptorProviderBuilder jce = new JceOpenSSLPKCS8DecryptorProviderBuilder().setProvider("BC");
-
-                InputDecryptorProvider decProv;
-                try {
-                    decProv = jce.build("aapa".toCharArray());
-                    PrivateKeyInfo info = pair.decryptPrivateKeyInfo(decProv);
-                    System.out.println("org.caulfield.enigma.crypto.x509.PrivateKeyReader.getPrivateKey()" + info.parsePrivateKey().toASN1Primitive().toString());
-                } catch (OperatorCreationException ex) {
-                    Logger.getLogger(PrivateKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (PKCSException ex) {
-                    Logger.getLogger(PrivateKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-                    if (ex.toString().contains("corrupted")) {
-                        return "Encrypted RSA PKCS#8 Private Key File detected.";
-                    } else {
-                        return "Corrupted RSA PKCS#8 Private Key File detected.";
-                    }
-                }
-
-            } else if (isRSAKey) {
-                //keySpec = getRSAKeySpec(encoded);
-                FileInputStream fiss = null;
-                File fs = new File(fileName);
-                fiss = new FileInputStream(fs);
+                FileInputStream fiss = new FileInputStream(fs);
 
                 BufferedReader brs = new BufferedReader(new InputStreamReader(fiss));
 
                 PEMParser pemParser = new PEMParser(brs);
                 Object object = pemParser.readObject();
                 JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-
-                KeyPair kp = null;
-
                 PEMKeyPair ukp = (PEMKeyPair) object;
-                kp = converter.getKeyPair(ukp);
-//            }
+                KeyPair kp = converter.getKeyPair(ukp);
 
-// RSA
+                // RSA
                 KeyFactory keyFac = KeyFactory.getInstance("RSA");
-                RSAPrivateCrtKeySpec privateKey = keyFac.getKeySpec(kp.getPrivate(), RSAPrivateCrtKeySpec.class);
+                RSAPublicKeySpec publicKey = keyFac.getKeySpec(kp.getPublic(), RSAPublicKeySpec.class);
+                System.out.println(publicKey.getClass());
+                System.out.println("org.caulfield.enigma.crypto.x509.PrivateKeyReader.getPublicKey()" + publicKey.getPublicExponent());
 
-                System.out.println(privateKey.getClass());
-                System.out.println("org.caulfield.enigma.crypto.x509.PrivateKeyReader.getPrivateKey()" + privateKey.getPublicExponent());
-                return "RSA PKCS#8 Private Key File without password detected.";
-
-//            ASN1InputStream bIn = new ASN1InputStream(new ByteArrayInputStream(encoded));
-//            ASN1Primitive obj = bIn.readObject();
-//            System.out.println(ASN1Dump.dumpAsString(obj));
-//            DLSequence app = (DLSequence) obj;
-//            Enumeration secEnum = app.getObjects();
-//            while (secEnum.hasMoreElements()) {
-//                ASN1Primitive seqObj = (ASN1Primitive) secEnum.nextElement();
-//                System.out.println(seqObj);
-//            }
+                return "RSA Public Key File detected.";
             } else {
-                keySpec = new PKCS8EncodedKeySpec(encoded);
+                keySpec = new X509EncodedKeySpec(encoded);
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                key = kf.generatePublic(keySpec);
+
+                return "Public Key File detected.";
 
             }
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            key = kf.generatePrivate(keySpec);
-
-            return "PKCS#8 Private Key File without password detected.";
 
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException ex) {
-            Logger.getLogger(PrivateKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-            return "not a X509 file";
+            Logger.getLogger(PublicKeyReader.class.getName()).log(Level.SEVERE, null, ex);
+            return "Not a public key.";
         }
     }
 
