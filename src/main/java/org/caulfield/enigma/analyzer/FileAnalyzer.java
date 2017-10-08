@@ -61,7 +61,7 @@ public class FileAnalyzer {
         return fileType;
     }
 
-    private String tryPGP(final File file) {
+    private String tryPGP(File file) {
 
         boolean b = false;
         try {
@@ -77,16 +77,18 @@ public class FileAnalyzer {
         return (b ? "PGP file detected !" : "not a PGP file");
     }
 
-    private String tryX509(final File file) {
-        String output = null;
+    private String tryX509(File file) {
+
         X509Manager xmng = new X509Manager();
-        
-        // Tries
-        String tryResult = xmng.detectPrivateKey(file);
-        if (!tryResult.contains("detected")) {
-            tryResult = xmng.detectPublicKey(file);
+        Scenario scenario = new Scenario();
+        scenario.addStep(X509Manager.class, xmng, file, "detectPrivateKey");
+        scenario.addStep(X509Manager.class, xmng, file, "detectPublicKey");
+
+        String tryResult = "";
+        while (scenario.hasNextStep() && !tryResult.contains("detected")) {
+            tryResult = ((String) scenario.runNextStep())+" | ";
         }
-        return output;
+        return tryResult;
 
     }
 }

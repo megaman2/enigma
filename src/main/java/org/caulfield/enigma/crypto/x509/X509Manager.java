@@ -44,7 +44,8 @@ public class X509Manager {
         }
         return "No X509 detected.";
     }
-        public String detectPublicKey(File f) {
+
+    public String detectPublicKey(File f) {
         byte[] keyBytes;
 
         try {
@@ -70,5 +71,5 @@ public class X509Manager {
         }
         return "No X509 detected.";
     }
-    
+
 }
