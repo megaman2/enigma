@@ -44,18 +44,16 @@ public class CertificateReader {
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
-            String linev = br.readLine();
-            if (linev.contains("BEGIN")) {
+            String firstLine = br.readLine();
+            if (firstLine.startsWith(CRT_BEGIN_MARKER)) {
                 format = "PEM";
+                inKey = true;
             } else {
                 format = "DER";
+                builder.append(firstLine);
             }
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey) {
-                    if (line.startsWith(CRT_BEGIN_MARKER)) {
-                        inKey = true;
-                    }
-                } else {
+                if (inKey) {
                     if (line.startsWith(CRT_END_MARKER)) {
                         inKey = false;
                         break;
