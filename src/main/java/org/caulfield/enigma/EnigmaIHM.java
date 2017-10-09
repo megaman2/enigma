@@ -963,7 +963,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel32)
                         .addComponent(jTextFieldP10Pk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jCheckBoxP10PubKey)
@@ -1027,7 +1026,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
         });
 
-        jEditorPaneIdentifierResults.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jEditorPaneIdentifierResults.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane3.setViewportView(jEditorPaneIdentifierResults);
 
         jLabel8.setText("Results :");

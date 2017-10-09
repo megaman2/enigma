@@ -19,83 +19,22 @@ import java.util.logging.Logger;
 public class X509Manager {
 
     public String detectPrivateKey(File f) {
-        byte[] keyBytes;
-
-        try {
-            keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-            String privateKey = new String(keyBytes, "UTF-8");
-            System.out.println(privateKey);
-            PrivateKeyReader fde = new PrivateKeyReader(f.getAbsolutePath());
-            return fde.getPrivateKey();
-
-        } catch (IOException ex) {
-//            try {
-//                keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-//                PKCS8EncodedKeySpec spec
-//                        = new PKCS8EncodedKeySpec(keyBytes);
-//                kf = KeyFactory.getInstance("RSA");
-//                kf.generatePublic(spec);
-//            } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException exx) {
-//                System.out.println("org.caulfield.enigma.crypto.x509.X509Manager.detectX509()" + exx.getMessage());
-//                return false;
-//            }
-
-            Logger.getLogger(X509Manager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "No X509 detected.";
+        PrivateKeyReader fde = new PrivateKeyReader(f.getAbsolutePath());
+        return fde.getPrivateKey();
     }
 
     public String detectPublicKey(File f) {
-        byte[] keyBytes;
-
-        try {
-            keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-            String publicKey = new String(keyBytes, "UTF-8");
-            System.out.println(publicKey);
-            PublicKeyReader pbr = new PublicKeyReader(f.getAbsolutePath());
-            return pbr.getPublicKey();
-
-        } catch (IOException ex) {
-//            try {
-//                keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-//                PKCS8EncodedKeySpec spec
-//                        = new PKCS8EncodedKeySpec(keyBytes);
-//                kf = KeyFactory.getInstance("RSA");
-//                kf.generatePublic(spec);
-//            } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException exx) {
-//                System.out.println("org.caulfield.enigma.crypto.x509.X509Manager.detectX509()" + exx.getMessage());
-//                return false;
-//            }
-
-            Logger.getLogger(X509Manager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "No X509 detected.";
+        PublicKeyReader pbr = new PublicKeyReader(f.getAbsolutePath());
+        return pbr.getPublicKey();
     }
 
     public String detectCSR(File f) {
-        byte[] keyBytes;
+        CSRReader pbr = new CSRReader(f.getAbsolutePath());
+        return pbr.getCSR();
+    }
 
-        try {
-            keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-            String publicKey = new String(keyBytes, "UTF-8");
-            System.out.println(publicKey);
-            CSRReader pbr = new CSRReader(f.getAbsolutePath());
-            return pbr.getCSR();
-
-        } catch (IOException ex) {
-//            try {
-//                keyBytes = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-//                PKCS8EncodedKeySpec spec
-//                        = new PKCS8EncodedKeySpec(keyBytes);
-//                kf = KeyFactory.getInstance("RSA");
-//                kf.generatePublic(spec);
-//            } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException exx) {
-//                System.out.println("org.caulfield.enigma.crypto.x509.X509Manager.detectX509()" + exx.getMessage());
-//                return false;
-//            }
-
-            Logger.getLogger(X509Manager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "No X509 detected.";
+    public String detectCertificate(File f) {
+        CertificateReader pbr = new CertificateReader(f.getAbsolutePath());
+        return pbr.getCertificate();
     }
 }

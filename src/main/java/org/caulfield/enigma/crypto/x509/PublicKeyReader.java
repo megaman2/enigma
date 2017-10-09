@@ -17,16 +17,12 @@ import java.io.InputStreamReader;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,9 +59,6 @@ public class PublicKeyReader {
             = "-----BEGIN PUBLIC KEY"; //$NON-NLS-1$
     public static final String P8_END_MARKER
             = "-----END PUBLIC KEY"; //$NON-NLS-1$
-
-    private static Map<String, PrivateKey> keyCache
-            = Collections.synchronizedMap(new HashMap<String, PrivateKey>());
 
     protected final String fileName;
 

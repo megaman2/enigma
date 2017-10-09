@@ -9,21 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
@@ -31,11 +17,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
 /**
@@ -49,9 +30,6 @@ public class CSRReader {
             = "-----BEGIN CERTIFICATE REQUEST"; //$NON-NLS-1$
     public static final String P10_END_MARKER
             = "-----END CERTIFICATE REQUEST"; //$NON-NLS-1$
-
-    private static Map<String, PrivateKey> keyCache
-            = Collections.synchronizedMap(new HashMap<String, PrivateKey>());
 
     protected final String fileName;
 
@@ -99,11 +77,11 @@ public class CSRReader {
 
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             JcaPKCS10CertificationRequest p10Object = new JcaPKCS10CertificationRequest(encoded);
-            
+
             System.out.println("org.caulfield.enigma.crypto.x509.CSRReader.getCSR()" + p10Object.getSubject());
             return "Certificate signing request detected.";
 
-        } catch (IOException | NullPointerException ex ) {
+        } catch (IOException | NullPointerException ex) {
             Logger.getLogger(PublicKeyReader.class.getName()).log(Level.SEVERE, null, ex);
             return "Not a Certificate signing request";
         }

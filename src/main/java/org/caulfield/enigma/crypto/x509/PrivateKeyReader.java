@@ -23,9 +23,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,9 +65,6 @@ public class PrivateKeyReader {
             = "-----BEGIN PRIVATE KEY"; //$NON-NLS-1$
     public static final String P8_END_MARKER
             = "-----END PRIVATE KEY"; //$NON-NLS-1$
-
-    private static Map<String, PrivateKey> keyCache
-            = Collections.synchronizedMap(new HashMap<String, PrivateKey>());
 
     protected final String fileName;
 
@@ -178,15 +172,6 @@ public class PrivateKeyReader {
                 System.out.println("org.caulfield.enigma.crypto.x509.PrivateKeyReader.getPrivateKey()" + privateKey.getPublicExponent());
                 return "RSA PKCS#8 Private Key File without password detected.";
 
-//            ASN1InputStream bIn = new ASN1InputStream(new ByteArrayInputStream(encoded));
-//            ASN1Primitive obj = bIn.readObject();
-//            System.out.println(ASN1Dump.dumpAsString(obj));
-//            DLSequence app = (DLSequence) obj;
-//            Enumeration secEnum = app.getObjects();
-//            while (secEnum.hasMoreElements()) {
-//                ASN1Primitive seqObj = (ASN1Primitive) secEnum.nextElement();
-//                System.out.println(seqObj);
-//            }
             } else {
                 keySpec = new PKCS8EncodedKeySpec(encoded);
 

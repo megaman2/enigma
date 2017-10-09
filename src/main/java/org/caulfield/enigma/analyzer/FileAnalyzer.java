@@ -103,6 +103,7 @@ public class FileAnalyzer {
         scenario.addStep(X509Manager.class, xmng, file, "detectPrivateKey");
         scenario.addStep(X509Manager.class, xmng, file, "detectPublicKey");
         scenario.addStep(X509Manager.class, xmng, file, "detectCSR");
+        scenario.addStep(X509Manager.class, xmng, file, "detectCertificate");
         String tryResult = "";
         while (scenario.hasNextStep() && !tryResult.contains("detected")) {
             tryResult += ((String) scenario.runNextStep()) + " > ";
