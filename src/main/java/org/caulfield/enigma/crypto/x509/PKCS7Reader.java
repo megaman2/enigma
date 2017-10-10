@@ -83,16 +83,16 @@ public class PKCS7Reader {
             String tryCMS = tryCMS(encoded);
             if (tryCMS.contains("detected")) {
                 return tryCMS;
-            } 
+            }
             String tryLegacyPKCS7 = tryLegacyPKCS7(encoded);
-               if (tryLegacyPKCS7.contains("detected")) {
+            if (tryLegacyPKCS7.contains("detected")) {
                 return tryLegacyPKCS7;
-            } 
+            }
 
         } catch (IOException | NullPointerException ex) {
             Logger.getLogger(PublicKeyReader.class.getName()).log(Level.SEVERE, null, ex);
             return "Not a X509 file";
-        } 
+        }
         return output;
     }
 
@@ -110,7 +110,7 @@ public class PKCS7Reader {
 
             //the following array will contain the content of xml document
             byte[] data = null;
-            
+
             while (it.hasNext()) {
                 SignerInformation signer = (SignerInformation) it.next();
                 Collection certCollection = cs.getMatches(signer.getSID());

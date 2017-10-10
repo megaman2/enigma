@@ -83,7 +83,7 @@ public class CSRReader {
 
         } catch (IOException | NullPointerException ex) {
             Logger.getLogger(PublicKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-            return "Not a Certificate signing request";
+            return "Not a certificate signing request";
         }
     }
     private static final String COUNTRY = "2.5.4.6";

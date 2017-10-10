@@ -1677,15 +1677,15 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
     private void jButtonPKCS12GenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPKCS12GenerateActionPerformed
         // TODO add your handling code here:
-        String pubExpo = (String) jSpinnerP12Expo.getValue();
+        Integer pubExpo = (Integer) jSpinnerP12Expo.getValue();
         if (!jSpinnerP12Expo.isEnabled()) {
-            pubExpo = props.getProperty("defaultPublicExponent");
+            pubExpo = new Integer(props.getProperty("defaultPublicExponent"));
         }
         int certainty = jSliderP12Certainty.getValue();
         if (!jSliderP12Certainty.isEnabled()) {
             certainty = Integer.parseInt(props.getProperty("defaultCertainty"));
         }
-        CryptoGenerator.generatePKCS12((int) jSpinnerKeySize.getValue(), jTextFieldCN.getText(), jTextFieldKeystorePW.getText(), jTextFieldPKCS8PW.getText(), jTextFieldDirectory.getText(), pubExpo, certainty, jDateChooserP12Expiry.getDate());
+        CryptoGenerator.generatePKCS12((int) jSpinnerKeySize.getValue(), jTextFieldCN.getText(), jTextFieldKeystorePW.getText(), jTextFieldPKCS8PW.getText(), jTextFieldDirectory.getText(), pubExpo.toString(), certainty, jDateChooserP12Expiry.getDate());
         ((DefaultListModel) jListEvents.getModel()).addElement("PKCS#12 successfully generated for " + jTextFieldCN.getText() + " in directory " + jTextFieldDirectory.getText() + ".");
     }//GEN-LAST:event_jButtonPKCS12GenerateActionPerformed
 
