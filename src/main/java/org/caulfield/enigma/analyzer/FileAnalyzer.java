@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bouncycastle.openpgp.PGPException;
+import org.caulfield.enigma.analyzer.ascii.ASCIIScanner;
 import org.caulfield.enigma.crypto.pgp.PGPManager;
 import org.caulfield.enigma.crypto.x509.X509Manager;
 
@@ -38,6 +39,7 @@ public class FileAnalyzer {
         results.add("Starting analysis of " + f.getName() + "...");
         results.add("Java File Type Detection : " + identifyFileTypeUsingFilesProbeContentType(f));
         results.add("MIME Cache Magic Detection : " + identifyFileMIMETypeUsingMimeCache(f));
+        results.add("ASCII / Binary Detection : " + identifyFileFormatUsingGuava(f));
         results.add("PGP detection : " + tryPGP(f));
         results.add("X509 detection : " + tryX509(f));
         long endTime = System.nanoTime();
@@ -57,6 +59,14 @@ public class FileAnalyzer {
      */
     public void setResults(List<String> results) {
         this.results = results;
+    }
+
+    private String identifyFileFormatUsingGuava(File file) {
+        if (ASCIIScanner.isFileASCII(file)) {
+            return "ASCII file.";
+        } else {
+            return "BINARY file.";
+        }
     }
 
     private String identifyFileTypeUsingFilesProbeContentType(File file) {
@@ -104,6 +114,8 @@ public class FileAnalyzer {
         scenario.addStep(X509Manager.class, xmng, file, "detectPublicKey");
         scenario.addStep(X509Manager.class, xmng, file, "detectCSR");
         scenario.addStep(X509Manager.class, xmng, file, "detectCertificate");
+        scenario.addStep(X509Manager.class, xmng, file, "detectPKCS7");
+        scenario.addStep(X509Manager.class, xmng, file, "detectPKCS12");
         String tryResult = "";
         while (scenario.hasNextStep() && !tryResult.contains("detected")) {
             tryResult += ((String) scenario.runNextStep()) + " > ";

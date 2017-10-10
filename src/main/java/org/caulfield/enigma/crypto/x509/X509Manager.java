@@ -6,11 +6,6 @@
 package org.caulfield.enigma.crypto.x509;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -36,5 +31,15 @@ public class X509Manager {
     public String detectCertificate(File f) {
         CertificateReader pbr = new CertificateReader(f.getAbsolutePath());
         return pbr.getCertificate();
+    }
+
+    public String detectPKCS7(File f) {
+        PKCS7Reader pbr = new PKCS7Reader(f.getAbsolutePath());
+        return pbr.getPKCS7();
+    }
+
+    public String detectPKCS12(File f) {
+        PKCS12Reader pbr = new PKCS12Reader(f.getAbsolutePath());
+        return pbr.getPKCS12();
     }
 }
