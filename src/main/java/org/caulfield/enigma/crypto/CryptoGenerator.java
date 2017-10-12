@@ -314,7 +314,7 @@ public class CryptoGenerator {
         return writePublicKey(myPublicKey, targetDirectory, fileOutName);
     }
 
-    public static String generatePKCS12(int size, String CN, String p12Password, String keyPassword, String directory, String publicExponent, int certainty, Date expiryDate) {
+    public static String generatePKCS12(int size, String CN, String p12Password, String keyPassword, String directory, String publicExponent, int certainty, Date expiryDate, String targetFilename, boolean writeCrtPk) {
         String returnString = "OK";
         AsymmetricCipherKeyPair pair = CryptoGenerator.CreateRSAKey(size, publicExponent, certainty);
         AsymmetricKeyParameter privateKey = pair.getPrivate();
@@ -354,38 +354,41 @@ public class CryptoGenerator {
             System.out.println(certHolder.getSubject().toString() + " - "
                     + certHolder.getNotAfter());
 
-            // Save the private key to the file system, in the webapp this
-            // should get saved to some directory configurable via a properties
-            // file
-            final File privateKeyFile = new File(directory + "private.key");
-            final JcaPEMWriter privatePemWriter = new JcaPEMWriter(
-                    new FileWriter(privateKeyFile));
+            if (writeCrtPk) {
+                // Save the private key to the file system, in the webapp this
+                // should get saved to some directory configurable via a properties
+                // file
+                final File privateKeyFile = new File(directory + targetFilename.substring(0, targetFilename.indexOf("."))+"key");
+                final JcaPEMWriter privatePemWriter = new JcaPEMWriter(
+                        new FileWriter(privateKeyFile));
 
-            if (keyPassword != null) {
-                JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
-                        PKCS8Generator.PBE_SHA1_3DES);
-                encryptorBuilder.setRandom(new SecureRandom());
-                encryptorBuilder.setPasssword(keyPassword.toCharArray());
-                OutputEncryptor oe = encryptorBuilder.build();
-                JcaPKCS8Generator gen = new JcaPKCS8Generator(privkey, oe);
-                PemObject obj = gen.generate();
-                privatePemWriter.writeObject(obj);
-            } else {
-                privatePemWriter.writeObject(privkey);
+                if (keyPassword != null) {
+                    JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
+                            PKCS8Generator.PBE_SHA1_3DES);
+                    encryptorBuilder.setRandom(new SecureRandom());
+                    encryptorBuilder.setPasssword(keyPassword.toCharArray());
+                    OutputEncryptor oe = encryptorBuilder.build();
+                    JcaPKCS8Generator gen = new JcaPKCS8Generator(privkey, oe);
+                    PemObject obj = gen.generate();
+                    privatePemWriter.writeObject(obj);
+                } else {
+                    privatePemWriter.writeObject(privkey);
+                }
+
+                privatePemWriter.flush();
+                privatePemWriter.close();
             }
 
-            privatePemWriter.flush();
-            privatePemWriter.close();
-
-            // Save the public key to the file system, in the webapp this should
-            // get saved to some directory configurable via a properties file
-            final File publicKeyFile = new File(directory + "public.pem");
-            final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
-                    new FileWriter(publicKeyFile));
-            publicPemWriter.writeObject(certHolder);
-            publicPemWriter.flush();
-            publicPemWriter.close();
-
+            if (writeCrtPk) {
+                // Save the public key to the file system, in the webapp this should
+                // get saved to some directory configurable via a properties file
+                final File publicKeyFile = new File(directory + targetFilename.substring(0, targetFilename.indexOf("."))+"crt");
+                final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
+                        new FileWriter(publicKeyFile));
+                publicPemWriter.writeObject(certHolder);
+                publicPemWriter.flush();
+                publicPemWriter.close();
+            }
             // X509Certificate[] chain = {};
             X509Certificate pubCert = new JcaX509CertificateConverter()
                     .setProvider("BC").getCertificate(certHolder);
@@ -417,7 +420,7 @@ public class CryptoGenerator {
             store.setKeyEntry("PrivateKey", privkey, p12Password.toCharArray(),
                     chain);
 
-            FileOutputStream fOut = new FileOutputStream(directory + "id.p12");
+            FileOutputStream fOut = new FileOutputStream(directory + targetFilename);
 
             store.store(fOut, p12Password.toCharArray());
 
