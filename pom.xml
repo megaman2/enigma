@@ -66,6 +66,7 @@
                     <include>**/*.properties</include>
                     <include>**/*.cache</include>
                     <include>**/*.sql</include>
+                    <include>**/*.png</include>
                 </includes>
             </resource>
         </resources>

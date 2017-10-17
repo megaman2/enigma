@@ -88,6 +88,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jFileChooserDirectoriesOnly = new javax.swing.JFileChooser();
         jFrame1 = new javax.swing.JFrame();
         jFileChooserFileOnly = new javax.swing.JFileChooser();
+        jFrameAbout = new javax.swing.JFrame();
+        jButton1 = new javax.swing.JButton();
+        jLabel49 = new javax.swing.JLabel();
+        jLabel48 = new javax.swing.JLabel();
+        jLabel50 = new javax.swing.JLabel();
         jTabbedPaneScreens = new javax.swing.JTabbedPane();
         jTabbedPaneGenerate = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
@@ -289,6 +294,60 @@ public class EnigmaIHM extends javax.swing.JFrame {
         );
 
         jFileChooserFileOnly.setDialogTitle("");
+
+        jFrameAbout.setSize(new java.awt.Dimension(565, 709));
+
+        jButton1.setBackground(new java.awt.Color(204, 255, 204));
+        jButton1.setFont(new java.awt.Font("Gulim", 1, 14)); // NOI18N
+        jButton1.setText("I see !");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jLabel49.setIcon(new javax.swing.ImageIcon(getClass().getResource("/enigma500.png"))); // NOI18N
+
+        jLabel48.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel48.setText("Author : Philippe BAKHTIARI");
+
+        jLabel50.setFont(new java.awt.Font("Tahoma", 0, 20)); // NOI18N
+        jLabel50.setText("Enigma version 1.04a ");
+
+        javax.swing.GroupLayout jFrameAboutLayout = new javax.swing.GroupLayout(jFrameAbout.getContentPane());
+        jFrameAbout.getContentPane().setLayout(jFrameAboutLayout);
+        jFrameAboutLayout.setHorizontalGroup(
+            jFrameAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jFrameAboutLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel50)
+                .addGap(178, 178, 178))
+            .addGroup(jFrameAboutLayout.createSequentialGroup()
+                .addGroup(jFrameAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jFrameAboutLayout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addComponent(jLabel49))
+                    .addGroup(jFrameAboutLayout.createSequentialGroup()
+                        .addGap(200, 200, 200)
+                        .addComponent(jLabel48, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jFrameAboutLayout.createSequentialGroup()
+                        .addGap(154, 154, 154)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(29, Short.MAX_VALUE))
+        );
+        jFrameAboutLayout.setVerticalGroup(
+            jFrameAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jFrameAboutLayout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addComponent(jLabel50)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel49)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel48)
+                .addContainerGap(47, Short.MAX_VALUE))
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -1362,7 +1421,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 1390, Short.MAX_VALUE)
+            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, 1390, Short.MAX_VALUE)
             .addComponent(jPanel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1748,6 +1807,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         aboutMenuItem.setMnemonic('a');
         aboutMenuItem.setText("About");
+        aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutMenuItemActionPerformed(evt);
+            }
+        });
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -2092,6 +2156,16 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonBrowseSignOutputActionPerformed
 
+    private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
+
+        jFrameAbout.setDefaultCloseOperation(jFrameAbout.EXIT_ON_CLOSE);
+        jFrameAbout.setVisible(true);
+    }//GEN-LAST:event_aboutMenuItemActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        jFrameAbout.setVisible(false);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -2139,6 +2213,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton12;
@@ -2186,6 +2261,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JFileChooser jFileChooserDirectoriesOnly;
     private javax.swing.JFileChooser jFileChooserFileOnly;
     private javax.swing.JFrame jFrame1;
+    private javax.swing.JFrame jFrameAbout;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -2228,7 +2304,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel45;
     private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel47;
+    private javax.swing.JLabel jLabel48;
+    private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel50;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
