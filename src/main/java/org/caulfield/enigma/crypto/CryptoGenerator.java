@@ -22,9 +22,11 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
@@ -32,8 +34,10 @@ import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,15 +47,24 @@ import javax.xml.bind.DatatypeConverter;
 import org.bouncycastle.asn1.ASN1Sequence;
 
 import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.cms.ContentInfo;
+
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
@@ -64,7 +77,6 @@ import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -76,6 +88,7 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.PKCS12PfxPdu;
@@ -88,11 +101,13 @@ import org.bouncycastle.pkcs.bc.BcPKCS12MacCalculatorBuilder;
 import org.bouncycastle.pkcs.bc.BcPKCS12PBEOutputEncryptorBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS12SafeBagBuilder;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.caulfield.enigma.crypto.x509.PrivateKeyReader;
+import sun.misc.IOUtils;
 
 public class CryptoGenerator {
 
@@ -358,7 +373,7 @@ public class CryptoGenerator {
                 // Save the private key to the file system, in the webapp this
                 // should get saved to some directory configurable via a properties
                 // file
-                final File privateKeyFile = new File(directory + targetFilename.substring(0, targetFilename.indexOf("."))+"key");
+                final File privateKeyFile = new File(directory + targetFilename.substring(0, targetFilename.indexOf(".")) + "key");
                 final JcaPEMWriter privatePemWriter = new JcaPEMWriter(
                         new FileWriter(privateKeyFile));
 
@@ -382,7 +397,7 @@ public class CryptoGenerator {
             if (writeCrtPk) {
                 // Save the public key to the file system, in the webapp this should
                 // get saved to some directory configurable via a properties file
-                final File publicKeyFile = new File(directory + targetFilename.substring(0, targetFilename.indexOf("."))+"crt");
+                final File publicKeyFile = new File(directory + targetFilename.substring(0, targetFilename.indexOf(".")) + "crt");
                 final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
                         new FileWriter(publicKeyFile));
                 publicPemWriter.writeObject(certHolder);
@@ -854,6 +869,80 @@ public class CryptoGenerator {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidKeySpecException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+//    public String signFile(String targetFile, String privateKey, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+    public static byte[] signer(byte[] data, PrivateKey key) throws Exception {
+        Signature signer = Signature.getInstance("SHA1withRSA/ISO9796-2", "BC");
+        signer.initSign(key);
+        signer.update(data);
+        return signer.sign();
+    }
+
+    public String signFile(String targetFile, String privateKey, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm, String signerCertificate) {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+        FileInputStream fis = null;
+        File f = new File(targetFile);
+        try {
+            fis = new FileInputStream(f);
+
+            byte[] data = IOUtils.readFully(fis, 0, true);
+            PrivateKey pk = getPrivateKey(privateKey, privateKeyPassword);
+            Certificate certificate = getCertificate(signerCertificate);
+            X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());
+
+            List certList = new ArrayList();
+            CMSTypedData msg = new CMSProcessableByteArray(data); //Data to sign
+
+            certList.add(certificateHolder); //Adding the X509 Certificate
+
+            Store certs = new JcaCertStore(certList);
+
+            CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+            //Initializing the the BC's Signer
+            ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(pk);
+
+            gen.addSignerInfoGenerator(
+                    new JcaSignerInfoGeneratorBuilder(
+                            new JcaDigestCalculatorProviderBuilder().setProvider("BC").build())
+                            .build(sha1Signer, certificateHolder));
+            //adding the certificate
+            gen.addCertificates(certs);
+            //Getting the signed data
+            CMSSignedData sigData = gen.generate(msg, false);
+            //byte[] signedDatas = sigData.getEncoded();
+
+            //  Write the file 
+            ContentInfo ci = sigData.toASN1Structure();
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.signFile()" + ci.getContent());
+            final File signedFile = new File(targetDirectory + targetFileName);
+            final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
+                    new FileWriter(signedFile));
+            publicPemWriter.writeObject(ci);
+            publicPemWriter.flush();
+            publicPemWriter.close();
+            return "File " + targetFileName + " successfuly signed.";
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "Failed to sign file " + targetFileName + " : " + ex.getMessage();
+        } catch (IOException | CMSException | CertificateEncodingException | EnigmaException | OperatorCreationException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "Failed to sign file " + targetFileName + " : " + ex.getMessage();
+        }
+    }
+
+    private Certificate getCertificate(String signerCertificate) {
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Certificate cert = cf.generateCertificate(new FileInputStream(signerCertificate));
+            return cert;
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return null;
     }
