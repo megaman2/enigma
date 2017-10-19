@@ -85,7 +85,7 @@ public class HSQLLoader {
                 exists = false;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(HSQLLoader.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Base " + databaseName + " does not exist : building a fresh one ...");
         }
         return exists;
     }
@@ -95,7 +95,6 @@ public class HSQLLoader {
             Class.forName("org.hsqldb.jdbcDriver").newInstance();
             connexion = DriverManager.getConnection("jdbc:hsqldb:file:" + databaseName, "sa", "");
             if (baseDoesNotExist()) {
-                System.out.println("Base " + databaseName + " does not exist : building a fresh one ...");
                 initDatabase();
             }
         } catch (ClassNotFoundException ex) {

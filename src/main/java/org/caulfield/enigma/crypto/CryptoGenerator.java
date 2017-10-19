@@ -904,8 +904,8 @@ public class CryptoGenerator {
             Store certs = new JcaCertStore(certList);
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-            //Initializing the the BC's Signer
-            ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(pk);
+            //Initializing the the BC's Signer http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
+            ContentSigner sha1Signer = new JcaContentSignerBuilder(algorithm).setProvider("BC").build(pk);
 
             gen.addSignerInfoGenerator(
                     new JcaSignerInfoGeneratorBuilder(

@@ -12,8 +12,11 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -23,6 +26,9 @@ import javax.swing.event.DocumentListener;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.ACManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
+import org.caulfield.enigma.database.HSQLLoader;
+import org.caulfield.enigma.database.algo.AlgoEnum;
+import org.caulfield.enigma.database.algo.ListAlgorithms;
 
 /**
  *
@@ -91,6 +97,23 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
 
         });
+
+        try {
+            HSQLLoader database = new HSQLLoader();
+            ResultSet f = database.runQuery("select ALGONAME from ALGO WHERE TYPE='SIGNATURE'");
+            while (f.next()) {
+                jComboBoxAlgoSign.addItem(f.getString("ALGONAME"));
+            }
+            jComboBoxAlgoSign.setSelectedIndex(5);
+        } catch (SQLException ex) {
+            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Set<String> ff = ListAlgorithms.listAlgo(AlgoEnum.SIGNATURE);
+        for (String i : ff) {
+            System.out.println("org.caulfield.enigma.EnigmaIHM.<init>()" + i);
+        }
+
     }
 
     private String getFileName(String str) {
