@@ -140,6 +140,15 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel48 = new javax.swing.JLabel();
         jLabel50 = new javax.swing.JLabel();
         jTabbedPaneScreens = new javax.swing.JTabbedPane();
+        jPanelDashboard = new javax.swing.JPanel();
+        jButtonDashGenerate = new javax.swing.JButton();
+        jButtonDashTransform = new javax.swing.JButton();
+        jButtonDashAnalyze = new javax.swing.JButton();
+        jButtonDashConvert = new javax.swing.JButton();
+        jButtonDashX509 = new javax.swing.JButton();
+        jButtonDashPGP = new javax.swing.JButton();
+        jButtonDashScenarios = new javax.swing.JButton();
+        jButtonDashAbout = new javax.swing.JButton();
         jTabbedPaneGenerate = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
@@ -347,6 +356,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jFileChooserFileOnly.setDialogTitle("");
 
+        jFrameAbout.setTitle("About Enigma");
+        jFrameAbout.setAlwaysOnTop(true);
         jFrameAbout.setSize(new java.awt.Dimension(565, 709));
 
         jButton1.setBackground(new java.awt.Color(204, 255, 204));
@@ -404,6 +415,148 @@ public class EnigmaIHM extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jTabbedPaneScreens.setPreferredSize(new java.awt.Dimension(1239, 550));
+
+        jPanelDashboard.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Choisissez une activité :", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+
+        jButtonDashGenerate.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/create.png"))); // NOI18N
+        jButtonDashGenerate.setText("Générer");
+        jButtonDashGenerate.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jButtonDashGenerate.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        jButtonDashGenerate.setIconTextGap(10);
+        jButtonDashGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashGenerateActionPerformed(evt);
+            }
+        });
+
+        jButtonDashTransform.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashTransform.setIcon(new javax.swing.ImageIcon(getClass().getResource("/transform.png"))); // NOI18N
+        jButtonDashTransform.setText("Transformer");
+        jButtonDashTransform.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jButtonDashTransform.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        jButtonDashTransform.setIconTextGap(10);
+        jButtonDashTransform.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashTransformActionPerformed(evt);
+            }
+        });
+
+        jButtonDashAnalyze.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashAnalyze.setIcon(new javax.swing.ImageIcon(getClass().getResource("/analyze3.png"))); // NOI18N
+        jButtonDashAnalyze.setText("Analyser");
+        jButtonDashAnalyze.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+        jButtonDashAnalyze.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        jButtonDashAnalyze.setIconTextGap(10);
+        jButtonDashAnalyze.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashAnalyzeActionPerformed(evt);
+            }
+        });
+
+        jButtonDashConvert.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashConvert.setIcon(new javax.swing.ImageIcon(getClass().getResource("/convert.png"))); // NOI18N
+        jButtonDashConvert.setText("Convertir");
+        jButtonDashConvert.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+        jButtonDashConvert.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        jButtonDashConvert.setIconTextGap(10);
+        jButtonDashConvert.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashConvertActionPerformed(evt);
+            }
+        });
+
+        jButtonDashX509.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashX509.setIcon(new javax.swing.ImageIcon(getClass().getResource("/X509.png"))); // NOI18N
+        jButtonDashX509.setText("Objets X509");
+        jButtonDashX509.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jButtonDashX509.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        jButtonDashX509.setIconTextGap(10);
+        jButtonDashX509.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashX509ActionPerformed(evt);
+            }
+        });
+
+        jButtonDashPGP.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashPGP.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pgp.png"))); // NOI18N
+        jButtonDashPGP.setText("Trousseau PGP");
+        jButtonDashPGP.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+        jButtonDashPGP.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        jButtonDashPGP.setIconTextGap(10);
+        jButtonDashPGP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashPGPActionPerformed(evt);
+            }
+        });
+
+        jButtonDashScenarios.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashScenarios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/scenario.png"))); // NOI18N
+        jButtonDashScenarios.setText("Scenarios");
+        jButtonDashScenarios.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jButtonDashScenarios.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        jButtonDashScenarios.setIconTextGap(10);
+        jButtonDashScenarios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashScenariosActionPerformed(evt);
+            }
+        });
+
+        jButtonDashAbout.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
+        jButtonDashAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/about.png"))); // NOI18N
+        jButtonDashAbout.setText("A propos");
+        jButtonDashAbout.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+        jButtonDashAbout.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        jButtonDashAbout.setIconTextGap(10);
+        jButtonDashAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashAboutActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanelDashboardLayout = new javax.swing.GroupLayout(jPanelDashboard);
+        jPanelDashboard.setLayout(jPanelDashboardLayout);
+        jPanelDashboardLayout.setHorizontalGroup(
+            jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                .addGap(363, 363, 363)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButtonDashScenarios, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jButtonDashGenerate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonDashTransform, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonDashX509, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButtonDashPGP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButtonDashConvert, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButtonDashAnalyze, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonDashAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(388, Short.MAX_VALUE))
+        );
+        jPanelDashboardLayout.setVerticalGroup(
+            jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                .addGap(34, 34, 34)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonDashAnalyze)
+                    .addComponent(jButtonDashGenerate))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonDashTransform)
+                    .addComponent(jButtonDashConvert))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonDashX509)
+                    .addComponent(jButtonDashPGP))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonDashScenarios)
+                    .addComponent(jButtonDashAbout))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPaneScreens.addTab("Dashboard", jPanelDashboard);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "PKCS#12", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
@@ -1534,7 +1687,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 1390, Short.MAX_VALUE)
+            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, 1390, Short.MAX_VALUE)
             .addComponent(jPanel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1779,7 +1932,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
         );
 
-        jTabbedPaneScreens.addTab("Gestion ACs", jPanelACManagement);
+        jTabbedPaneScreens.addTab("Gestion des objets X509", jPanelACManagement);
 
         javax.swing.GroupLayout jPanelPGPKeyringLayout = new javax.swing.GroupLayout(jPanelPGPKeyring);
         jPanelPGPKeyring.setLayout(jPanelPGPKeyringLayout);
@@ -2312,6 +2465,40 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }        // TODO add your handling code here:
     }//GEN-LAST:event_jButtonBrowseSignSignerCertActionPerformed
 
+    private void jButtonDashGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashGenerateActionPerformed
+        jTabbedPaneGenerate.setSelectedIndex(0);
+        jTabbedPaneScreens.setSelectedIndex(1);
+    }//GEN-LAST:event_jButtonDashGenerateActionPerformed
+
+    private void jButtonDashAnalyzeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAnalyzeActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(2);
+    }//GEN-LAST:event_jButtonDashAnalyzeActionPerformed
+
+    private void jButtonDashTransformActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashTransformActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(3);
+    }//GEN-LAST:event_jButtonDashTransformActionPerformed
+
+    private void jButtonDashConvertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashConvertActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(4);
+    }//GEN-LAST:event_jButtonDashConvertActionPerformed
+
+    private void jButtonDashX509ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashX509ActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(5);
+    }//GEN-LAST:event_jButtonDashX509ActionPerformed
+
+    private void jButtonDashPGPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashPGPActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(6);
+    }//GEN-LAST:event_jButtonDashPGPActionPerformed
+
+    private void jButtonDashScenariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashScenariosActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(7);
+    }//GEN-LAST:event_jButtonDashScenariosActionPerformed
+
+    private void jButtonDashAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAboutActionPerformed
+        jFrameAbout.setDefaultCloseOperation(jFrameAbout.EXIT_ON_CLOSE);
+        jFrameAbout.setVisible(true);
+    }//GEN-LAST:event_jButtonDashAboutActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -2383,6 +2570,14 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonBrowseSignSignerCert;
     private javax.swing.JButton jButtonCSRGenerate;
     private javax.swing.JButton jButtonCertGenerate;
+    private javax.swing.JButton jButtonDashAbout;
+    private javax.swing.JButton jButtonDashAnalyze;
+    private javax.swing.JButton jButtonDashConvert;
+    private javax.swing.JButton jButtonDashGenerate;
+    private javax.swing.JButton jButtonDashPGP;
+    private javax.swing.JButton jButtonDashScenarios;
+    private javax.swing.JButton jButtonDashTransform;
+    private javax.swing.JButton jButtonDashX509;
     private javax.swing.JButton jButtonPKCS12Generate;
     private javax.swing.JButton jButtonPkGenerate;
     private javax.swing.JButton jButtonPubGenerate;
@@ -2483,6 +2678,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelACManagement;
     private javax.swing.JPanel jPanelAnalyze;
     private javax.swing.JPanel jPanelConvert;
+    private javax.swing.JPanel jPanelDashboard;
     private javax.swing.JPanel jPanelEvents;
     private javax.swing.JPanel jPanelPGPKeyring;
     private javax.swing.JPanel jPanelScenarios;
