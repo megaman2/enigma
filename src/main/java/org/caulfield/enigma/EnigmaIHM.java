@@ -537,7 +537,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanelDashboardLayout.setVerticalGroup(
             jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelDashboardLayout.createSequentialGroup()
-                .addGap(34, 34, 34)
+                .addGap(21, 21, 21)
                 .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonDashAnalyze)
                     .addComponent(jButtonDashGenerate))
@@ -553,7 +553,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonDashScenarios)
                     .addComponent(jButtonDashAbout))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Dashboard", jPanelDashboard);
@@ -1687,7 +1687,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, 1390, Short.MAX_VALUE)
+            .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 1390, Short.MAX_VALUE)
             .addComponent(jPanel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2465,10 +2465,26 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }        // TODO add your handling code here:
     }//GEN-LAST:event_jButtonBrowseSignSignerCertActionPerformed
 
-    private void jButtonDashGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashGenerateActionPerformed
-        jTabbedPaneGenerate.setSelectedIndex(0);
-        jTabbedPaneScreens.setSelectedIndex(1);
-    }//GEN-LAST:event_jButtonDashGenerateActionPerformed
+    private void jButtonDashAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAboutActionPerformed
+        jFrameAbout.setDefaultCloseOperation(jFrameAbout.EXIT_ON_CLOSE);
+        jFrameAbout.setVisible(true);
+    }//GEN-LAST:event_jButtonDashAboutActionPerformed
+
+    private void jButtonDashScenariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashScenariosActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(7);
+    }//GEN-LAST:event_jButtonDashScenariosActionPerformed
+
+    private void jButtonDashPGPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashPGPActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(6);
+    }//GEN-LAST:event_jButtonDashPGPActionPerformed
+
+    private void jButtonDashX509ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashX509ActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(5);
+    }//GEN-LAST:event_jButtonDashX509ActionPerformed
+
+    private void jButtonDashConvertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashConvertActionPerformed
+        jTabbedPaneScreens.setSelectedIndex(4);
+    }//GEN-LAST:event_jButtonDashConvertActionPerformed
 
     private void jButtonDashAnalyzeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAnalyzeActionPerformed
         jTabbedPaneScreens.setSelectedIndex(2);
@@ -2478,26 +2494,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jTabbedPaneScreens.setSelectedIndex(3);
     }//GEN-LAST:event_jButtonDashTransformActionPerformed
 
-    private void jButtonDashConvertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashConvertActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(4);
-    }//GEN-LAST:event_jButtonDashConvertActionPerformed
-
-    private void jButtonDashX509ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashX509ActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(5);
-    }//GEN-LAST:event_jButtonDashX509ActionPerformed
-
-    private void jButtonDashPGPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashPGPActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(6);
-    }//GEN-LAST:event_jButtonDashPGPActionPerformed
-
-    private void jButtonDashScenariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashScenariosActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(7);
-    }//GEN-LAST:event_jButtonDashScenariosActionPerformed
-
-    private void jButtonDashAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAboutActionPerformed
-        jFrameAbout.setDefaultCloseOperation(jFrameAbout.EXIT_ON_CLOSE);
-        jFrameAbout.setVisible(true);
-    }//GEN-LAST:event_jButtonDashAboutActionPerformed
+    private void jButtonDashGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashGenerateActionPerformed
+        jTabbedPaneGenerate.setSelectedIndex(0);
+        jTabbedPaneScreens.setSelectedIndex(1);
+    }//GEN-LAST:event_jButtonDashGenerateActionPerformed
 
     /**
      * @param args the command line arguments
