@@ -139,11 +139,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel49 = new javax.swing.JLabel();
         jLabel48 = new javax.swing.JLabel();
         jLabel50 = new javax.swing.JLabel();
-        jPanel17 = new javax.swing.JPanel();
+        jPanelSignature = new javax.swing.JPanel();
         jLabel53 = new javax.swing.JLabel();
         jScrollPane6 = new javax.swing.JScrollPane();
         jTextArea2 = new javax.swing.JTextArea();
-        jPanel18 = new javax.swing.JPanel();
+        jPanelX509vsPGP = new javax.swing.JPanel();
         jScrollPane7 = new javax.swing.JScrollPane();
         jTextArea3 = new javax.swing.JTextArea();
         jTabbedPaneScreens = new javax.swing.JTabbedPane();
@@ -336,7 +336,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
         saveMenuItem = new javax.swing.JMenuItem();
-        saveAsMenuItem = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         cutMenuItem = new javax.swing.JMenuItem();
@@ -421,7 +420,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addContainerGap(47, Short.MAX_VALUE))
         );
 
-        jPanel17.setBorder(javax.swing.BorderFactory.createTitledBorder("Signature de fichier"));
+        jPanelSignature.setBorder(javax.swing.BorderFactory.createTitledBorder("Signature de fichier"));
 
         jLabel53.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel53.setIcon(new javax.swing.ImageIcon(getClass().getResource("/X509sig.png"))); // NOI18N
@@ -436,30 +435,30 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jTextArea2.setText("Advantages of X.509 Signatures\n\nIt is much easier to verify that the key that signed the file is really ours (not attacker’s).\nYou do not have to download or install any extra software to verify an X.509 signature (see below).\nYou do not have to download and import our public key (it is embedded in the signed file).\nYou do not have to download any separate signature file (the signature is embedded in the signed file).\n\nAdvantages of PGP Signatures\n\nThey do not depend on any certificate authority (which might be e.g. infiltrated or controlled by an adversary, or be untrustworthy for other reasons).");
         jScrollPane6.setViewportView(jTextArea2);
 
-        javax.swing.GroupLayout jPanel17Layout = new javax.swing.GroupLayout(jPanel17);
-        jPanel17.setLayout(jPanel17Layout);
-        jPanel17Layout.setHorizontalGroup(
-            jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel17Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelSignatureLayout = new javax.swing.GroupLayout(jPanelSignature);
+        jPanelSignature.setLayout(jPanelSignatureLayout);
+        jPanelSignatureLayout.setHorizontalGroup(
+            jPanelSignatureLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelSignatureLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel17Layout.createSequentialGroup()
+                .addGroup(jPanelSignatureLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSignatureLayout.createSequentialGroup()
                         .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 728, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel17Layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSignatureLayout.createSequentialGroup()
                         .addComponent(jLabel53)
                         .addGap(139, 139, 139))))
         );
-        jPanel17Layout.setVerticalGroup(
-            jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel17Layout.createSequentialGroup()
+        jPanelSignatureLayout.setVerticalGroup(
+            jPanelSignatureLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelSignatureLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel53))
         );
 
-        jPanel18.setBorder(javax.swing.BorderFactory.createTitledBorder("X509 vs PGP"));
+        jPanelX509vsPGP.setBorder(javax.swing.BorderFactory.createTitledBorder("X509 vs PGP"));
 
         jScrollPane7.setBorder(null);
 
@@ -470,21 +469,20 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jTextArea3.setText("Advantages of X.509 Signatures\n\nIt is much easier to verify that the key that signed the file is really ours (not attacker’s).\nYou do not have to download or install any extra software to verify an X.509 signature (see below).\nYou do not have to download and import our public key (it is embedded in the signed file).\nYou do not have to download any separate signature file (the signature is embedded in the signed file).\n\nAdvantages of PGP Signatures\n\nThey do not depend on any certificate authority (which might be e.g. infiltrated or controlled by an adversary, or be untrustworthy for other reasons).");
         jScrollPane7.setViewportView(jTextArea3);
 
-        javax.swing.GroupLayout jPanel18Layout = new javax.swing.GroupLayout(jPanel18);
-        jPanel18.setLayout(jPanel18Layout);
-        jPanel18Layout.setHorizontalGroup(
-            jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel18Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelX509vsPGPLayout = new javax.swing.GroupLayout(jPanelX509vsPGP);
+        jPanelX509vsPGP.setLayout(jPanelX509vsPGPLayout);
+        jPanelX509vsPGPLayout.setHorizontalGroup(
+            jPanelX509vsPGPLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelX509vsPGPLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 728, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        jPanel18Layout.setVerticalGroup(
-            jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel18Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(296, Short.MAX_VALUE))
+        jPanelX509vsPGPLayout.setVerticalGroup(
+            jPanelX509vsPGPLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelX509vsPGPLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -2097,23 +2095,18 @@ public class EnigmaIHM extends javax.swing.JFrame {
         menuBar.setVerifyInputWhenFocusTarget(false);
 
         fileMenu.setMnemonic('f');
-        fileMenu.setText("File");
+        fileMenu.setText("Fichier");
 
         openMenuItem.setMnemonic('o');
-        openMenuItem.setText("Open");
+        openMenuItem.setText("Importer");
         fileMenu.add(openMenuItem);
 
         saveMenuItem.setMnemonic('s');
-        saveMenuItem.setText("Save");
+        saveMenuItem.setText("Exporter");
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setMnemonic('a');
-        saveAsMenuItem.setText("Save As ...");
-        saveAsMenuItem.setDisplayedMnemonicIndex(5);
-        fileMenu.add(saveAsMenuItem);
-
         exitMenuItem.setMnemonic('x');
-        exitMenuItem.setText("Exit");
+        exitMenuItem.setText("Quitter");
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitMenuItemActionPerformed(evt);
@@ -2162,7 +2155,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         helpMenu.setText("Aide");
 
         aboutMenuItem.setMnemonic('a');
-        aboutMenuItem.setText("About");
+        aboutMenuItem.setText("A propos");
         aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 aboutMenuItemActionPerformed(evt);
@@ -2764,8 +2757,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel14;
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
-    private javax.swing.JPanel jPanel17;
-    private javax.swing.JPanel jPanel18;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -2781,7 +2772,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelEvents;
     private javax.swing.JPanel jPanelPGPKeyring;
     private javax.swing.JPanel jPanelScenarios;
+    private javax.swing.JPanel jPanelSignature;
     private javax.swing.JPanel jPanelTransform;
+    private javax.swing.JPanel jPanelX509vsPGP;
     private javax.swing.JProgressBar jProgressBarEnigma;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
@@ -2846,7 +2839,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem pasteMenuItem;
-    private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     // End of variables declaration//GEN-END:variables
 
