@@ -68,9 +68,16 @@ import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
+import org.bouncycastle.crypto.generators.DHKeyPairGenerator;
+import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
+import org.bouncycastle.crypto.generators.DSAParametersGenerator;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
@@ -115,6 +122,23 @@ public class CryptoGenerator {
         RSAKeyPairGenerator g = new RSAKeyPairGenerator();
         g.init(new RSAKeyGenerationParameters(new BigInteger(publicExponent),
                 new SecureRandom(), size, certainty));
+        return g.generateKeyPair();
+    }
+
+    private static AsymmetricCipherKeyPair CreateDSAKey(int size, String publicExponent, int certainty) {
+        DSAKeyPairGenerator g = new DSAKeyPairGenerator();
+        DSAParametersGenerator dpg = new DSAParametersGenerator();
+        dpg.init(size, certainty, new SecureRandom());
+        DSAParameters params = dpg.generateParameters();
+        g.init(new DSAKeyGenerationParameters(new SecureRandom(), params));
+        return g.generateKeyPair();
+    }
+
+    private static AsymmetricCipherKeyPair CreateDHKey(int size, String publicExponent, int certainty) {
+        DHKeyPairGenerator g = new DHKeyPairGenerator();
+        Random rand = new Random();
+        DHParameters dhParams = new DHParameters(new BigInteger(size, rand), new BigInteger(size, rand), new BigInteger(size, rand));
+        g.init(new DHKeyGenerationParameters(new SecureRandom(), dhParams));
         return g.generateKeyPair();
     }
 
@@ -668,9 +692,16 @@ public class CryptoGenerator {
 //        System.out.println(generatePKCS12(1024, "CN=TEST PBA", "password",
 //                "keypassword", "F:\\Certificates\\"));
 //    }
-    public String buildPrivateKey(String directory, String privateKeyPassword, String fileOutName, int size, String publicExponent, int certainty) {
+    public String buildPrivateKey(String directory, String privateKeyPassword, String fileOutName, int size, String publicExponent, int certainty, String algo) {
+        AsymmetricCipherKeyPair pair = null;
+        if ("RSA".equals(algo)) {
+            pair = CreateRSAKey(size, publicExponent, certainty);
+        } else if ("DSA".equals(algo)) {
+            pair = CreateDSAKey(size, publicExponent, certainty);
+        } else if ("DH".equals(algo)) {
+            pair = CreateDHKey(size, publicExponent, certainty);
+        }
 
-        AsymmetricCipherKeyPair pair = CryptoGenerator.CreateRSAKey(size, publicExponent, certainty);
         AsymmetricKeyParameter privateKey = pair.getPrivate();
         PrivateKey privkey = null;
         boolean hasPassword = false;
