@@ -66,16 +66,18 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSTypedData;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
-import org.bouncycastle.crypto.generators.DHKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
@@ -134,12 +136,51 @@ public class CryptoGenerator {
         return g.generateKeyPair();
     }
 
+    /**
+     * Generate a random EC (Elliptic Curve) random 192-bit key pair (equivalent
+     * to 1536-bit RSA) based on NIST and SECG, using Bc (Bouncy Castle) classes
+     *
+     * @return a pair of EC keys (AsymmetricCipherKeyPair type)
+     */
+    public static AsymmetricCipherKeyPair generateECKeyPair192() {
+        AsymmetricCipherKeyPairGenerator kpGen = new ECKeyPairGenerator();
+//
+//        // First, define an EC curve
+//        // ECCurve.Fp(p, a, b); p = prime; a,b = constants defined in equation E: y^2=x^3+ax+b (mod p)
+//        ECCurve curve = new ECCurve.Fp(new BigInteger(ECParams.P_192_R1, 16), // p 
+//                new BigInteger(ECParams.A_192_R1, 16), // a
+//                new BigInteger(ECParams.B_192_R1, 16));			// b
+//
+//        byte[] seed = Hex.decode(ECParams.SEED_192_R1);
+//
+//        // finally use the seed in the ECKeyGenerationParameters along with the others
+//        // ECKeyGenerationParameters(ECDomainParameters(ECCurve, G, n, h),random)
+//        kpGen.init(new ECKeyGenerationParameters(new ECDomainParameters(curve,
+//                curve.decodePoint(Hex.decode(ECParams.G_192_R1_NCOMP)), // G		 
+//                new BigInteger(ECParams.N_192_R1, 16), // n
+//                new BigInteger(ECParams.H_192_R1, 16), // h 
+//                seed), // seed
+//                new SecureRandom()));
+
+        return kpGen.generateKeyPair();
+    }
+
+//    public AsymmetricCipherKeyPair generateKeyPair() {
+//        DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
+//        Random rand = new Random();
+//        DHParameters dhParams = new DHParameters(new BigInteger(size, rand), new BigInteger(size, rand), new BigInteger(size, rand));
+//        BigInteger x = helper.calculatePrivate(dhParams, new SecureRandom());
+//        BigInteger y = helper.calculatePublic(dhParams, x);
+//        return new AsymmetricCipherKeyPair(new DHPublicKeyParameters(y, dhParams), new DHPrivateKeyParameters(x, dhParams));
+//    }
+
     private static AsymmetricCipherKeyPair CreateDHKey(int size, String publicExponent, int certainty) {
-        DHKeyPairGenerator g = new DHKeyPairGenerator();
+        DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
         Random rand = new Random();
         DHParameters dhParams = new DHParameters(new BigInteger(size, rand), new BigInteger(size, rand), new BigInteger(size, rand));
-        g.init(new DHKeyGenerationParameters(new SecureRandom(), dhParams));
-        return g.generateKeyPair();
+        BigInteger x = helper.calculatePrivate(dhParams, new SecureRandom());
+        BigInteger y = helper.calculatePublic(dhParams, x);
+        return new AsymmetricCipherKeyPair(new DHPublicKeyParameters(y, dhParams), new DHPrivateKeyParameters(x, dhParams));
     }
 
     public String buildCSRfromKeyPair(String CN, String pkFileName, String pkPassword, String pubFileName, String outputFileName, String outputDirectory) {
