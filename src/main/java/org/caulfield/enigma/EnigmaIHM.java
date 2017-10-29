@@ -102,6 +102,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         fillCertificateVersionObjects();
         fillAlgoObjects();
         refreshX509KeyTable();
+        refreshX509CertTable();
         refreshPKObjects();
         refreshPubKObjects();
     }
@@ -168,6 +169,51 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
             }
 
+        } catch (SQLException ex) {
+            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void refreshX509CertTable() {
+        // Fill X509 Certificates Table
+        try {
+            //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),KEYFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER);
+            DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
+            model.getDataVector().removeAllElements();
+            model.fireTableDataChanged();
+            HSQLLoader database = new HSQLLoader();
+
+            jTableCerts.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
+            jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
+            jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
+            jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(120);
+            jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(380);
+            jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
+            jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(120);
+            jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(120);
+jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
+            // GET ROOT and SUBS
+            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) OR C1.ID_ISSUER_CERT=0");
+            while (f.next()) {
+
+                ImageIcon icon = null;
+                if (0 == f.getInt("ID_ISSUER_CERT")) {
+                    icon = new ImageIcon(getClass().getResource("/AC.png"));
+                } else {
+                    icon = new ImageIcon(getClass().getResource("/sub.png"));
+                }
+                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"),});
+            }
+
+            // GET END USER CERTS
+            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
+            while (f.next()) {
+
+                ImageIcon icon = new ImageIcon(getClass().getResource("/usercert.png"));
+
+                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"),});
+            }
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -2405,14 +2451,14 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jTableCerts.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "CN", "Issuer", "Expiry date", "CRL", "Fingerprint"
+                "", "ID", "Certificate Name", "CN", "Signing Algo", "Issuer", "Expiry date", "CRL", "Fingerprint", "Parent Certificate"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, true, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

@@ -130,7 +130,8 @@ public Connection getConnection (){
         }
         int inset = 0;
         try {
-            inset = runUpdate("INSERT INTO CERTIFICATES VALUES (1,'CN=AC LOCALE DE " + System.getProperty("user.name") + ",O=LOCAL',1)");
+        //    CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),KEYFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER);
+            inset = runUpdate("INSERT INTO CERTIFICATES VALUES (1,'DefaultKey','CN=AC LOCALE DE " + System.getProperty("user.name") + ",O=LOCAL','RSA',null,'','',0)");
         } catch (SQLException ex) {
             Logger.getLogger(HSQLLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
