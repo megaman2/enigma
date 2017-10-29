@@ -73,6 +73,7 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
@@ -98,6 +99,9 @@ import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jcajce.provider.asymmetric.dsa.BCDSAPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.dsa.BCDSAPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -219,15 +223,33 @@ public class CryptoGenerator {
 
     public String buildCSRfromKeyPair(String CN, String pkFileName, String pkPassword, String pubFileName, String outputFileName, String outputDirectory) {
         try {
+            Integer keyId = getKeyIDFromComboBox(pkFileName);
+            InputStream stream = getKeyFromDB(keyId);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+// Fake code simulating the copy
+// You can generally do better with nio if you need...
+// And please, unlike me, do something about the Exceptions :D
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = stream.read(buffer)) > -1) {
+                baos.write(buffer, 0, len);
+            }
+            baos.flush();
+// Open new InputStreams using the recorded bytes
+// Can be repeated as many times as you wish
+            InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+            InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+
             PublicKey pubK = null;
             if ("".equals(pubFileName)) {
-                pubK = buildPublicKeyFromPrivateKey(pkFileName, pkPassword);
+                pubK = buildPublicKeyFromPrivateKey(is1, pkPassword);
             } else {
                 pubK = getPublicKeyV2(pubFileName);
             }
-            PrivateKey privK = getPrivateKey(pkFileName, pkPassword);
+            PrivateKey privK = getPrivateKey(is2, pkPassword);
 
-            PKCS10CertificationRequest csr = CreateCSRfromKeyPair(CN, privK, pubK);
+            PKCS10CertificationRequest csr = createCSRfromKeyPair(CN, privK, pubK);
             final File csrFile = new File(outputDirectory + outputFileName);
             final JcaPEMWriter publicPemWriter;
             publicPemWriter = new JcaPEMWriter(new FileWriter(csrFile));
@@ -245,7 +267,7 @@ public class CryptoGenerator {
         return "PKCS#10 file " + outputFileName + " successfully generated with " + CN;
     }
 
-    private PKCS10CertificationRequest CreateCSRfromKeyPair(String CN, PrivateKey privateKey, PublicKey publicKey) {
+    private PKCS10CertificationRequest createCSRfromKeyPair(String CN, PrivateKey privateKey, PublicKey publicKey) {
 
         X500Principal subject = new X500Principal(CN);
 
@@ -1327,7 +1349,7 @@ public class CryptoGenerator {
         return br.readLine().contains("PRIVATE");
     }
 
-    public String generateCertificateFromPublicKeyAndPrivateKey(String CN, String pubKey, String privKey, String privPassword, String targetDirectory, String targetFilename, Date expiryDate, String algo) {
+    public String generateCertificateFromPublicKeyAndPrivateKey(String CN, String pubKey, String privKey, String privPassword, String targetDirectory, String targetFilename, Date expiryDate, String algo, String certVersion) {
 // TODO CHANGE ARGS FILES
         Integer pubKid = getKeyIDFromComboBox(pubKey);
         Integer privKid = getKeyIDFromComboBox(privKey);
@@ -1360,18 +1382,18 @@ public class CryptoGenerator {
             Date startDate = new Date(System.currentTimeMillis() - 24 * 60 * 60
                     * 1000);
             Date endDate = expiryDate;
-
-            X509v1CertificateBuilder v1CertGen = new X509v1CertificateBuilder(
-                    new X500Name(CN), BigInteger.ONE, startDate, endDate,
-                    new X500Name(CN), publicKeyInfo);
-
             Security.addProvider(new BouncyCastleProvider());
             ContentSigner sigGen = new JcaContentSignerBuilder(algo)
                     .setProvider("BC").build(privateKey);
-            X509CertificateHolder certHolder = v1CertGen.build(sigGen);
-            System.out.println(certHolder.getSubject().toString() + " - "
-                    + certHolder.getNotAfter());
 
+            X509CertificateHolder certHolder = null;
+            if ("V1".equals(certVersion)) {
+                X509v1CertificateBuilder v1CertGen = new X509v1CertificateBuilder(new X500Name(CN), BigInteger.ONE, startDate, endDate, new X500Name(CN), publicKeyInfo);
+                certHolder = v1CertGen.build(sigGen);
+            } else {
+                X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(new X500Name(CN), BigInteger.ONE, startDate, endDate, new X500Name(CN), publicKeyInfo);
+                certHolder = v3CertGen.build(sigGen);
+            }
             // Save the public key to the file system, in the webapp this should
             // get saved to some directory configurable via a properties file
             final File publicKeyFile = new File(targetDirectory + targetFilename);
@@ -1696,11 +1718,13 @@ public class CryptoGenerator {
                     builder.append(line);
                 }
             }
-            KeySpec keySpec = null;
+
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             Security.addProvider(new BouncyCastleProvider());
             pssk = new PKCS8EncodedKeySpec(encoded);
-            if(pssk==null) throw new EnigmaException(absolutePath + " is not a valid PKCS8 private key file.");
+            if (pssk == null) {
+                throw new EnigmaException(absolutePath + " is not a valid PKCS8 private key file.");
+            }
         } catch (IOException ex) {
             Logger.getLogger(CryptoGenerator.class
                     .getName()).log(Level.SEVERE, null, ex);
@@ -1755,5 +1779,108 @@ public class CryptoGenerator {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "Private key " + keyname + " successfully imported.";
+    }
+
+    public String importPublicKey(String pubFile, String keyname) throws EnigmaException {
+        FileInputStream fis = null;
+        X509EncodedKeySpec spec = null;
+        PublicKey pubk = null;
+        try {
+            File f = new File(pubFile);
+            if (!quickCheckPublicKey(f)) {
+                throw new EnigmaException(pubFile + " is not a public key file.");
+            }
+            fis = new FileInputStream(f);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            StringBuilder builder = new StringBuilder();
+            boolean inKey = false;
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (!inKey) {
+                    if (line.startsWith("-----BEGIN ")
+                            && line.endsWith(" PUBLIC KEY-----")) {
+                        inKey = true;
+                    }
+                    continue;
+                } else {
+                    if (line.startsWith("-----END ")
+                            && line.endsWith(" PUBLIC KEY-----")) {
+                        inKey = false;
+                        break;
+                    }
+                    builder.append(line);
+                }
+            }
+            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
+            spec = new X509EncodedKeySpec(encoded);
+            if (spec == null) {
+                throw new EnigmaException(pubFile + " is not a valid X509 public key file.");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String modulus = null;
+        KeyFactory kf;
+        Security.addProvider(new BouncyCastleProvider());
+        try {
+            kf = KeyFactory.getInstance("RSA", "BC");
+            pubk = kf.generatePublic(spec);
+            BCRSAPublicKey pub = (BCRSAPublicKey) pubk;
+            modulus = pub.getModulus().toString(16);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException ex) {
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.importPublicKey()" + ex);
+            try {
+                kf = KeyFactory.getInstance("DSA", "BC");
+                pubk = kf.generatePublic(spec);
+                BCDSAPublicKey pub = (BCDSAPublicKey) pubk;
+                modulus = pub.getY().toString(16);
+            } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException ex2) {
+                System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.importPublicKey()" + ex2);
+                try {
+                    kf = KeyFactory.getInstance("EC", "BC");
+                    pubk = kf.generatePublic(spec);
+                    BCECPublicKey pub = (BCECPublicKey) pubk;
+                    modulus = pub.getW().toString();
+                } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException ex3) {
+                    System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.importPublicKey()" + ex3);
+                }
+            }
+        }
+
+        if (pubk == null) {
+            throw new EnigmaException(pubFile + " is ruined.");
+        }
+        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.importPublicKey() MODULUS IS " + modulus);
+        String algo = pubk.getAlgorithm();
+        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.importPublicKey() DETECTED PUBK ALGO IS " + algo);
+
+        // Calculate SHA256
+        HashCalculator hashc = new HashCalculator();
+        byte[] hash = hashc.checksum(pubFile, HashCalculator.SHA1);
+        String realHash = DatatypeConverter.printHexBinary(hash);
+        // Write in Database
+
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            File file = new File(pubFile);
+            FileInputStream inputStream = new FileInputStream(file);
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO X509KEYS (ID_KEY,KEYNAME,KEYTYPE,KEYFILE,ALGO,SHA256,ID_ASSOCIATED_KEY) VALUES (NEXT VALUE FOR X509KEYS_SEQ,?,?,?,?,?,null)");
+            // CREATE TABLE X509KEYS (ID_KEY INTEGER PRIMARY KEY,	KEYNAME VARCHAR(200), KEYTYPE INTEGER,KEYFILE BLOB, ALGO VARCHAR(64), SHA256  VARCHAR(256),ID_ASSOCIATED_KEY INTEGER);
+            pst.setString(1, keyname);
+            pst.setInt(2, 2);
+            pst.setBinaryStream(3, inputStream);
+            pst.setString(4, algo);
+            pst.setString(5, realHash);
+            pst.execute();
+            pst.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "Public key " + keyname + " successfully imported.";
     }
 }
