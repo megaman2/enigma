@@ -857,7 +857,7 @@ public class CryptoGenerator {
 
         // Calculate SHA256
         HashCalculator hashc = new HashCalculator();
-        byte[] hash = hashc.checksum(targetDirectory + fileOutName, HashCalculator.SHA1);
+        byte[] hash = hashc.checksum(targetDirectory + fileOutName, HashCalculator.SHA256);
         String realHash = DatatypeConverter.printHexBinary(hash);
 
         // Write in Database
@@ -1294,7 +1294,7 @@ public class CryptoGenerator {
         }
         // Calculate SHA256
         HashCalculator hashc = new HashCalculator();
-        byte[] hash = hashc.checksum(directory + fileOutName, HashCalculator.SHA1);
+        byte[] hash = hashc.checksum(directory + fileOutName, HashCalculator.SHA256);
         String realHash = DatatypeConverter.printHexBinary(hash);
         // Write in Database
 
@@ -1753,7 +1753,7 @@ public class CryptoGenerator {
 
         // Calculate SHA256
         HashCalculator hashc = new HashCalculator();
-        byte[] hash = hashc.checksum(absolutePath, HashCalculator.SHA1);
+        byte[] hash = hashc.checksum(absolutePath, HashCalculator.SHA256);
         String realHash = DatatypeConverter.printHexBinary(hash);
         // Write in Database
 
@@ -1856,7 +1856,7 @@ public class CryptoGenerator {
 
         // Calculate SHA256
         HashCalculator hashc = new HashCalculator();
-        byte[] hash = hashc.checksum(pubFile, HashCalculator.SHA1);
+        byte[] hash = hashc.checksum(pubFile, HashCalculator.SHA256);
         String realHash = DatatypeConverter.printHexBinary(hash);
         // Write in Database
 
