@@ -61,29 +61,29 @@ public Connection getConnection (){
         statement.close();
         return set;
     }
-
-    public static void main(String[] args) {
-        HSQLLoader ldd = new HSQLLoader();
-        try {
-            ResultSet f = ldd.runQuery("select * from certificates");
-            while (f.next()) {
-                System.out.println("org.caulfield.enigma.database.HSQLLoader.main()" + f.getInt("ID_CERT") + f.getString("CN"));
-            }
-            ldd.closeConnexion();
-        } catch (SQLException ex) {
-            Logger.getLogger(HSQLLoader.class.getName()).log(Level.SEVERE, null, ex);
-            ldd.closeConnexion();
-        }
-
-//        fz = ldd.runUpdate("CREATE TABLE Kappa (colonne1 INT , colonne2 INT)");
-    }
+//
+//    public static void main(String[] args) {
+//        HSQLLoader ldd = new HSQLLoader();
+//        try {
+//            ResultSet f = ldd.runQuery("select * from certificates");
+//            while (f.next()) {
+//                System.out.println("org.caulfield.enigma.database.HSQLLoader.main()" + f.getInt("ID_CERT") + f.getString("CN"));
+//            }
+//            ldd.closeConnexion();
+//        } catch (SQLException ex) {
+//            Logger.getLogger(HSQLLoader.class.getName()).log(Level.SEVERE, null, ex);
+//            ldd.closeConnexion();
+//        }
+//
+////        fz = ldd.runUpdate("CREATE TABLE Kappa (colonne1 INT , colonne2 INT)");
+//    }
 
     private boolean baseDoesNotExist() {
         boolean exists = true;
         try {
             ResultSet f = runQuery("select * from CERTIFICATES");
             if (f.next()) {
-                System.out.println("org.caulfield.enigma.database.HSQLLoader.main()" + f.getInt("ID_CERT"));
+               
                 exists = false;
             }
         } catch (SQLException ex) {
