@@ -31,7 +31,9 @@ public class HSQLLoader {
     public HSQLLoader() {
         loadConnection();
     }
-
+public Connection getConnection (){
+    return connexion;
+}
     public void closeConnexion() {
         try {
             connexion.close();
