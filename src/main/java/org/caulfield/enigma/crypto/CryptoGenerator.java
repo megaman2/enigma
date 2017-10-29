@@ -1657,4 +1657,103 @@ public class CryptoGenerator {
         }
         return null;
     }
+
+    public String importPrivateKey(String absolutePath, String keyname) throws EnigmaException {
+        PrivateKey pk = null;
+        File f = new File(absolutePath);
+        boolean isRSAPKCS1Key = false;
+        boolean isDSAPKCS1Key = false;
+        boolean isEncryptedRSAKey = false;
+        PKCS8EncodedKeySpec pssk = null;
+        try {
+            if (!quickCheckPrivateKey(f)) {
+                throw new EnigmaException(absolutePath + " is not a private key file.");
+            }
+            InputStream fis = new FileInputStream(f);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            StringBuilder builder = new StringBuilder();
+            boolean inKey = false;
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (!inKey) {
+                    if (line.startsWith("-----BEGIN ")
+                            && line.endsWith(" PRIVATE KEY-----")) {
+                        inKey = true;
+                        isRSAPKCS1Key = line.contains("RSA");
+                        isDSAPKCS1Key = line.contains("DSA");
+                        isEncryptedRSAKey = line.contains("ENCRYPTED");
+                    }
+                    continue;
+                } else {
+                    if (line.startsWith("-----END ")
+                            && line.endsWith(" PRIVATE KEY-----")) {
+                        inKey = false;
+                        isRSAPKCS1Key = line.contains("RSA");
+                        isDSAPKCS1Key = line.contains("DSA");
+                        isEncryptedRSAKey = line.contains("ENCRYPTED");
+                        break;
+                    }
+                    builder.append(line);
+                }
+            }
+            KeySpec keySpec = null;
+            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
+            Security.addProvider(new BouncyCastleProvider());
+            pssk = new PKCS8EncodedKeySpec(encoded);
+            if(pssk==null) throw new EnigmaException(absolutePath + " is not a valid PKCS8 private key file.");
+        } catch (IOException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+        }
+
+        KeyFactory kf;
+        try {
+            kf = KeyFactory.getInstance("RSA", "BC");
+            pk = kf.generatePrivate(pssk);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException ex) {
+            try {
+                kf = KeyFactory.getInstance("DSA", "BC");
+                pk = kf.generatePrivate(pssk);
+            } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException ex2) {
+                try {
+                    kf = KeyFactory.getInstance("EC", "BC");
+                    pk = kf.generatePrivate(pssk);
+                } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException ex3) {
+
+                }
+            }
+        }
+        String algo = pk.getAlgorithm();
+        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.importPrivateKey() DETECTED PK ALGO IS " + algo);
+
+        // Calculate SHA256
+        HashCalculator hashc = new HashCalculator();
+        byte[] hash = hashc.checksum(absolutePath, HashCalculator.SHA1);
+        String realHash = DatatypeConverter.printHexBinary(hash);
+        // Write in Database
+
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            File file = new File(absolutePath);
+            FileInputStream inputStream = new FileInputStream(file);
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO X509KEYS (ID_KEY,KEYNAME,KEYTYPE,KEYFILE,ALGO,SHA256,ID_ASSOCIATED_KEY) VALUES (NEXT VALUE FOR X509KEYS_SEQ,?,?,?,?,?,null)");
+            // CREATE TABLE X509KEYS (ID_KEY INTEGER PRIMARY KEY,	KEYNAME VARCHAR(200), KEYTYPE INTEGER,KEYFILE BLOB, ALGO VARCHAR(64), SHA256  VARCHAR(256),ID_ASSOCIATED_KEY INTEGER);
+            pst.setString(1, keyname);
+            pst.setInt(2, 1);
+            pst.setBinaryStream(3, inputStream);
+            pst.setString(4, algo);
+            pst.setString(5, realHash);
+            pst.execute();
+            pst.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "Private key " + keyname + " successfully imported.";
+    }
 }
