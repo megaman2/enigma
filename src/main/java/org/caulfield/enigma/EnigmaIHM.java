@@ -5,10 +5,12 @@
  */
 package org.caulfield.enigma;
 
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +24,13 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.table.DefaultTableModel;
 import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
@@ -105,6 +112,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         refreshX509CertTable();
         refreshPKObjects();
         refreshPubKObjects();
+        buildPopupMenuX509();
     }
 
     private void fillCertificateVersionObjects() {
@@ -140,6 +148,65 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }
     }
 
+    private void buildPopupMenuX509() {
+        final JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem rootCert = new JMenuItem("+ Create New Root Certificate");
+        rootCert.addActionListener((ActionEvent e) -> {
+            System.out.println(".actionPerformed() CREATE ROOT");
+        });
+        popupMenu.add(rootCert);
+        JMenuItem subCert = new JMenuItem("+ Create New Sub Certificate");
+        subCert.addActionListener((ActionEvent e) -> {
+            System.out.println(".actionPerformed() CREATE SUB " + jTableCerts.getSelectedRow());
+        });
+        popupMenu.add(subCert);
+        JMenuItem userCert = new JMenuItem("+ Create New User Certificate");
+        userCert.addActionListener((ActionEvent e) -> {
+            System.out.println(".actionPerformed() CREATE USER " + jTableCerts.getSelectedRow());
+        });
+        popupMenu.add(userCert);
+        JMenuItem exportCertPEM = new JMenuItem("> Export PEM");
+        exportCertPEM.addActionListener((ActionEvent e) -> {
+            System.out.println(".actionPerformed() EXPORT CERT PEM " + jTableCerts.getSelectedRow());
+        });
+        popupMenu.add(exportCertPEM);
+        JMenuItem exportCertDER = new JMenuItem("> Export DER");
+        exportCertDER.addActionListener((ActionEvent e) -> {
+            System.out.println(".actionPerformed() EXPORT CERT DER " + jTableCerts.getSelectedRow());
+        });
+        popupMenu.add(exportCertDER);
+        JMenuItem deleteItem = new JMenuItem("- Delete");
+        deleteItem.addActionListener((ActionEvent e) -> {
+            System.out.println(".actionPerformed() DELETE ITEM " + jTableCerts.getSelectedRow());
+        });
+        popupMenu.add(deleteItem);
+        jTableCerts.setComponentPopupMenu(popupMenu);
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
+
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    int rowAtPoint = jTableCerts.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), jTableCerts));
+                    if (rowAtPoint > -1) {
+                        jTableCerts.setRowSelectionInterval(rowAtPoint, rowAtPoint);
+                    }
+                });
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+    }
+
     private void refreshX509KeyTable() {
         // Fill X509 Keys Table
         try {
@@ -165,7 +232,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 } else {
                     icon = new ImageIcon(getClass().getResource("/keypub.png"));
                 }
-                model.addRow(new Object[]{icon, f.getInt("ID_KEY"), f.getString("KEYNAME"), f.getInt("KEYTYPE"), f.getString("ALGO"), f.getString("SHA256"), f.getInt("ID_ASSOCIATED_KEY")});
+                model.addRow(new Object[]{icon, f.getInt("ID_KEY"), f.getString("KEYNAME"), f.getInt("KEYTYPE") == 1 ? "Private" : "Public", f.getString("ALGO"), f.getString("SHA256"), f.getInt("ID_ASSOCIATED_KEY")});
 
             }
 
@@ -177,7 +244,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private void refreshX509CertTable() {
         // Fill X509 Certificates Table
         try {
-            //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),KEYFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER);
+            // CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
             DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
             model.getDataVector().removeAllElements();
             model.fireTableDataChanged();
@@ -187,14 +254,15 @@ public class EnigmaIHM extends javax.swing.JFrame {
             jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
             jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
-            jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(120);
-            jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(380);
+            jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(100);
+            jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(290);
             jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
-            jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(120);
-            jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(120);
-jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
+            jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(410);
+            jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
+            jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
+            jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
             // GET ROOT and SUBS
-            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) OR C1.ID_ISSUER_CERT=0");
+            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) OR C1.ID_ISSUER_CERT=0");
             while (f.next()) {
 
                 ImageIcon icon = null;
@@ -203,16 +271,16 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
                 } else {
                     icon = new ImageIcon(getClass().getResource("/sub.png"));
                 }
-                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"),});
+                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
             }
 
             // GET END USER CERTS
-            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
+            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
             while (f.next()) {
 
                 ImageIcon icon = new ImageIcon(getClass().getResource("/usercert.png"));
 
-                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"),});
+                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
             }
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
@@ -389,6 +457,8 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
         jLabel61 = new javax.swing.JLabel();
         jLabel66 = new javax.swing.JLabel();
         jComboBoxCertVersion = new javax.swing.JComboBox<>();
+        jLabel67 = new javax.swing.JLabel();
+        jTextFieldPubTargetCertName = new javax.swing.JTextField();
         jPanel5 = new javax.swing.JPanel();
         jButtonPubGenerate = new javax.swing.JButton();
         jLabel23 = new javax.swing.JLabel();
@@ -729,7 +799,6 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
         jDialogFileImport.setAlwaysOnTop(true);
         jDialogFileImport.setMinimumSize(new java.awt.Dimension(352, 125));
         jDialogFileImport.setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
-        jDialogFileImport.setPreferredSize(new java.awt.Dimension(352, 125));
         jDialogFileImport.setSize(new java.awt.Dimension(352, 125));
 
         jLabel62.setText("Key Name :");
@@ -801,7 +870,6 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
         jDialogFileImportPublic.setAlwaysOnTop(true);
         jDialogFileImportPublic.setMinimumSize(new java.awt.Dimension(352, 125));
         jDialogFileImportPublic.setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
-        jDialogFileImportPublic.setPreferredSize(new java.awt.Dimension(352, 125));
         jDialogFileImportPublic.setSize(new java.awt.Dimension(352, 125));
 
         jLabel64.setText("Key Name :");
@@ -1494,6 +1562,10 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
             }
         });
 
+        jLabel67.setText("Certificate Name :");
+
+        jTextFieldPubTargetCertName.setText("Enigma");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -1554,16 +1626,17 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jComboBoxCertAlgo, 0, 150, Short.MAX_VALUE)
                             .addComponent(jDateChooserExpiry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(326, 326, 326))))
+                        .addGap(40, 40, 40)
+                        .addComponent(jLabel67)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldPubTargetCertName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(45, 45, 45))))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(jDateChooserExpiry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addGroup(jPanel4Layout.createSequentialGroup()
                             .addComponent(jLabel30)
@@ -1603,12 +1676,18 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
                                     .addComponent(jLabel22)
                                     .addComponent(jButtonBrowseCertPub)
                                     .addComponent(jComboBoxCertPubK, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel28))))))
+                                    .addComponent(jLabel28)))))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel67)
+                                    .addComponent(jTextFieldPubTargetCertName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButtonCertGenerate))
+                            .addComponent(jDateChooserExpiry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButtonCertGenerate)
-                .addContainerGap())
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Public Key", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -2451,21 +2530,20 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
 
         jTableCerts.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "", "ID", "Certificate Name", "CN", "Signing Algo", "Issuer", "Expiry date", "CRL", "Fingerprint", "Parent Certificate"
+                "", "ID", "Certificate Name", "CN", "Signing Algo", "SHA256", "Thumbprint", "Issuer Certificate ID", "Private Key ID"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, true, false, false, false, false, false
+                false, false, false, false, true, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
-        jTableCerts.setColumnSelectionAllowed(true);
         jTableCerts.getTableHeader().setReorderingAllowed(false);
         jScrollPane2.setViewportView(jTableCerts);
         jTableCerts.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -2488,7 +2566,7 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "", "ID", "Name", "Type", "Algo", "SHA256", "Related to"
+                "", "ID", "Key Name", "Type", "Algo", "SHA256", "Related to"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -3110,7 +3188,7 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
 
     private void jButtonCertGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCertGenerateActionPerformed
         CryptoGenerator cg = new CryptoGenerator();
-        String outRet = cg.generateCertificateFromPublicKeyAndPrivateKey(jTextFieldCertCN.getText(), (String) jComboBoxCertPubK.getSelectedItem(), (String) jComboBoxCertPk.getSelectedItem(), jTextFieldCertPkPw.getText(), jTextFieldCertTargetDirectory.getText(), jTextFieldCertTargetFilename.getText(), jDateChooserExpiry.getDate(), (String) jComboBoxCertAlgo.getSelectedItem(), (String) jComboBoxCertVersion.getSelectedItem());
+        String outRet = cg.generateCertificateFromPublicKeyAndPrivateKey(jTextFieldCertCN.getText(), (String) jComboBoxCertPubK.getSelectedItem(), (String) jComboBoxCertPk.getSelectedItem(), jTextFieldCertPkPw.getText(), jTextFieldCertTargetDirectory.getText(), jTextFieldCertTargetFilename.getText(), jDateChooserExpiry.getDate(), (String) jComboBoxCertAlgo.getSelectedItem(), (String) jComboBoxCertVersion.getSelectedItem(), jTextFieldPubTargetCertName.getText());
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonCertGenerateActionPerformed
 
@@ -3535,6 +3613,7 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
     private javax.swing.JLabel jLabel64;
     private javax.swing.JLabel jLabel65;
     private javax.swing.JLabel jLabel66;
+    private javax.swing.JLabel jLabel67;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -3628,6 +3707,7 @@ jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(90);
     private javax.swing.JTextField jTextFieldPkTargetKeyName;
     private javax.swing.JTextField jTextFieldPubPrivkey1;
     private javax.swing.JTextField jTextFieldPubPrivkeyPW;
+    private javax.swing.JTextField jTextFieldPubTargetCertName;
     private javax.swing.JTextField jTextFieldPubTargetFilename;
     private javax.swing.JTextField jTextFieldPubTargetKeyName;
     private javax.swing.JTextField jTextFieldPublTargetDirectory;

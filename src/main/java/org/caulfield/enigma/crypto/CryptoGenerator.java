@@ -857,8 +857,7 @@ public class CryptoGenerator {
 
         // Calculate SHA256
         HashCalculator hashc = new HashCalculator();
-        byte[] hash = hashc.checksum(targetDirectory + fileOutName, HashCalculator.SHA256);
-        String realHash = DatatypeConverter.printHexBinary(hash);
+        String realHash = hashc.getStringChecksum(targetDirectory + fileOutName, HashCalculator.SHA256);
 
         // Write in Database
         try {
@@ -1333,9 +1332,9 @@ public class CryptoGenerator {
     public boolean quickCheckPublicKey(InputStream publicKeyFile) throws FileNotFoundException, IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(publicKeyFile));
-        
+
         String line = br.readLine();
-        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.quickCheckPublicKey() LINE READ "+line);
+        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.quickCheckPublicKey() LINE READ " + line);
         return line.contains("PUBLIC");
     }
 
@@ -1352,7 +1351,7 @@ public class CryptoGenerator {
         return br.readLine().contains("PRIVATE");
     }
 
-    public String generateCertificateFromPublicKeyAndPrivateKey(String CN, String pubKey, String privKey, String privPassword, String targetDirectory, String targetFilename, Date expiryDate, String algo, String certVersion) {
+    public String generateCertificateFromPublicKeyAndPrivateKey(String CN, String pubKey, String privKey, String privPassword, String targetDirectory, String targetFilename, Date expiryDate, String algo, String certVersion, String certName) {
 // TODO CHANGE ARGS FILES
         Integer pubKid = getKeyIDFromComboBox(pubKey);
         Integer privKid = getKeyIDFromComboBox(privKey);
@@ -1408,19 +1407,39 @@ public class CryptoGenerator {
 
             X509Certificate pubCert = new JcaX509CertificateConverter()
                     .setProvider("BC").getCertificate(certHolder);
+
+            // Calculate SHA256
+            HashCalculator hashc = new HashCalculator();
+            String realHash = hashc.getStringChecksum(targetDirectory + targetFilename, HashCalculator.SHA256);
+            String thumbPrint = hashc.getThumbprint(pubCert.getEncoded());
+
+            // Write in Database
+            try {
+                HSQLLoader sql = new HSQLLoader();
+                File file = new File(targetDirectory + targetFilename);
+                FileInputStream inputStream = new FileInputStream(file);
+                PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)");
+                // CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
+                pst.setString(1, certName);
+                pst.setString(2, CN);
+                pst.setString(3, algo);
+                pst.setBinaryStream(4, inputStream);
+                pst.setString(5, realHash);
+                pst.setString(6, thumbPrint);
+                pst.setInt(7, 0);
+                pst.setInt(8, privKid);
+                pst.execute();
+                pst.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(CryptoGenerator.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(CryptoGenerator.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
             return "Certificate successfully generated with " + pubCert.getSubjectDN().getName() + " and expiry date : " + pubCert.getNotAfter();
 
-        } catch (OperatorCreationException ex) {
-            Logger.getLogger(CryptoGenerator.class
-                    .getName()).log(Level.SEVERE, null, ex);
-            return "Certificate generation failed : " + ex;
-
-        } catch (CertificateException ex) {
-            Logger.getLogger(CryptoGenerator.class
-                    .getName()).log(Level.SEVERE, null, ex);
-            return "Certificate generation failed : " + ex;
-
-        } catch (IOException ex) {
+        } catch (OperatorCreationException | CertificateException | IOException | NoSuchAlgorithmException ex) {
             Logger.getLogger(CryptoGenerator.class
                     .getName()).log(Level.SEVERE, null, ex);
             return "Certificate generation failed : " + ex;

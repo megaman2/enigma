@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.caulfield.enigma.init.ObjectsInitializer;
 import org.hsqldb.cmdline.SqlFile;
 import org.hsqldb.cmdline.SqlToolError;
 
@@ -81,9 +82,8 @@ public Connection getConnection (){
     private boolean baseDoesNotExist() {
         boolean exists = true;
         try {
-            ResultSet f = runQuery("select * from CERTIFICATES");
+            ResultSet f = runQuery("select * from ALGO where ID_ALGO = 1");
             if (f.next()) {
-               
                 exists = false;
             }
         } catch (SQLException ex) {
@@ -128,16 +128,8 @@ public Connection getConnection (){
             Logger.getLogger(HSQLLoader.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Base already exists !");
         }
-        int inset = 0;
-        try {
-        //    CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),KEYFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER);
-            inset = runUpdate("INSERT INTO CERTIFICATES VALUES (1,'DefaultKey','CN=AC LOCALE DE " + System.getProperty("user.name") + ",O=LOCAL','RSA',null,'','',0)");
-        } catch (SQLException ex) {
-            Logger.getLogger(HSQLLoader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (inset == 0) {
-            System.out.println("org.caulfield.enigma.database.HSQLLoader.initDatabase() INSERTS OK");
-        }
+        // Create ROOT objects
+        ObjectsInitializer.createLocalObjects();
         System.out.println("Build successful !");
 
     }

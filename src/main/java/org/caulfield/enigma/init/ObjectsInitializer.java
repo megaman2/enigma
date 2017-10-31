@@ -17,12 +17,13 @@ public class ObjectsInitializer {
     public static String[] createLocalObjects() {
         String[] out = new String[3];
         CryptoGenerator cg = new CryptoGenerator();
+        String user = System.getProperty("user.name").toUpperCase();
         // GENERATE ROOT PRIVATE KEY
-        out[0] = cg.buildPrivateKey(".", "", "ROOT_private.key", 2048, "65537", 8, "RSA", "ROOT_private");
+        out[0] = cg.buildPrivateKey("", "", user +"_private.key", 2048, "65537", 8, "RSA", user+"_private");
         // GENERATE ROOT PUBLIC KEY
-        out[1] = cg.generatePublicKeyFromPrivateKey("1. ROOT_private", "", ".", "ROOT_public.key", "ROOT_public");
+        out[1] = cg.generatePublicKeyFromPrivateKey("1. "+user +"_private", "", "", user+"_public.key", user +"_public");
         // GENERATE ROOT CERTIFICATE USING PRIVATE & PUBLIC KEY
-        out[2] = cg.generateCertificateFromPublicKeyAndPrivateKey("CN=AC LOCALE DE " + System.getProperty("user.name").toUpperCase() + ",O=LOCAL", "2. ROOT_public", "1. ROOT_private", "", ".", "ROOT_Certificate.crt", new Date(), "SHA256withRSA", "V3");
+        out[2] = cg.generateCertificateFromPublicKeyAndPrivateKey("CN=AC LOCALE DE " + user+ ",O=LOCAL", "2. "+user+"_public", "1. "+user+"_private", "", "", user+"_certificate.crt", new Date(), "SHA256withRSA", "V3",System.getProperty("user.name").toUpperCase());
         return out;
     }
     public static void main(String [] args){

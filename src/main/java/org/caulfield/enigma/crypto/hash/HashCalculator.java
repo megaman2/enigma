@@ -40,6 +40,10 @@ public class HashCalculator {
         }
         return null;
     }
+    
+    public String getStringChecksum(String file, String algorithm){
+        return DatatypeConverter.printHexBinary(checksum( file,  algorithm));
+    }
 
     public String getThumbprint(X509Certificate cert)
             throws NoSuchAlgorithmException, CertificateEncodingException {
