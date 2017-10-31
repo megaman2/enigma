@@ -1333,7 +1333,10 @@ public class CryptoGenerator {
     public boolean quickCheckPublicKey(InputStream publicKeyFile) throws FileNotFoundException, IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(publicKeyFile));
-        return br.readLine().contains("PUBLIC");
+        
+        String line = br.readLine();
+        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.quickCheckPublicKey() LINE READ "+line);
+        return line.contains("PUBLIC");
     }
 
     public boolean quickCheckPrivateKey(File privateKeyFile) throws FileNotFoundException, IOException {
@@ -1440,6 +1443,7 @@ public class CryptoGenerator {
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
             for (String line = br.readLine(); line != null; line = br.readLine()) {
+                System.out.println(line);
                 if (!inKey) {
                     if (line.startsWith("-----BEGIN ")
                             && line.endsWith(" PUBLIC KEY-----")) {
@@ -1515,6 +1519,7 @@ public class CryptoGenerator {
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
             for (String line = br.readLine(); line != null; line = br.readLine()) {
+                System.out.println(line);
                 if (!inKey) {
                     if (line.startsWith("-----BEGIN ")
                             && line.endsWith(" PUBLIC KEY-----")) {
