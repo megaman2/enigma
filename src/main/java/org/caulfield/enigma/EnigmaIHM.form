@@ -561,6 +561,8 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JFileChooser" name="jFileChooserExportCert">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="menuBar">
       <Properties>
         <Property name="verifyInputWhenFocusTarget" type="boolean" value="false"/>

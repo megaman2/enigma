@@ -31,6 +31,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
@@ -38,6 +40,7 @@ import org.caulfield.enigma.crypto.ACManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
 import org.caulfield.enigma.database.HSQLLoader;
+import org.caulfield.enigma.export.ExportManager;
 
 /**
  *
@@ -165,13 +168,43 @@ public class EnigmaIHM extends javax.swing.JFrame {
             System.out.println(".actionPerformed() CREATE USER " + jTableCerts.getSelectedRow());
         });
         popupMenu.add(userCert);
+        JMenuItem importCert = new JMenuItem("+ Import Certificate");
+        importCert.addActionListener((ActionEvent e) -> {
+
+            System.out.println(".actionPerformed() IMPORT CERT " + jTableCerts.getSelectedRow());
+        });
+        popupMenu.add(importCert);
         JMenuItem exportCertPEM = new JMenuItem("> Export PEM");
         exportCertPEM.addActionListener((ActionEvent e) -> {
+            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            FileFilter ft = new FileNameExtensionFilter("Certificate file (.crt, .pem)", "crt", "pem");
+            jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
+            jFileChooserExportCert.addChoosableFileFilter(ft);
+            int ret = jFileChooserExportCert.showSaveDialog(this);
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                File targetCert = jFileChooserExportCert.getSelectedFile();
+                ExportManager xm = new ExportManager();
+                String outRet = xm.exportCertificate(idCert, targetCert.getAbsolutePath());
+                ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            }
+
             System.out.println(".actionPerformed() EXPORT CERT PEM " + jTableCerts.getSelectedRow());
         });
         popupMenu.add(exportCertPEM);
         JMenuItem exportCertDER = new JMenuItem("> Export DER");
         exportCertDER.addActionListener((ActionEvent e) -> {
+            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            FileFilter ft = new FileNameExtensionFilter("Certificate file (.cer, .der)", "cer");
+            jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
+            jFileChooserExportCert.addChoosableFileFilter(ft);
+            int ret = jFileChooserExportCert.showSaveDialog(this);
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                File targetCert = jFileChooserExportCert.getSelectedFile();
+                ExportManager xm = new ExportManager();
+                String outRet = xm.exportCertificateAsDER(idCert, targetCert.getAbsolutePath());
+                ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            }
+
             System.out.println(".actionPerformed() EXPORT CERT DER " + jTableCerts.getSelectedRow());
         });
         popupMenu.add(exportCertDER);
@@ -371,6 +404,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel65 = new javax.swing.JLabel();
         jTextFieldImportKeyFile1 = new javax.swing.JTextField();
         jButtonImportKey1 = new javax.swing.JButton();
+        jFileChooserExportCert = new javax.swing.JFileChooser();
         jTabbedPaneScreens = new javax.swing.JTabbedPane();
         jPanelDashboard = new javax.swing.JPanel();
         jButtonDashGenerate = new javax.swing.JButton();
@@ -3546,6 +3580,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JDialog jDialogFileImportPublic;
     private javax.swing.JEditorPane jEditorPaneIdentifierResults;
     private javax.swing.JFileChooser jFileChooserDirectoriesOnly;
+    private javax.swing.JFileChooser jFileChooserExportCert;
     private javax.swing.JFileChooser jFileChooserFileOnly;
     private javax.swing.JFrame jFrameAbout;
     private javax.swing.JFrame jFrameSignature;

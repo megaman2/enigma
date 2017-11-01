@@ -136,6 +136,7 @@ import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
 import org.caulfield.enigma.crypto.x509.PrivateKeyReader;
+import org.caulfield.enigma.database.CryptoDAO;
 import org.caulfield.enigma.database.HSQLLoader;
 import sun.misc.IOUtils;
 
@@ -224,7 +225,7 @@ public class CryptoGenerator {
     public String buildCSRfromKeyPair(String CN, String pkFileName, String pkPassword, String pubFileName, String outputFileName, String outputDirectory) {
         try {
             Integer keyId = getKeyIDFromComboBox(pkFileName);
-            InputStream stream = getKeyFromDB(keyId);
+            InputStream stream = CryptoDAO.getKeyFromDB(keyId);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 // Fake code simulating the copy
@@ -820,28 +821,6 @@ public class CryptoGenerator {
 //Ao8eayMp6FcvNucIpUndo1X8dKMv3Y26ZQIDAQAB
 //-----END RSA PUBLIC KEY-----
 
-    public InputStream getKeyFromDB(Integer idX509Key) {
-        InputStream in = null;
-
-        // Load key from Database
-        HSQLLoader sql = new HSQLLoader();
-        try {
-            System.out.println("SELECT KEYFILE FROM X509KEYS WHERE ID_KEY=" + idX509Key);
-            ResultSet ff = sql.runQuery("SELECT KEYFILE FROM X509KEYS WHERE ID_KEY=" + idX509Key);
-
-            if (ff.next()) {
-                System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.generatePublicKeyFromPrivateKey() KEY OPENED");
-                in = ff.getBinaryStream("KEYFILE");
-            }
-            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.getKeyFromDB()" + in.toString());
-
-        } catch (SQLException ex) {
-            Logger.getLogger(CryptoGenerator.class
-                    .getName()).log(Level.SEVERE, null, ex);
-
-        }
-        return in;
-    }
 
     public Integer getKeyIDFromComboBox(String comboText) {
         return new Integer(comboText.substring(0, comboText.indexOf(".")));
@@ -852,7 +831,7 @@ public class CryptoGenerator {
 
         Integer idPrivateKey = getKeyIDFromComboBox(privateKeyFilename);
         // Load key from Database
-        PublicKey myPublicKey = buildPublicKeyFromPrivateKey(getKeyFromDB(idPrivateKey), privateKeyPassword);
+        PublicKey myPublicKey = buildPublicKeyFromPrivateKey(CryptoDAO.getKeyFromDB(idPrivateKey), privateKeyPassword);
         output = writePublicKey(myPublicKey, targetDirectory, fileOutName);
 
         // Calculate SHA256
@@ -1355,8 +1334,8 @@ public class CryptoGenerator {
 // TODO CHANGE ARGS FILES
         Integer pubKid = getKeyIDFromComboBox(pubKey);
         Integer privKid = getKeyIDFromComboBox(privKey);
-        InputStream stPubKey = getKeyFromDB(pubKid);
-        InputStream stPrivKey = getKeyFromDB(privKid);
+        InputStream stPubKey = CryptoDAO.getKeyFromDB(pubKid);
+        InputStream stPrivKey = CryptoDAO.getKeyFromDB(privKid);
 
         PrivateKey privateKey = null;
         try {
