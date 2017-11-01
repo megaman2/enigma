@@ -7,12 +7,10 @@ package org.caulfield.enigma.imp0rt;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.bind.DatatypeConverter;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
 import org.caulfield.enigma.database.CryptoDAO;
@@ -34,13 +32,13 @@ public class ImportManager {
             String realHash= hashc.getStringChecksum(cert, HashCalculator.SHA256);
             String thumbPrint = hashc.getThumbprint(certX);
             String CN = certX.getSubjectDN().getName();
-            System.out.println(CN);
-            System.out.println(thumbPrint);
-            String certName = null;
-            System.out.println( CN.substring(1,CN.indexOf(",")));
-            //if(CN.length()>)CN.replaceAll("CN=", "");
+            String certName = CN.replace("CN=", "");
+            if(CN.contains(",")){
+                certName=certName.substring(0,certName.indexOf(","));
+            }
+
             // DAO Write it
-            //CryptoDAO.insertCertInDB(cert, certName, CN, realHash, algo, 0, thumbPrint);
+            CryptoDAO.insertCertInDB(cert, certName, CN, realHash, algo, 0, thumbPrint);
             return "Certificate imported successfully as "+certName;
 
         } catch (CertificateEncodingException | NoSuchAlgorithmException ex) {
