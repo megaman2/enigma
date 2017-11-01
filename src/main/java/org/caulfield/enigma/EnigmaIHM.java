@@ -39,8 +39,10 @@ import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.ACManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
+import org.caulfield.enigma.database.CryptoDAO;
 import org.caulfield.enigma.database.HSQLLoader;
 import org.caulfield.enigma.export.ExportManager;
+import org.caulfield.enigma.imp0rt.ImportManager;
 
 /**
  *
@@ -170,14 +172,23 @@ public class EnigmaIHM extends javax.swing.JFrame {
         popupMenu.add(userCert);
         JMenuItem importCert = new JMenuItem("+ Import Certificate");
         importCert.addActionListener((ActionEvent e) -> {
-
-            System.out.println(".actionPerformed() IMPORT CERT " + jTableCerts.getSelectedRow());
+            FileFilter ft = new FileNameExtensionFilter("Certificate file (.crt, .p7b, .cer, .der)", "crt", "p7b", "cert", "der");
+            jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
+            jFileChooserExportCert.addChoosableFileFilter(ft);
+            int ret = jFileChooserExportCert.showOpenDialog(this);
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                File targetCert = jFileChooserExportCert.getSelectedFile();
+                ImportManager xm = new ImportManager();
+                String outRet = xm.importCertificate(targetCert);
+                refreshX509CertTable();
+                ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            }
         });
         popupMenu.add(importCert);
         JMenuItem exportCertPEM = new JMenuItem("> Export PEM");
         exportCertPEM.addActionListener((ActionEvent e) -> {
             Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
-            FileFilter ft = new FileNameExtensionFilter("Certificate file (.crt, .pem)", "crt", "pem");
+            FileFilter ft = new FileNameExtensionFilter("Certificate file (.crt, .cer)", "crt", "cer");
             jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
             jFileChooserExportCert.addChoosableFileFilter(ft);
             int ret = jFileChooserExportCert.showSaveDialog(this);
@@ -187,14 +198,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 String outRet = xm.exportCertificate(idCert, targetCert.getAbsolutePath());
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
-
-            System.out.println(".actionPerformed() EXPORT CERT PEM " + jTableCerts.getSelectedRow());
         });
         popupMenu.add(exportCertPEM);
         JMenuItem exportCertDER = new JMenuItem("> Export DER");
         exportCertDER.addActionListener((ActionEvent e) -> {
             Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
-            FileFilter ft = new FileNameExtensionFilter("Certificate file (.cer, .der)", "cer");
+            FileFilter ft = new FileNameExtensionFilter("Certificate file (.cer, .der, .crt)", "cer", "der", "crt");
             jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
             jFileChooserExportCert.addChoosableFileFilter(ft);
             int ret = jFileChooserExportCert.showSaveDialog(this);
@@ -204,13 +213,14 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 String outRet = xm.exportCertificateAsDER(idCert, targetCert.getAbsolutePath());
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
-
-            System.out.println(".actionPerformed() EXPORT CERT DER " + jTableCerts.getSelectedRow());
         });
         popupMenu.add(exportCertDER);
         JMenuItem deleteItem = new JMenuItem("- Delete");
         deleteItem.addActionListener((ActionEvent e) -> {
-            System.out.println(".actionPerformed() DELETE ITEM " + jTableCerts.getSelectedRow());
+            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            String outRet = CryptoDAO.deleteCertFromDB(idCert);
+            ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            refreshX509CertTable();
         });
         popupMenu.add(deleteItem);
         jTableCerts.setComponentPopupMenu(popupMenu);

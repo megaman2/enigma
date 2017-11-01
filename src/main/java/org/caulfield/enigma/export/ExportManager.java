@@ -76,4 +76,28 @@ public class ExportManager {
             return "Key export failed.";
         }
     }
+
+    public String exportKeyAsDER(Integer idKey, String outputFileName) {
+        try {
+            InputStream is = CryptoDAO.getKeyFromDB(idKey);
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            String pemFormated = new String(buffer);
+            String base64 = pemFormated.replaceAll("\\s", "");
+            base64 = base64.replace("-----BEGINPRIVATEKEY-----", "");
+            base64 = base64.replace("-----ENDPRIVATEKEY-----", "");
+            base64 = base64.replace("-----BEGINPUBLICKEY-----", "");
+            base64 = base64.replace("-----ENDPUBLICKEY-----", "");
+            byte[] derformated = Base64.decode(base64.getBytes());
+            File targetFile = new File(outputFileName);
+            OutputStream outStream = new FileOutputStream(targetFile);
+            outStream.write(derformated);
+            outStream.flush();
+            outStream.close();
+            return "Key exported successfully as " + targetFile;
+        } catch (IOException ex) {
+            Logger.getLogger(ExportManager.class.getName()).log(Level.SEVERE, null, ex);
+            return "Key export failed.";
+        }
+    }
 }

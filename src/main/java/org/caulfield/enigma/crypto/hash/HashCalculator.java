@@ -40,9 +40,27 @@ public class HashCalculator {
         }
         return null;
     }
-    
-    public String getStringChecksum(String file, String algorithm){
-        return DatatypeConverter.printHexBinary(checksum( file,  algorithm));
+
+    public byte[] checksum(File file, String algorithm) {
+
+        try (InputStream in = new FileInputStream(file)) {
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            byte[] block = new byte[4096];
+            int length;
+            while ((length = in.read(block)) > 0) {
+                digest.update(block, 0, length);
+            }
+            return digest.digest();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public String getStringChecksum(File file, String algorithm) {
+        return DatatypeConverter.printHexBinary(checksum(file, algorithm));
+    }
+    public String getStringChecksum(String file, String algorithm) {
+        return DatatypeConverter.printHexBinary(checksum(file, algorithm));
     }
 
     public String getThumbprint(X509Certificate cert)

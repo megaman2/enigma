@@ -49,7 +49,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -821,7 +820,6 @@ public class CryptoGenerator {
 //Ao8eayMp6FcvNucIpUndo1X8dKMv3Y26ZQIDAQAB
 //-----END RSA PUBLIC KEY-----
 
-
     public Integer getKeyIDFromComboBox(String comboText) {
         return new Integer(comboText.substring(0, comboText.indexOf(".")));
     }
@@ -1392,30 +1390,9 @@ public class CryptoGenerator {
             String realHash = hashc.getStringChecksum(targetDirectory + targetFilename, HashCalculator.SHA256);
             String thumbPrint = hashc.getThumbprint(pubCert.getEncoded());
 
-            // Write in Database
-            try {
-                HSQLLoader sql = new HSQLLoader();
-                File file = new File(targetDirectory + targetFilename);
-                FileInputStream inputStream = new FileInputStream(file);
-                PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)");
-                // CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
-                pst.setString(1, certName);
-                pst.setString(2, CN);
-                pst.setString(3, algo);
-                pst.setBinaryStream(4, inputStream);
-                pst.setString(5, realHash);
-                pst.setString(6, thumbPrint);
-                pst.setInt(7, 0);
-                pst.setInt(8, privKid);
-                pst.execute();
-                pst.close();
-            } catch (SQLException ex) {
-                Logger.getLogger(CryptoGenerator.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(CryptoGenerator.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
+            // Save in DB
+            CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint);
+
             return "Certificate successfully generated with " + pubCert.getSubjectDN().getName() + " and expiry date : " + pubCert.getNotAfter();
 
         } catch (OperatorCreationException | CertificateException | IOException | NoSuchAlgorithmException ex) {
@@ -1672,9 +1649,22 @@ public class CryptoGenerator {
         }
     }
 
+    public X509Certificate getCertificate(File cert) {
+        try {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            InputStream targetStream = new FileInputStream(cert);
+           X509Certificate cer = (X509Certificate) cf.generateCertificate(targetStream);
+            return cer;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
     private Certificate getCertificate(String signerCertificate) {
         try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
             Certificate cert = cf.generateCertificate(new FileInputStream(signerCertificate));
             return cert;
         } catch (Exception ex) {
