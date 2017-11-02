@@ -1,31 +1,44 @@
 package org.caulfield.enigma.crypto;
 
-import java.io.FileOutputStream;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Sequence;
 
 import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509ExtensionUtils;
+import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
 /**
@@ -35,46 +48,81 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
  * depending on your application, but you should get the idea! As always this is
  * just an example...
  */
-public class PKCS12Example {
+public class PKCS12Builder {
 
-    static char[] passwd = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l',
-        'd'};
+    static char[] passwd = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
 
-    static X509V1CertificateGenerator v1CertGen = new X509V1CertificateGenerator();
-    static X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
-
+//    public static KeyStore createKeyStore()
+//            throws Exception {
+//        KeyStore store = KeyStore.getInstance("PKCS12", "BC");
+//
+//        // initialize
+//        store.load(null, null);
+//
+//        X500PrivateCredential rootCredential = Utils.createRootCredential();
+//        X500PrivateCredential interCredential = Utils.createIntermediateCredential(rootCredential.getPrivateKey(), rootCredential.getCertificate());
+//        X500PrivateCredential endCredential = Utils.createEndEntityCredential(interCredential.getPrivateKey(), interCredential.getCertificate());
+//
+//        Certificate[] chain = new Certificate[3];
+//
+//        chain[0] = endCredential.getCertificate();
+//        chain[1] = interCredential.getCertificate();
+//        chain[2] = rootCredential.getCertificate();
+//
+//        // set the entries
+//        store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
+//        store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), null, chain);
+//
+//        return store;
+//    }
+//    public static KeyStore makeKeystore(String password)
+//            throws Exception {
+//        KeyStore store = createKeyStore();
+//        char[] passwrd = password.toCharArray();
+//        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+//        store.store(bOut, passwrd);
+//        store = KeyStore.getInstance("PKCS12", "BC");
+//        store.load(new ByteArrayInputStream(bOut.toByteArray()), passwrd);
+//        return store;
+////        Enumeration en = store.aliases();
+////        while (en.hasMoreElements())
+////        {
+////            String alias = (String)en.nextElement();
+////            System.out.println("found " + alias + ", isCertificate? " + store.isCertificateEntry(alias));
+////        }
+//    }
     /**
      * we generate the CA's certificate
      */
-    public static Certificate createMasterCert(PublicKey pubKey,
-            PrivateKey privKey) throws Exception {
-        //
-        // signers name
-        //
-        String issuer = "C=AU, O=The Legion of the Bouncy Castle, OU=Bouncy Primary Certificate";
-
-        //
-        // subjects name - the same as we are self signed.
-        //
-        String subject = "C=AU, O=The Legion of the Bouncy Castle, OU=Bouncy Primary Certificate";
-
+    public static X509CertificateHolder createMasterCert(PublicKey pubKey, PrivateKey privKey, String subject, String alias, String algo) throws Exception {
+        String issuer = subject;
         //
         // create the certificate - version 1
         //
-        v1CertGen.setSerialNumber(BigInteger.valueOf(1));
-        v1CertGen.setIssuerDN(new X509Principal(issuer));
-        v1CertGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60
-                * 60 * 24 * 30));
-        v1CertGen.setNotAfter(new Date(System.currentTimeMillis()
-                + (1000L * 60 * 60 * 24 * 30)));
-        v1CertGen.setSubjectDN(new X509Principal(subject));
-        v1CertGen.setPublicKey(pubKey);
-        v1CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
+        SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(pubKey.getEncoded());
+        X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(new X500Name(issuer), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)), new X500Name(subject), subPubKeyInfo);
 
-        X509Certificate cert = v1CertGen.generateX509Certificate(privKey);
+        AsymmetricKeyParameter pa = PrivateKeyFactory.createKey(privKey.getEncoded());
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(algo);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+        ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(pa);
 
+        v3CertGen.addExtension(Extension.subjectKeyIdentifier, false, subPubKeyInfo);
+        v3CertGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
+
+        KeyUsage usage = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.digitalSignature | KeyUsage.keyEncipherment | KeyUsage.dataEncipherment | KeyUsage.cRLSign);
+        v3CertGen.addExtension(Extension.keyUsage, false, usage);
+
+        ASN1EncodableVector purposes = new ASN1EncodableVector();
+        purposes.add(KeyPurposeId.id_kp_serverAuth);
+        purposes.add(KeyPurposeId.id_kp_clientAuth);
+        purposes.add(KeyPurposeId.anyExtendedKeyUsage);
+        v3CertGen.addExtension(Extension.extendedKeyUsage, false, new DERSequence(purposes));
+
+        X509CertificateHolder certificateHolder = v3CertGen.build(sigGen);
+
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
         cert.checkValidity(new Date());
-
         cert.verify(pubKey);
 
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
@@ -84,65 +132,49 @@ public class PKCS12Example {
         // over setting the friendly name this is the way to do it...
         //
         bagAttr.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName,
-                new DERBMPString("Bouncy Primary Certificate"));
+                new DERBMPString("ROOT"));
 
-        return cert;
+        return certificateHolder;
     }
 
     /**
      * we generate an intermediate certificate signed by our CA
      */
-    public static Certificate createIntermediateCert(PublicKey pubKey,
-            PrivateKey caPrivKey, X509Certificate caCert) throws Exception {
+    public static Certificate createIntermediateCert(PublicKey pubKey, PrivateKey caPrivKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
         //
         // subject name table.
         //
-        Hashtable attrs = new Hashtable();
-        Vector order = new Vector();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.OU, "Bouncy Intermediate Certificate");
-        attrs.put(X509Principal.EmailAddress,
-                "feedback-crypto@bouncycastle.org");
-
-        order.addElement(X509Principal.C);
-        order.addElement(X509Principal.O);
-        order.addElement(X509Principal.OU);
-        order.addElement(X509Principal.EmailAddress);
+        SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(pubKey.getEncoded());
 
         //
         // create the certificate - version 3
         //
-        v3CertGen.reset();
+        X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(caCert.getSubject(), BigInteger.valueOf(2), new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)), new X500Name(subject), subPubKeyInfo);
 
-        v3CertGen.setSerialNumber(BigInteger.valueOf(2));
-        v3CertGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
-        v3CertGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60
-                * 60 * 24 * 30));
-        v3CertGen.setNotAfter(new Date(System.currentTimeMillis()
-                + (1000L * 60 * 60 * 24 * 30)));
-        v3CertGen.setSubjectDN(new X509Principal(order, attrs));
-        v3CertGen.setPublicKey(pubKey);
-        v3CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
+        AsymmetricKeyParameter pa = PrivateKeyFactory.createKey(caPrivKey.getEncoded());
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(algo);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+        ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(pa);
 
         //
         // extensions
+        // https://www.programcreek.com/java-api-examples/index.php?api=org.bouncycastle.cert.X509v3CertificateBuilder
         //
-        v3CertGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
-                new SubjectKeyIdentifier(pubKey.getEncoded()));
+        X509ExtensionUtils extUtils = new X509ExtensionUtils(new SHA1DigestCalculator());
 
-        v3CertGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
-                new AuthorityKeyIdentifierStructure(caCert));
+        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false,
+                extUtils.createAuthorityKeyIdentifier(caCert))
+                .addExtension(Extension.subjectKeyIdentifier, false,
+                        extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
+                .addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
+                .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign
+                        | KeyUsage.cRLSign));
 
-        v3CertGen.addExtension(X509Extensions.BasicConstraints, true,
-                new BasicConstraints(0));
+        X509CertificateHolder certificateHolder = v3CertGen.build(sigGen);
 
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
-
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
         cert.checkValidity(new Date());
-
-        cert.verify(caCert.getPublicKey());
+        cert.verify(pubKey);
 
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
@@ -151,7 +183,7 @@ public class PKCS12Example {
         // over setting the friendly name this is the way to do it...
         //
         bagAttr.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName,
-                new DERBMPString("Bouncy Intermediate Certificate"));
+                new DERBMPString("SUB"));
 
         return cert;
     }
@@ -159,73 +191,44 @@ public class PKCS12Example {
     /**
      * we generate a certificate signed by our CA's intermediate certficate
      */
-    public static Certificate createCert(PublicKey pubKey,
-            PrivateKey caPrivKey, PublicKey caPubKey) throws Exception {
-        //
-        // signers name table.
-        //
-        Hashtable sAttrs = new Hashtable();
-        Vector sOrder = new Vector();
-
-        sAttrs.put(X509Principal.C, "AU");
-        sAttrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        sAttrs.put(X509Principal.OU, "Bouncy Intermediate Certificate");
-        sAttrs.put(X509Principal.EmailAddress,
-                "feedback-crypto@bouncycastle.org");
-
-        sOrder.addElement(X509Principal.C);
-        sOrder.addElement(X509Principal.O);
-        sOrder.addElement(X509Principal.OU);
-        sOrder.addElement(X509Principal.EmailAddress);
-
-        //
-        // subjects name table.
-        //
-        Hashtable attrs = new Hashtable();
-        Vector order = new Vector();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.CN, "Eric H. Echidna");
-        attrs.put(X509Principal.EmailAddress,
-                "feedback-crypto@bouncycastle.org");
-
-        order.addElement(X509Principal.C);
-        order.addElement(X509Principal.O);
-        order.addElement(X509Principal.L);
-        order.addElement(X509Principal.CN);
-        order.addElement(X509Principal.EmailAddress);
+    public static Certificate createCert(PublicKey pubKey, PrivateKey caPrivKey, PublicKey caPubKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
 
         //
         // create the certificate - version 3
         //
-        v3CertGen.reset();
+        SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(pubKey.getEncoded());
 
-        v3CertGen.setSerialNumber(BigInteger.valueOf(3));
-        v3CertGen.setIssuerDN(new X509Principal(sOrder, sAttrs));
-        v3CertGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60
-                * 60 * 24 * 30));
-        v3CertGen.setNotAfter(new Date(System.currentTimeMillis()
-                + (1000L * 60 * 60 * 24 * 30)));
-        v3CertGen.setSubjectDN(new X509Principal(order, attrs));
-        v3CertGen.setPublicKey(pubKey);
-        v3CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
+        //
+        // create the certificate - version 3
+        //
+        X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(caCert.getSubject(), BigInteger.valueOf(2), new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)), new X500Name(subject), subPubKeyInfo);
 
         //
         // add the extensions
         //
-        v3CertGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
-                new SubjectKeyIdentifier(pubKey.getEncoded()));
+        X509ExtensionUtils extUtils = new X509ExtensionUtils(
+                new SHA1DigestCalculator());
 
-        v3CertGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
-                new AuthorityKeyIdentifierStructure(caPubKey));
+        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false,
+                extUtils.createAuthorityKeyIdentifier(caCert))
+                .addExtension(Extension.subjectKeyIdentifier, false,
+                        extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
+                .addExtension(Extension.basicConstraints, true,
+                        new BasicConstraints(false))
+                .addExtension(Extension.keyUsage, true, new KeyUsage(
+                        KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
+                .addExtension(Extension.subjectAlternativeName, false, new GeneralNames(
+                        new GeneralName(GeneralName.rfc822Name, subject)));
+        AsymmetricKeyParameter pa = PrivateKeyFactory.createKey(caPrivKey.getEncoded());
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(algo);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+        ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(pa);
 
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
+        X509CertificateHolder certificateHolder = v3CertGen.build(signer);
 
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
         cert.checkValidity(new Date());
-
-        cert.verify(caPubKey);
+        cert.verify(pubKey);
 
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
