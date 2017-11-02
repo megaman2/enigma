@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -65,11 +66,23 @@ import org.bouncycastle.asn1.ASN1Sequence;
 
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.pkcs.CertificationRequest;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extension;
+import static org.bouncycastle.asn1.x509.X509Extensions.AuthorityKeyIdentifier;
+import static org.bouncycastle.asn1.x509.X509Extensions.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -95,6 +108,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jcajce.provider.asymmetric.dsa.BCDSAPrivateKey;
@@ -111,9 +125,12 @@ import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
 import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -1654,7 +1671,7 @@ public class CryptoGenerator {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
             InputStream targetStream = new FileInputStream(cert);
-           X509Certificate cer = (X509Certificate) cf.generateCertificate(targetStream);
+            X509Certificate cer = (X509Certificate) cf.generateCertificate(targetStream);
             return cer;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -1875,5 +1892,63 @@ public class CryptoGenerator {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "Public key " + keyname + " successfully imported.";
+    }
+
+    /**
+     * Given a Keystore containing a private key and certificate and a Reader
+     * containing a PEM-encoded Certificiate Signing Request (CSR), sign the CSR
+     * with that private key and return the signed certificate as a PEM-encoded
+     * PKCS#7 signedData object. The returned value can be written to a file and
+     * imported into a Java KeyStore with "keytool -import -trustcacerts -alias
+     * subjectalias -file file.pem"
+     *
+     * @param pemcsr a Reader from which will be read a PEM-encoded CSR (begins
+     * "-----BEGIN NEW CERTIFICATE REQUEST-----")
+     * @param validity the number of days to sign the Certificate for
+     * @param keystore the KeyStore containing the CA signing key
+     * @param alias the alias of the CA signing key in the KeyStore
+     * @param password the password of the CA signing key in the KeyStore
+     *
+     * @return a String containing the PEM-encoded signed Certificate (begins
+     * "-----BEGIN PKCS #7 SIGNED DATA-----")
+     */
+    public static String signCSR(Reader pemcsr, int validity, KeyStore keystore, String alias, char[] password) throws Exception {
+        PrivateKey cakey = (PrivateKey) keystore.getKey(alias, password);
+        X509Certificate cacert = (X509Certificate) keystore.getCertificate(alias);
+        PEMParser reader = new PEMParser(pemcsr);
+        PKCS10CertificationRequest csr = new PKCS10CertificationRequest((CertificationRequest) reader.readObject());
+
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+        X500Name issuer = new X500Name(cacert.getSubjectX500Principal().getName());
+        BigInteger serial = new BigInteger(32, new SecureRandom());
+        Date from = new Date();
+        Date to = new Date(System.currentTimeMillis() + (validity * 86400000L));
+        JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+
+        X509v3CertificateBuilder certgen = new X509v3CertificateBuilder(issuer, serial, from, to, csr.getSubject(), csr.getSubjectPublicKeyInfo());
+        certgen.addExtension(X509Extension.basicConstraints, false, new BasicConstraints(false));
+        certgen.addExtension(Extension.subjectKeyIdentifier, false,  extUtils.createSubjectKeyIdentifier(
+                csr.getSubjectPublicKeyInfo()));
+        certgen.addExtension(X509Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifier(new GeneralNames(new GeneralName(new X509Name(cacert.getSubjectX500Principal().getName()))), cacert.getSerialNumber()));
+
+        ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(PrivateKeyFactory.createKey(cakey.getEncoded()));
+        X509CertificateHolder holder = certgen.build(signer);
+        byte[] certencoded = holder.toASN1Structure().getEncoded();
+
+        CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
+        signer = new JcaContentSignerBuilder("SHA1withRSA").build(cakey);
+        generator.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().build()).build(signer, cacert));
+        generator.addCertificate(new X509CertificateHolder(certencoded));
+        generator.addCertificate(new X509CertificateHolder(cacert.getEncoded()));
+        CMSTypedData content = new CMSProcessableByteArray(certencoded);
+        CMSSignedData signeddata = generator.generate(content, true);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write("-----BEGIN PKCS #7 SIGNED DATA-----\n".getBytes("ISO-8859-1"));
+        out.write(Base64.encode(signeddata.getEncoded()));
+        out.write("\n-----END PKCS #7 SIGNED DATA-----\n".getBytes("ISO-8859-1"));
+        out.close();
+        return new String(out.toByteArray(), "ISO-8859-1");
     }
 }
