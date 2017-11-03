@@ -5,13 +5,19 @@
  */
 package org.caulfield.enigma.crypto.x509;
 
+import org.caulfield.enigma.crypto.x509.reader.CSRReader;
+import org.caulfield.enigma.crypto.x509.reader.PublicKeyReader;
+import org.caulfield.enigma.crypto.x509.reader.CertificateReader;
+import org.caulfield.enigma.crypto.x509.reader.PrivateKeyReader;
+import org.caulfield.enigma.crypto.x509.reader.PKCS7Reader;
+import org.caulfield.enigma.crypto.x509.reader.PKCS12Reader;
 import java.io.File;
 
 /**
  *
  * @author Ender
  */
-public class X509Manager {
+public class X509Detector {
 
     public String detectPrivateKey(File f) {
         PrivateKeyReader fde = new PrivateKeyReader(f.getAbsolutePath());

@@ -151,7 +151,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
-import org.caulfield.enigma.crypto.x509.PrivateKeyReader;
+import org.caulfield.enigma.crypto.x509.reader.PrivateKeyReader;
 import org.caulfield.enigma.database.CryptoDAO;
 import org.caulfield.enigma.database.HSQLLoader;
 import sun.misc.IOUtils;
@@ -1665,7 +1665,17 @@ public class CryptoGenerator {
             return "Failed to sign file " + targetFileName + " : " + ex.getMessage();
         }
     }
-
+    public X509Certificate getCertificate(InputStream targetStream) {
+        try {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            X509Certificate cer = (X509Certificate) cf.generateCertificate(targetStream);
+            return cer;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
     public X509Certificate getCertificate(File cert) {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());

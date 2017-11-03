@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.caulfield.enigma.crypto;
+package org.caulfield.enigma.crypto.x509;
 
 
 import java.math.BigInteger;

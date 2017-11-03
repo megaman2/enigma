@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import org.bouncycastle.openpgp.PGPException;
 import org.caulfield.enigma.analyzer.ascii.ASCIIScanner;
 import org.caulfield.enigma.crypto.pgp.PGPManager;
-import org.caulfield.enigma.crypto.x509.X509Manager;
+import org.caulfield.enigma.crypto.x509.X509Detector;
 
 /**
  *
@@ -108,14 +108,14 @@ public class FileAnalyzer {
 
     private String tryX509(File file) {
 
-        X509Manager xmng = new X509Manager();
+        X509Detector xmng = new X509Detector();
         Scenario scenario = new Scenario();
-        scenario.addStep(X509Manager.class, xmng, file, "detectPrivateKey");
-        scenario.addStep(X509Manager.class, xmng, file, "detectPublicKey");
-        scenario.addStep(X509Manager.class, xmng, file, "detectCSR");
-        scenario.addStep(X509Manager.class, xmng, file, "detectCertificate");
-        scenario.addStep(X509Manager.class, xmng, file, "detectPKCS7");
-        scenario.addStep(X509Manager.class, xmng, file, "detectPKCS12");
+        scenario.addStep(X509Detector.class, xmng, file, "detectPrivateKey");
+        scenario.addStep(X509Detector.class, xmng, file, "detectPublicKey");
+        scenario.addStep(X509Detector.class, xmng, file, "detectCSR");
+        scenario.addStep(X509Detector.class, xmng, file, "detectCertificate");
+        scenario.addStep(X509Detector.class, xmng, file, "detectPKCS7");
+        scenario.addStep(X509Detector.class, xmng, file, "detectPKCS12");
         String tryResult = "";
         while (scenario.hasNextStep() && !tryResult.contains("detected")) {
             tryResult += ((String) scenario.runNextStep()) + " > ";

@@ -36,7 +36,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
-import org.caulfield.enigma.crypto.ACManager;
+import org.caulfield.enigma.crypto.x509.CertificateChainManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
 import org.caulfield.enigma.database.CryptoDAO;
@@ -87,7 +87,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                     ex.printStackTrace();
                 }
                 jComboBoxAC.addItem("None");
-                ACManager acm = new ACManager();
+                CertificateChainManager acm = new CertificateChainManager();
                 for (String AC : acm.getFullACList()) {
                     jComboBoxAC.addItem(AC);
                 }
