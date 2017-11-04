@@ -3243,6 +3243,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private void jButtonCertGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCertGenerateActionPerformed
         CryptoGenerator cg = new CryptoGenerator();
         String outRet = cg.generateCertificateFromPublicKeyAndPrivateKey(jTextFieldCertCN.getText(), (String) jComboBoxCertPubK.getSelectedItem(), (String) jComboBoxCertPk.getSelectedItem(), jTextFieldCertPkPw.getText(), jTextFieldCertTargetDirectory.getText(), jTextFieldCertTargetFilename.getText(), jDateChooserExpiry.getDate(), (String) jComboBoxCertAlgo.getSelectedItem(), (String) jComboBoxCertVersion.getSelectedItem(), jTextFieldPubTargetCertName.getText());
+        refreshX509CertTable();
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonCertGenerateActionPerformed
 

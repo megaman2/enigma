@@ -40,9 +40,11 @@ public class CertificateChainManager {
     public Iterable<String> getFullACList() {
         return new ArrayList<String>();
     }
-public String matchKeysAndCerts(){
-    return "";
-}
+
+    public String matchKeysAndCerts() {
+        return "";
+    }
+
     public String buildIntermediateCertificate(Integer idParentCert, String subject, String caPKPassword) {
         InputStream caCertIS = CryptoDAO.getCertFromDB(idParentCert);
         CryptoGenerator cg = new CryptoGenerator();
@@ -65,15 +67,18 @@ public String matchKeysAndCerts(){
                 PrivateKey intermediatePK = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
                 SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(kp.getPublic());
                 PublicKey intermediatePubK = new JcaPEMKeyConverter().getPublicKey(publicKeyInfo);
-                Certificate cert = PKCS12Builder.createIntermediateCert(intermediatePubK, caPK, caCertHolder, subject, algo);
+                X509Certificate cert = PKCS12Builder.createIntermediateCert(intermediatePubK, caPK, caCertHolder, subject, algo);
                 InputStream pkStream = new ByteArrayInputStream(intermediatePK.getEncoded());
                 InputStream pubkStream = new ByteArrayInputStream(intermediatePubK.getEncoded());
                 HashCalculator hc = new HashCalculator();
-                CryptoDAO.insertKeyInDB(pkStream, "SUB_PK_" + certName, algo, hc.getStringChecksum(pkStream, algo), null, true);
-                CryptoDAO.insertKeyInDB(pubkStream, "SUB_PUB_" + certName, algo, hc.getStringChecksum(pkStream, algo), null, false);
-                // Save Cert
-                //   CryptoDAO.insertCertInDB(filePath, pkAlgo, algo, pkAlgo, algo, 0, subject);
-
+                long privKeyID = CryptoDAO.insertKeyInDB(pkStream, "SUB_" + certName + "_private", algo, hc.getStringChecksum(pkStream, HashCalculator.SHA256), 0, true);
+                long pubKeyID = CryptoDAO.insertKeyInDB(pubkStream, "SUB_" + certName + "_public", algo, hc.getStringChecksum(pkStream, HashCalculator.SHA256), (int) (long) privKeyID, false);
+                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()"+privKeyID);
+                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()"+pubKeyID);
+                InputStream certStream = new ByteArrayInputStream(cert.getEncoded());
+                String thumbPrint = hc.getThumbprint(cert.getEncoded());
+                long certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
+                return "SUB_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
             } else {
                 return "CA Cert not found";
             }

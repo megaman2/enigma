@@ -133,7 +133,7 @@ public class PKCS12Builder {
     /**
      * we generate an intermediate certificate signed by our CA
      */
-    public static Certificate createIntermediateCert(PublicKey pubKey, PrivateKey caPrivKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
+    public static X509Certificate createIntermediateCert(PublicKey pubKey, PrivateKey caPrivKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
         //
         // subject name table.
         //
@@ -155,19 +155,19 @@ public class PKCS12Builder {
         //
         X509ExtensionUtils extUtils = new X509ExtensionUtils(new SHA1DigestCalculator());
 
-        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false,
-                extUtils.createAuthorityKeyIdentifier(caCert))
-                .addExtension(Extension.subjectKeyIdentifier, false,
-                        extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
+        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
+                .addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
                 .addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
-                .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign
-                        | KeyUsage.cRLSign));
+                .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
 
         X509CertificateHolder certificateHolder = v3CertGen.build(sigGen);
 
         X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+        X509Certificate caccert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(caCert);
         cert.checkValidity(new Date());
-        cert.verify(pubKey);
+        System.out.println("org.caulfield.enigma.crypto.x509.PKCS12Builder.createIntermediateCert()"+cert.getPublicKey().toString());
+        System.out.println("org.caulfield.enigma.crypto.x509.PKCS12Builder.createIntermediateCert()"+caccert.getPublicKey().toString());
+        cert.verify(caccert.getPublicKey());
 
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
@@ -175,8 +175,7 @@ public class PKCS12Builder {
         // this is actually optional - but if you want to have control
         // over setting the friendly name this is the way to do it...
         //
-        bagAttr.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName,
-                new DERBMPString("SUB"));
+        bagAttr.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName, new DERBMPString("SUB"));
 
         return cert;
     }

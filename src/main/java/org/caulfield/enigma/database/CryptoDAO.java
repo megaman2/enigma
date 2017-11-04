@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.caulfield.enigma.crypto.CryptoGenerator;
@@ -93,13 +94,13 @@ public class CryptoDAO {
         }
     }
 
-    public static String insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint) {
+    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
             File file = new File(filePath);
             FileInputStream inputStream = new FileInputStream(file);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)");
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -108,33 +109,41 @@ public class CryptoDAO {
             pst.setString(6, thumbPrint);
             pst.setInt(7, 0);
             pst.setInt(8, privKid);
-            pst.execute();
+            pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
             pst.close();
-            return "Certificate successfully inserted.";
+            return 0;
         } catch (SQLException | FileNotFoundException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
-            return "Certificate insertion failed.";
+            return 0;
         }
     }
 
-    public static String insertKeyInDB(InputStream fileStream, String keyName, String algo, String realHash, Integer idAssociatedKey, boolean isPrivate) {
+    public static long insertKeyInDB(InputStream fileStream, String keyName, String algo, String realHash, Integer idAssociatedKey, boolean isPrivate) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO X509KEYS (ID_KEY,KEYNAME,KEYTYPE,KEYFILE,ALGO,SHA256,ID_ASSOCIATED_KEY) VALUES (NEXT VALUE FOR X509KEYS_SEQ,?,?,?,?,?,?)");
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO X509KEYS (ID_KEY,KEYNAME,KEYTYPE,KEYFILE,ALGO,SHA256,ID_ASSOCIATED_KEY) VALUES (NEXT VALUE FOR X509KEYS_SEQ,?,?,?,?,?,?)", new String[]{"ID_KEY"});
             // CREATE TABLE X509KEYS (ID_KEY INTEGER PRIMARY KEY,	KEYNAME VARCHAR(200), KEYTYPE INTEGER,KEYFILE BLOB, ALGO VARCHAR(64), SHA256  VARCHAR(256),ID_ASSOCIATED_KEY INTEGER);
             pst.setString(1, keyName);
-            pst.setInt(2, isPrivate?1:2);
+            pst.setInt(2, isPrivate ? 1 : 2);
             pst.setBinaryStream(3, fileStream);
             pst.setString(4, algo);
             pst.setString(5, realHash);
             pst.setInt(6, idAssociatedKey);
-            pst.execute();
+            pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
             pst.close();
-            return "Key successfully inserted.";
+            return 0;
         } catch (SQLException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
-            return "Key insertion failed.";
+            return 0;
         }
     }
 
@@ -162,25 +171,29 @@ public class CryptoDAO {
         }
     }
 
-    public static String insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint) {
+    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)");
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
             pst.setBinaryStream(4, fileStream);
             pst.setString(5, realHash);
             pst.setString(6, thumbPrint);
-            pst.setInt(7, 0);
+            pst.setInt(7, issuerCertificateID);
             pst.setInt(8, privKid);
-            pst.execute();
+            pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
             pst.close();
-            return "Certificate successfully inserted.";
+            return 0;
         } catch (SQLException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
-            return "Certificate insertion failed.";
+            return 0;
         }
     }
 
