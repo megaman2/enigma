@@ -155,14 +155,24 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
     private void buildPopupMenuX509() {
         final JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem rootCert = new JMenuItem("+ Create New Root Certificate");
-        rootCert.addActionListener((ActionEvent e) -> {
-            System.out.println(".actionPerformed() CREATE ROOT");
-        });
-        popupMenu.add(rootCert);
+//        JMenuItem rootCert = new JMenuItem("+ Create New Root Certificate");
+//        rootCert.addActionListener((ActionEvent e) -> {
+//            System.out.println(".actionPerformed() CREATE ROOT");
+//                    jTabbedPaneGenerate.setSelectedIndex(0);
+//        jTabbedPaneScreens.setSelectedIndex(1);
+//        
+//        });
+//        popupMenu.add(rootCert);
         JMenuItem subCert = new JMenuItem("+ Create New Sub Certificate");
         subCert.addActionListener((ActionEvent e) -> {
-            System.out.println(".actionPerformed() CREATE SUB " + jTableCerts.getSelectedRow());
+            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            CertificateChainManager cm = new CertificateChainManager();
+            String outRet = cm.buildIntermediateCertificate(idCert, "CN=SUBTEST,O=SUB", "");
+            refreshX509CertTable();
+            refreshX509KeyTable();
+            refreshPKObjects();
+            refreshPubKObjects();
+            ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
         });
         popupMenu.add(subCert);
         JMenuItem userCert = new JMenuItem("+ Create New User Certificate");

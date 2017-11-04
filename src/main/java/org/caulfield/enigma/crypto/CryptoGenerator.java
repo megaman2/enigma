@@ -77,11 +77,8 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
-import static org.bouncycastle.asn1.x509.X509Extensions.AuthorityKeyIdentifier;
-import static org.bouncycastle.asn1.x509.X509Extensions.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
@@ -101,7 +98,6 @@ import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -158,14 +154,23 @@ import sun.misc.IOUtils;
 
 public class CryptoGenerator {
 
-    private static AsymmetricCipherKeyPair createRSAKey(int size, String publicExponent, int certainty) {
+    public static AsymmetricCipherKeyPair createRSAKey(int size, String publicExponent, int certainty) {
         RSAKeyPairGenerator g = new RSAKeyPairGenerator();
         g.init(new RSAKeyGenerationParameters(new BigInteger(publicExponent),
                 new SecureRandom(), size, certainty));
         return g.generateKeyPair();
     }
 
-    private static AsymmetricCipherKeyPair createDSAKey(int size, String publicExponent, int certainty) {
+    public static AsymmetricCipherKeyPair createKeyPair(String algo) {
+        if ("RSA".equals(algo)) {
+            return createRSAKey(2048, "65537", 8);
+        } else if ("DSA".equals(algo)) {
+            return createDSAKey(2048, "65537", 8);
+        }
+        return null;
+    }
+
+    public static AsymmetricCipherKeyPair createDSAKey(int size, String publicExponent, int certainty) {
         DSAKeyPairGenerator g = new DSAKeyPairGenerator();
         DSAParametersGenerator dpg = new DSAParametersGenerator();
         dpg.init(size, certainty, new SecureRandom());
@@ -181,26 +186,46 @@ public class CryptoGenerator {
      * @return a pair of EC keys (AsymmetricCipherKeyPair type)
      */
     public static AsymmetricCipherKeyPair generateECKeyPair192() {
-        ECKeyPairGenerator kpGen = new ECKeyPairGenerator();
-//
-//        // First, define an EC curve
-//        // ECCurve.Fp(p, a, b); p = prime; a,b = constants defined in equation E: y^2=x^3+ax+b (mod p)
-//        ECCurve curve = new ECCurve.Fp(new BigInteger(ECParams.P_192_R1, 16), // p 
-//                new BigInteger(ECParams.A_192_R1, 16), // a
-//                new BigInteger(ECParams.B_192_R1, 16));			// b
-//
-//        byte[] seed = Hex.decode(ECParams.SEED_192_R1);
-//
-//        // finally use the seed in the ECKeyGenerationParameters along with the others
-//        // ECKeyGenerationParameters(ECDomainParameters(ECCurve, G, n, h),random)
-//        kpGen.init(new ECKeyGenerationParameters(new ECDomainParameters(curve,
-//                curve.decodePoint(Hex.decode(ECParams.G_192_R1_NCOMP)), // G		 
-//                new BigInteger(ECParams.N_192_R1, 16), // n
-//                new BigInteger(ECParams.H_192_R1, 16), // h 
-//                seed), // seed
-//                new SecureRandom()));
+//        try {
+//            ECKeyPairGenerator kpGen = new ECKeyPairGenerator();
+////
+////        // First, define an EC curve
+////        // ECCurve.Fp(p, a, b); p = prime; a,b = constants defined in equation E: y^2=x^3+ax+b (mod p)
+////        ECCurve curve = new ECCurve.Fp(new BigInteger(ECParams.P_192_R1, 16), // p 
+////                new BigInteger(ECParams.A_192_R1, 16), // a
+////                new BigInteger(ECParams.B_192_R1, 16));			// b
+////
+////        byte[] seed = Hex.decode(ECParams.SEED_192_R1);
+////
+////        // finally use the seed in the ECKeyGenerationParameters along with the others
+////        // ECKeyGenerationParameters(ECDomainParameters(ECCurve, G, n, h),random)
+////        kpGen.init(new ECKeyGenerationParameters(new ECDomainParameters(curve,
+////                curve.decodePoint(Hex.decode(ECParams.G_192_R1_NCOMP)), // G		 
+////                new BigInteger(ECParams.N_192_R1, 16), // n
+////                new BigInteger(ECParams.H_192_R1, 16), // h 
+////                seed), // seed
+////                new SecureRandom()));
+////ECCurve curve = new ECCurve.Fp(
+////        new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+////        new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+////        new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+////ECParameterSpec ecSpec = new ECParameterSpec(
+////        curve,
+////        curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+////        new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+////KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+////g.initialize(ecSpec, new SecureRandom());
+//////KeyPair pair = g.generateKeyPair();
+////return g.generateKeyPair();
+//        } catch (NoSuchAlgorithmException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (NoSuchProviderException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InvalidAlgorithmParameterException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        return null;
 
-        return kpGen.generateKeyPair();
     }
 
     private static final String modp2048 = ("FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
@@ -855,24 +880,9 @@ public class CryptoGenerator {
 
         // Write in Database
         try {
-            HSQLLoader sql = new HSQLLoader();
             File file = new File(targetDirectory + fileOutName);
             FileInputStream inputStream = new FileInputStream(file);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO X509KEYS (ID_KEY,KEYNAME,KEYTYPE,KEYFILE,ALGO,SHA256,ID_ASSOCIATED_KEY) VALUES (NEXT VALUE FOR X509KEYS_SEQ,?,?,?,?,?,?)");
-            // CREATE TABLE X509KEYS (ID_KEY INTEGER PRIMARY KEY,	KEYNAME VARCHAR(200), KEYTYPE INTEGER,KEYFILE BLOB, ALGO VARCHAR(64), SHA256  VARCHAR(256),ID_ASSOCIATED_KEY INTEGER);
-            pst.setString(1, keyName);
-            pst.setInt(2, 2);
-            pst.setBinaryStream(3, inputStream);
-            pst.setString(4, "Inherited");
-            pst.setString(5, realHash);
-            pst.setInt(6, idPrivateKey);
-            pst.execute();
-            pst.close();
-
-        } catch (SQLException ex) {
-            Logger.getLogger(CryptoGenerator.class
-                    .getName()).log(Level.SEVERE, null, ex);
-
+            CryptoDAO.insertKeyInDB(inputStream, keyName, "Inherited", realHash, idPrivateKey, false);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(CryptoGenerator.class
                     .getName()).log(Level.SEVERE, null, ex);
@@ -1290,25 +1300,10 @@ public class CryptoGenerator {
         byte[] hash = hashc.checksum(directory + fileOutName, HashCalculator.SHA256);
         String realHash = DatatypeConverter.printHexBinary(hash);
         // Write in Database
-
-        HSQLLoader sql = new HSQLLoader();
         try {
             File file = new File(directory + fileOutName);
             FileInputStream inputStream = new FileInputStream(file);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO X509KEYS (ID_KEY,KEYNAME,KEYTYPE,KEYFILE,ALGO,SHA256,ID_ASSOCIATED_KEY) VALUES (NEXT VALUE FOR X509KEYS_SEQ,?,?,?,?,?,null)");
-            // CREATE TABLE X509KEYS (ID_KEY INTEGER PRIMARY KEY,	KEYNAME VARCHAR(200), KEYTYPE INTEGER,KEYFILE BLOB, ALGO VARCHAR(64), SHA256  VARCHAR(256),ID_ASSOCIATED_KEY INTEGER);
-            pst.setString(1, keyname);
-            pst.setInt(2, 1);
-            pst.setBinaryStream(3, inputStream);
-            pst.setString(4, algo);
-            pst.setString(5, realHash);
-            pst.execute();
-            pst.close();
-
-        } catch (SQLException ex) {
-            Logger.getLogger(CryptoGenerator.class
-                    .getName()).log(Level.SEVERE, null, ex);
-
+            CryptoDAO.insertKeyInDB(inputStream, keyname, algo, realHash, null, true);
         } catch (IOException ex) {
             Logger.getLogger(CryptoGenerator.class
                     .getName()).log(Level.SEVERE, null, ex);
@@ -1665,6 +1660,7 @@ public class CryptoGenerator {
             return "Failed to sign file " + targetFileName + " : " + ex.getMessage();
         }
     }
+
     public X509Certificate getCertificate(InputStream targetStream) {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -1676,6 +1672,7 @@ public class CryptoGenerator {
         }
         return null;
     }
+
     public X509Certificate getCertificate(File cert) {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -1938,7 +1935,7 @@ public class CryptoGenerator {
 
         X509v3CertificateBuilder certgen = new X509v3CertificateBuilder(issuer, serial, from, to, csr.getSubject(), csr.getSubjectPublicKeyInfo());
         certgen.addExtension(X509Extension.basicConstraints, false, new BasicConstraints(false));
-        certgen.addExtension(Extension.subjectKeyIdentifier, false,  extUtils.createSubjectKeyIdentifier(
+        certgen.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(
                 csr.getSubjectPublicKeyInfo()));
         certgen.addExtension(X509Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifier(new GeneralNames(new GeneralName(new X509Name(cacert.getSubjectX500Principal().getName()))), cacert.getSerialNumber()));
 
