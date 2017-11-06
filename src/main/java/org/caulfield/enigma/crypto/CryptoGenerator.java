@@ -1303,7 +1303,7 @@ public class CryptoGenerator {
         try {
             File file = new File(directory + fileOutName);
             FileInputStream inputStream = new FileInputStream(file);
-            CryptoDAO.insertKeyInDB(inputStream, keyname, algo, realHash, null, true);
+            CryptoDAO.insertKeyInDB(inputStream, keyname, algo, realHash, 0, true);
         } catch (IOException ex) {
             Logger.getLogger(CryptoGenerator.class
                     .getName()).log(Level.SEVERE, null, ex);
