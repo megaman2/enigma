@@ -1,5 +1,7 @@
 package org.caulfield.enigma.crypto.x509;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -28,11 +30,14 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.crypto.SHA1DigestCalculator;
+import org.caulfield.enigma.export.ExportManager;
 
 /**
  * Example of how to set up a certificiate chain and a PKCS 12 store for a
@@ -165,10 +170,13 @@ public class PKCS12Builder {
         X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
         X509Certificate caccert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(caCert);
         cert.checkValidity(new Date());
-        System.out.println("org.caulfield.enigma.crypto.x509.PKCS12Builder.createIntermediateCert()"+cert.getPublicKey().toString());
-        System.out.println("org.caulfield.enigma.crypto.x509.PKCS12Builder.createIntermediateCert()"+caccert.getPublicKey().toString());
         cert.verify(caccert.getPublicKey());
 
+        final JcaPEMWriter publicPemWriter = new JcaPEMWriter(new FileWriter(new File("test.crt")));
+        publicPemWriter.writeObject(certificateHolder);
+        publicPemWriter.flush();
+        publicPemWriter.close();
+        
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
         //

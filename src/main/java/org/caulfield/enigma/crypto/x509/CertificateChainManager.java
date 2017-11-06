@@ -30,6 +30,7 @@ import org.caulfield.enigma.crypto.EnigmaException;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
 import org.caulfield.enigma.database.CryptoDAO;
 import org.caulfield.enigma.database.HSQLLoader;
+import org.caulfield.enigma.export.ExportManager;
 
 /**
  *
@@ -76,8 +77,10 @@ public class CertificateChainManager {
                 System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()"+privKeyID);
                 System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()"+pubKeyID);
                 InputStream certStream = new ByteArrayInputStream(cert.getEncoded());
+                // FAUX, UTILISER PEMWRITER
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                long certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
+                ExportManager xm = new ExportManager();
+                long certID = CryptoDAO.insertCertInDB(xm.convertDERstreamToPEMstream(certStream), "SUB_" + certName, subject, hc.getStringChecksum(certStream, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
                 return "SUB_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
             } else {
                 return "CA Cert not found";

@@ -5,11 +5,13 @@
  */
 package org.caulfield.enigma.export;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bouncycastle.util.encoders.Base64;
@@ -35,6 +37,29 @@ public class ExportManager {
         } catch (IOException ex) {
             Logger.getLogger(ExportManager.class.getName()).log(Level.SEVERE, null, ex);
             return "Certificate export failed.";
+        }
+    }
+
+    public InputStream convertDERstreamToPEMstream(InputStream derStream) {
+        try {
+            InputStream pemStream = null;
+            byte[] buffer = new byte[derStream.available()];
+            derStream.read(buffer);
+            String sDerFormated = new String(buffer);
+            byte[] bPemFormated = Base64.encode(sDerFormated.getBytes());
+            String sPemFormated = new String(bPemFormated);
+            StringBuilder sbPEM = new StringBuilder();
+            sbPEM.append("-----BEGIN CERTIFICATE-----");
+            sbPEM.append(System.getProperty("line.separator"));
+            sbPEM.append(sPemFormated.replaceAll("(.{64})", "$1"+System.getProperty("line.separator")));
+            sbPEM.append(System.getProperty("line.separator"));
+            sbPEM.append("-----END CERTIFICATE-----");
+            System.out.println("org.caulfield.enigma.export.ExportManager.convertStreamToPEM()"+sbPEM.toString());
+            pemStream = new ByteArrayInputStream(sbPEM.toString().getBytes(StandardCharsets.UTF_8.name()));
+            return pemStream;
+        } catch (IOException ex) {
+            Logger.getLogger(ExportManager.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 
