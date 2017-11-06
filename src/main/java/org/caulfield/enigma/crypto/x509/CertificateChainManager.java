@@ -5,8 +5,19 @@
  */
 package org.caulfield.enigma.crypto.x509;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -25,6 +36,7 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
@@ -68,19 +80,37 @@ public class CertificateChainManager {
                 PrivateKey intermediatePK = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
                 SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(kp.getPublic());
                 PublicKey intermediatePubK = new JcaPEMKeyConverter().getPublicKey(publicKeyInfo);
-                X509Certificate cert = PKCS12Builder.createIntermediateCert(intermediatePubK, caPK, caCertHolder, subject, algo);
+                X509CertificateHolder cert = PKCS12Builder.createIntermediateCert(intermediatePubK, caPK, caCertHolder, subject, algo);
                 InputStream pkStream = new ByteArrayInputStream(intermediatePK.getEncoded());
                 InputStream pubkStream = new ByteArrayInputStream(intermediatePubK.getEncoded());
                 HashCalculator hc = new HashCalculator();
                 long privKeyID = CryptoDAO.insertKeyInDB(pkStream, "SUB_" + certName + "_private", algo, hc.getStringChecksum(pkStream, HashCalculator.SHA256), 0, true);
                 long pubKeyID = CryptoDAO.insertKeyInDB(pubkStream, "SUB_" + certName + "_public", algo, hc.getStringChecksum(pkStream, HashCalculator.SHA256), (int) (long) privKeyID, false);
-                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()"+privKeyID);
-                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()"+pubKeyID);
-                InputStream certStream = new ByteArrayInputStream(cert.getEncoded());
-                // FAUX, UTILISER PEMWRITER
+                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()" + privKeyID);
+                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()" + pubKeyID);
+
+//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                Writer osWriter = new OutputStreamWriter(baos);
+                StringWriter sw = new StringWriter();
+                JcaPEMWriter writer = new JcaPEMWriter(sw);
+                JcaPEMWriter publicPemWriter = new JcaPEMWriter(writer);
+                publicPemWriter.writeObject(cert);
+                publicPemWriter.flush();
+                publicPemWriter.close();
+                InputStream certStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8.name()));
+                InputStream certStream2 = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8.name()));
+//                System.out.println("READING CERT STREAM");
+//                final BufferedReader reader = new BufferedReader(new InputStreamReader(certStream));
+//                String line = null;
+//                while ((line = reader.readLine()) != null) {
+//                    System.out.println(line);
+//                }
+//                reader.close();
+//                InputStream certStream = new ByteArrayInputStream(baos.toByteArray());
+                System.out.println("org.caulfield.enigma.crypto.x509.CertificateChainManager.buildIntermediateCertificate()" + sw.toString());
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                ExportManager xm = new ExportManager();
-                long certID = CryptoDAO.insertCertInDB(xm.convertDERstreamToPEMstream(certStream), "SUB_" + certName, subject, hc.getStringChecksum(certStream, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
+
+                long certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
                 return "SUB_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
             } else {
                 return "CA Cert not found";

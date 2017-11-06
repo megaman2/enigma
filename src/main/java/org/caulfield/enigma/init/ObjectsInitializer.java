@@ -23,7 +23,7 @@ public class ObjectsInitializer {
         // GENERATE ROOT PUBLIC KEY
         out[1] = cg.generatePublicKeyFromPrivateKey("1. "+user +"_private", "", "", user+"_public.key", user +"_public");
         // GENERATE ROOT CERTIFICATE USING PRIVATE & PUBLIC KEY
-        out[2] = cg.generateCertificateFromPublicKeyAndPrivateKey("CN=AC LOCALE DE " + user+ ",O=LOCAL", "2. "+user+"_public", "1. "+user+"_private", "", "", user+"_certificate.crt", new Date(), "SHA256withRSA", "V3",System.getProperty("user.name").toUpperCase());
+        out[2] = cg.generateCertificateFromPublicKeyAndPrivateKey("CN=AC LOCALE DE " + user+ ",O=LOCAL", "2. "+user+"_public", "1. "+user+"_private", "", "", user+"_certificate.crt",  new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)), "SHA256withRSA", "V3",System.getProperty("user.name").toUpperCase());
         return out;
     }
     public static void main(String [] args){

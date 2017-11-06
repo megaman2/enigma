@@ -138,7 +138,7 @@ public class PKCS12Builder {
     /**
      * we generate an intermediate certificate signed by our CA
      */
-    public static X509Certificate createIntermediateCert(PublicKey pubKey, PrivateKey caPrivKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
+    public static X509CertificateHolder createIntermediateCert(PublicKey pubKey, PrivateKey caPrivKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
         //
         // subject name table.
         //
@@ -171,11 +171,11 @@ public class PKCS12Builder {
         X509Certificate caccert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(caCert);
         cert.checkValidity(new Date());
         cert.verify(caccert.getPublicKey());
-
-        final JcaPEMWriter publicPemWriter = new JcaPEMWriter(new FileWriter(new File("test.crt")));
-        publicPemWriter.writeObject(certificateHolder);
-        publicPemWriter.flush();
-        publicPemWriter.close();
+//
+//        final JcaPEMWriter publicPemWriter = new JcaPEMWriter(new FileWriter(new File("test.crt")));
+//        publicPemWriter.writeObject(certificateHolder);
+//        publicPemWriter.flush();
+//        publicPemWriter.close();
         
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
@@ -185,7 +185,7 @@ public class PKCS12Builder {
         //
         bagAttr.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName, new DERBMPString("SUB"));
 
-        return cert;
+        return certificateHolder;
     }
 
     /**
