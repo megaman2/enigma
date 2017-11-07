@@ -118,11 +118,13 @@ public class CertificateChainManager {
                 SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(kp.getPublic());
                 PublicKey intermediatePubK = new JcaPEMKeyConverter().getPublicKey(publicKeyInfo);
                 X509CertificateHolder cert = PKCS12Builder.createCert(intermediatePubK, caPK, caCert.getPublicKey(), caCertHolder, subject, algo);
-                InputStream pkStream = new ByteArrayInputStream(intermediatePK.getEncoded());
-                InputStream pubkStream = new ByteArrayInputStream(intermediatePubK.getEncoded());
+                InputStream intermediatePKStream = StreamManager.convertPrivateKeyToInputStream(intermediatePK, null);
+                InputStream intermediatePubKStream = StreamManager.convertPublicKeyToInputStream(intermediatePubK);
+                InputStream intermediatePKStream2 = StreamManager.convertPrivateKeyToInputStream(intermediatePK, null);
+                InputStream intermediatePubKStream2 = StreamManager.convertPublicKeyToInputStream(intermediatePubK);
                 HashCalculator hc = new HashCalculator();
-                long privKeyID = CryptoDAO.insertKeyInDB(pkStream, "USER_" + certName + "_private", algo, hc.getStringChecksum(pkStream, HashCalculator.SHA256), 0, true);
-                long pubKeyID = CryptoDAO.insertKeyInDB(pubkStream, "USER_" + certName + "_public", algo, hc.getStringChecksum(pkStream, HashCalculator.SHA256), (int) (long) privKeyID, false);
+                long privKeyID = CryptoDAO.insertKeyInDB(intermediatePKStream, "USER_" + certName + "_private", algo, hc.getStringChecksum(intermediatePKStream2, HashCalculator.SHA256), 0, true);
+                long pubKeyID = CryptoDAO.insertKeyInDB(intermediatePubKStream, "USER_" + certName + "_public", algo, hc.getStringChecksum(intermediatePubKStream2, HashCalculator.SHA256), (int) (long) privKeyID, false);
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
