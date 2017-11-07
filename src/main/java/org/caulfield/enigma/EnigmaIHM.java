@@ -177,7 +177,14 @@ public class EnigmaIHM extends javax.swing.JFrame {
         popupMenu.add(subCert);
         JMenuItem userCert = new JMenuItem("+ Create New User Certificate");
         userCert.addActionListener((ActionEvent e) -> {
-            System.out.println(".actionPerformed() CREATE USER " + jTableCerts.getSelectedRow());
+            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            CertificateChainManager cm = new CertificateChainManager();
+            String outRet = cm.buildUserCertificate(idCert, "CN=USERTEST,O=USER", "");
+            refreshX509CertTable();
+            refreshX509KeyTable();
+            refreshPKObjects();
+            refreshPubKObjects();
+            ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
         });
         popupMenu.add(userCert);
         JMenuItem importCert = new JMenuItem("+ Import Certificate");

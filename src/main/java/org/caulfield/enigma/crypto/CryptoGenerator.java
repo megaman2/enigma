@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -150,7 +151,6 @@ import org.caulfield.enigma.crypto.hash.HashCalculator;
 import org.caulfield.enigma.crypto.x509.reader.PrivateKeyReader;
 import org.caulfield.enigma.database.CryptoDAO;
 import org.caulfield.enigma.database.HSQLLoader;
-import sun.misc.IOUtils;
 
 public class CryptoGenerator {
 
@@ -1606,13 +1606,9 @@ public class CryptoGenerator {
 
     public String signFile(String targetFile, String privateKey, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm, String signerCertificate) {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
-        FileInputStream fis = null;
-        File f = new File(targetFile);
         try {
-            fis = new FileInputStream(f);
-
-            byte[] data = IOUtils.readFully(fis, 0, true);
+            Path path = Paths.get(targetFile);
+            byte[] data = Files.readAllBytes(path);
             PrivateKey pk = getPrivateKey(privateKey, privateKeyPassword);
             Certificate certificate = getCertificate(signerCertificate);
             X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());

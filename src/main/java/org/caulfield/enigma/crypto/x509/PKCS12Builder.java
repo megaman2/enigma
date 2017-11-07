@@ -176,7 +176,7 @@ public class PKCS12Builder {
 //        publicPemWriter.writeObject(certificateHolder);
 //        publicPemWriter.flush();
 //        publicPemWriter.close();
-        
+
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
         //
@@ -191,7 +191,7 @@ public class PKCS12Builder {
     /**
      * we generate a certificate signed by our CA's intermediate certficate
      */
-    public static Certificate createCert(PublicKey pubKey, PrivateKey caPrivKey, PublicKey caPubKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
+    public static X509CertificateHolder createCert(PublicKey pubKey, PrivateKey caPrivKey, PublicKey caPubKey, X509CertificateHolder caCert, String subject, String algo) throws Exception {
 
         //
         // create the certificate - version 3
@@ -206,19 +206,17 @@ public class PKCS12Builder {
         //
         // add the extensions
         //
-        X509ExtensionUtils extUtils = new X509ExtensionUtils(
-                new SHA1DigestCalculator());
+        X509ExtensionUtils extUtils = new X509ExtensionUtils(new SHA1DigestCalculator());
 
-        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false,
-                extUtils.createAuthorityKeyIdentifier(caCert))
-                .addExtension(Extension.subjectKeyIdentifier, false,
-                        extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
-                .addExtension(Extension.basicConstraints, true,
-                        new BasicConstraints(false))
-                .addExtension(Extension.keyUsage, true, new KeyUsage(
-                        KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
-                .addExtension(Extension.subjectAlternativeName, false, new GeneralNames(
-                        new GeneralName(GeneralName.rfc822Name, subject)));
+        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
+                .addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
+                .addExtension(Extension.basicConstraints, true, new BasicConstraints(false))
+                .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
+                .addExtension(Extension.subjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.rfc822Name, subject)));
+//                v3Bldr.addExtension(
+//                Extension.authorityKeyIdentifier,
+//                false,
+//                extUtils.createAuthorityKeyIdentifier(caPubKey));
         AsymmetricKeyParameter pa = PrivateKeyFactory.createKey(caPrivKey.getEncoded());
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(algo);
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
@@ -228,7 +226,7 @@ public class PKCS12Builder {
 
         X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
         cert.checkValidity(new Date());
-        cert.verify(pubKey);
+        cert.verify(caPubKey);
 
         PKCS12BagAttributeCarrier bagAttr = (PKCS12BagAttributeCarrier) cert;
 
@@ -244,7 +242,7 @@ public class PKCS12Builder {
         bagAttr.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_localKeyId,
                 new SubjectKeyIdentifier(pubKey.getEncoded()));
 
-        return cert;
+        return certificateHolder;
     }
 
 //    public static void main(String[] args) throws Exception {
