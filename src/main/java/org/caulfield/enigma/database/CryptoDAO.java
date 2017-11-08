@@ -13,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.caulfield.enigma.crypto.CryptoGenerator;
@@ -57,6 +59,63 @@ public class CryptoDAO {
             return "Certificate deletion failed.";
         }
 
+    }
+
+    // A lancer sur tous les ROOT CERTS => créé l'arbre en dessous
+    // ROOT CERT <=> ID ISSUER CERT = 0
+    public static List<EnigmaCertificate> getEnigmaCertTreeFromDB() {
+        List<EnigmaCertificate> certList = new ArrayList<>();
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            EnigmaCertificate in = new EnigmaCertificate();
+            ResultSet cert = sql.runQuery("SELECT ID_CERT FROM CERTIFICATES WHERE ID_ISSUER_CERT=0");
+            //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
+            while (cert.next()) {
+                certList.add(getEnigmaCertFromDB(cert.getInt("ID_CERT")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return certList;
+    }
+
+    // A lancer sur tous les ROOT CERTS => créé l'arbre en dessous
+    // ROOT CERT <=> ID ISSUER CERT = 0
+    public static EnigmaCertificate getEnigmaCertFromDB(Integer idCert) {
+        EnigmaCertificate in = new EnigmaCertificate();
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            ResultSet cert = sql.runQuery("SELECT * FROM CERTIFICATES WHERE ID_CERT=" + idCert);
+            //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
+            if (cert.next()) {
+                in.setId_cert(cert.getInt("ID_CERT"));
+                in.setCertname(cert.getString("CERTNAME"));
+                in.setCN(cert.getString("CN"));
+                in.setAlgo(cert.getString("ALGO"));
+                in.setCertfile(cert.getBinaryStream("CERTFILE"));
+                in.setSHA256(cert.getString("SHA256"));
+                in.setThumbprint(cert.getString("THUMBPRINT"));
+                in.setId_issuer_cert(cert.getInt("ID_ISSUER_CERT"));
+                in.setId_private_key(cert.getInt("ID_PRIVATEKEY"));
+            }
+
+            // ADD CHILDS
+            ResultSet childs = sql.runQuery("SELECT * FROM CERTIFICATES WHERE ID_ISSUER_CERT=" + idCert);
+            while (childs.next()) {
+                in.getChilds().add(getEnigmaCertFromDB(childs.getInt("ID_CERT")));
+            }
+            System.out.println("org.caulfield.enigma.database.CryptoDAO.getCertFromDB()" + in.toString());
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return in;
     }
 
     public static InputStream getCertFromDB(Integer idCert) {
