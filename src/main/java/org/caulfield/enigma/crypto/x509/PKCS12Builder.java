@@ -211,7 +211,7 @@ public class PKCS12Builder {
         v3CertGen.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
                 .addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(subPubKeyInfo))
                 .addExtension(Extension.basicConstraints, true, new BasicConstraints(false))
-                .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
+                .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment | KeyUsage.nonRepudiation | KeyUsage.dataEncipherment | KeyUsage.keyAgreement))
                 .addExtension(Extension.subjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.rfc822Name, subject)));
 //                v3Bldr.addExtension(
 //                Extension.authorityKeyIdentifier,
