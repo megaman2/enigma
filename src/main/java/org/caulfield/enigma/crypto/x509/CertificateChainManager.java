@@ -73,8 +73,8 @@ public class CertificateChainManager {
                 InputStream intermediatePubKStream = StreamManager.convertPublicKeyToInputStream(intermediatePubK);
                 InputStream intermediatePKStream2 = StreamManager.convertPrivateKeyToInputStream(intermediatePK, null);
                 InputStream intermediatePubKStream2 = StreamManager.convertPublicKeyToInputStream(intermediatePubK);
-                long privKeyID = CryptoDAO.insertKeyInDB(intermediatePKStream, "SUB_" + certName + "_private", algo, hc.getStringChecksum(intermediatePKStream2, HashCalculator.SHA256), 0, true);
-                long pubKeyID = CryptoDAO.insertKeyInDB(intermediatePubKStream, "SUB_" + certName + "_public", algo, hc.getStringChecksum(intermediatePubKStream2, HashCalculator.SHA256), (int) (long) privKeyID, false);
+                long privKeyID = CryptoDAO.insertKeyInDB(intermediatePKStream, "SUB_" + certName + "_private", pkAlgo, hc.getStringChecksum(intermediatePKStream2, HashCalculator.SHA256), 0, true);
+                long pubKeyID = CryptoDAO.insertKeyInDB(intermediatePubKStream, "SUB_" + certName + "_public", "Inherited", hc.getStringChecksum(intermediatePubKStream2, HashCalculator.SHA256), (int) (long) privKeyID, false);
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
@@ -123,8 +123,8 @@ public class CertificateChainManager {
                 InputStream intermediatePKStream2 = StreamManager.convertPrivateKeyToInputStream(intermediatePK, null);
                 InputStream intermediatePubKStream2 = StreamManager.convertPublicKeyToInputStream(intermediatePubK);
                 HashCalculator hc = new HashCalculator();
-                long privKeyID = CryptoDAO.insertKeyInDB(intermediatePKStream, "USER_" + certName + "_private", algo, hc.getStringChecksum(intermediatePKStream2, HashCalculator.SHA256), 0, true);
-                long pubKeyID = CryptoDAO.insertKeyInDB(intermediatePubKStream, "USER_" + certName + "_public", algo, hc.getStringChecksum(intermediatePubKStream2, HashCalculator.SHA256), (int) (long) privKeyID, false);
+                long privKeyID = CryptoDAO.insertKeyInDB(intermediatePKStream, "USER_" + certName + "_private", pkAlgo, hc.getStringChecksum(intermediatePKStream2, HashCalculator.SHA256), 0, true);
+                long pubKeyID = CryptoDAO.insertKeyInDB(intermediatePubKStream, "USER_" + certName + "_public", "Inherited", hc.getStringChecksum(intermediatePubKStream2, HashCalculator.SHA256), (int) (long) privKeyID, false);
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());

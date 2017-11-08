@@ -321,25 +321,22 @@ public class EnigmaIHM extends javax.swing.JFrame {
             jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
             jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
             jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
-            // GET ROOT and SUBS
-            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) OR C1.ID_ISSUER_CERT=0");
+            // GET ROOT CERTS
+            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE C1.ID_ISSUER_CERT=0");
             while (f.next()) {
-
-                ImageIcon icon = null;
-                if (0 == f.getInt("ID_ISSUER_CERT")) {
-                    icon = new ImageIcon(getClass().getResource("/AC.png"));
-                } else {
-                    icon = new ImageIcon(getClass().getResource("/sub.png"));
-                }
+                ImageIcon icon = new ImageIcon(getClass().getResource("/AC.png"));
                 model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
             }
-
-            // GET END USER CERTS
-            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C1.ID_ISSUER_CERT=C2.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
+            // GET SUB CERTS
+            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
             while (f.next()) {
-
+                ImageIcon icon = new ImageIcon(getClass().getResource("/sub.png"));
+                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
+            }
+            // GET END USER CERTS
+            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
+            while (f.next()) {
                 ImageIcon icon = new ImageIcon(getClass().getResource("/usercert.png"));
-
                 model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
             }
         } catch (SQLException ex) {
