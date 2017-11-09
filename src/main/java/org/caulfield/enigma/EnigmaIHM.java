@@ -40,6 +40,7 @@ import org.caulfield.enigma.crypto.x509.CertificateChainManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
 import org.caulfield.enigma.database.CryptoDAO;
+import org.caulfield.enigma.database.EnigmaCertificate;
 import org.caulfield.enigma.database.HSQLLoader;
 import org.caulfield.enigma.export.ExportManager;
 import org.caulfield.enigma.imp0rt.ImportManager;
@@ -303,44 +304,64 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
     private void refreshX509CertTable() {
         // Fill X509 Certificates Table
-        try {
-            // CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
-            DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
-            model.getDataVector().removeAllElements();
-            model.fireTableDataChanged();
-            HSQLLoader database = new HSQLLoader();
+//        try {
+        // CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
+        DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
+        model.getDataVector().removeAllElements();
+        model.fireTableDataChanged();
+        HSQLLoader database = new HSQLLoader();
 
-            jTableCerts.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
-            jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
-            jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
-            jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(100);
-            jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(290);
-            jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
-            jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(410);
-            jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
-            jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
-            jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
-            // GET ROOT CERTS
-            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE C1.ID_ISSUER_CERT=0");
-            while (f.next()) {
-                ImageIcon icon = new ImageIcon(getClass().getResource("/AC.png"));
-                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
-            }
-            // GET SUB CERTS
-            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
-            while (f.next()) {
-                ImageIcon icon = new ImageIcon(getClass().getResource("/sub.png"));
-                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
-            }
-            // GET END USER CERTS
-            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
-            while (f.next()) {
-                ImageIcon icon = new ImageIcon(getClass().getResource("/usercert.png"));
-                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
+        jTableCerts.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
+        jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
+        jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
+        jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(100);
+        jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(290);
+        jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
+        jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(410);
+        jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
+        jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
+        jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
+//            // GET ROOT CERTS
+//            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE C1.ID_ISSUER_CERT=0");
+//            while (f.next()) {
+//                ImageIcon icon = new ImageIcon(getClass().getResource("/AC.png"));
+//                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
+//            }
+//            // GET SUB CERTS
+//            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
+//            while (f.next()) {
+//                ImageIcon icon = new ImageIcon(getClass().getResource("/sub.png"));
+//                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
+//            }
+//            // GET END USER CERTS
+//            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
+//            while (f.next()) {
+//                ImageIcon icon = new ImageIcon(getClass().getResource("/usercert.png"));
+//                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
+//            }
+        List<EnigmaCertificate> certs = CryptoDAO.getEnigmaCertTreeFromDB();
+        for (EnigmaCertificate cert : certs) {
+            addCertificateInTable(cert);
+        }
+//        } catch (SQLException ex) {
+//            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    }
+
+    private void addCertificateInTable(EnigmaCertificate cert) {
+        ImageIcon icon = null;
+        if (cert.isRoot()) {
+            icon = new ImageIcon(getClass().getResource("/AC.png"));
+        } else if (cert.isSub()) {
+            icon = new ImageIcon(getClass().getResource("/sub.png"));
+        } else if (cert.isUser()) {
+            icon = new ImageIcon(getClass().getResource("/usercert.png"));
+        }
+        DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
+        model.addRow(new Object[]{icon, cert.getId_cert(), cert.getCertname(), cert.getCN(), cert.getAlgo(), cert.getSHA256(), cert.getThumbprint(), cert.getId_issuer_cert(), cert.getId_private_key()});
+        for(EnigmaCertificate child : cert.getChilds()){
+            addCertificateInTable(child);
         }
     }
 

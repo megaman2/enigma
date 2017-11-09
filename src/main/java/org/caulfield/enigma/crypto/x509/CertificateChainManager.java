@@ -78,7 +78,7 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                long certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
+                long certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert,2);
                 return "SUB_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
             } else {
                 return "CA Cert not found";
@@ -128,7 +128,7 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                long certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert);
+                long certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert,3);
                 return "USER_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
             } else {
                 return "CA Cert not found";

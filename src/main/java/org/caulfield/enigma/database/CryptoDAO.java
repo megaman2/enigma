@@ -12,13 +12,11 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.caulfield.enigma.crypto.CryptoGenerator;
-import org.caulfield.enigma.crypto.hash.HashCalculator;
 
 /**
  *
@@ -102,6 +100,7 @@ public class CryptoDAO {
                 in.setThumbprint(cert.getString("THUMBPRINT"));
                 in.setId_issuer_cert(cert.getInt("ID_ISSUER_CERT"));
                 in.setId_private_key(cert.getInt("ID_PRIVATEKEY"));
+                in.setCerttype(cert.getInt("CERTTYPE"));
             }
 
             // ADD CHILDS
@@ -153,13 +152,13 @@ public class CryptoDAO {
         }
     }
 
-    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint) {
+    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
             File file = new File(filePath);
             FileInputStream inputStream = new FileInputStream(file);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -168,6 +167,7 @@ public class CryptoDAO {
             pst.setString(6, thumbPrint);
             pst.setInt(7, 0);
             pst.setInt(8, privKid);
+            pst.setInt(9, certType);
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -206,13 +206,13 @@ public class CryptoDAO {
         }
     }
 
-    public static String insertCertInDB(File filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint) {
+    public static String insertCertInDB(File filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
 
             FileInputStream inputStream = new FileInputStream(filePath);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)");
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY, CERTTYPE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?)");
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -221,6 +221,7 @@ public class CryptoDAO {
             pst.setString(6, thumbPrint);
             pst.setInt(7, 0);
             pst.setInt(8, privKid);
+                        pst.setInt(9, certType);
             pst.execute();
             pst.close();
             return "Certificate successfully inserted.";
@@ -230,11 +231,11 @@ public class CryptoDAO {
         }
     }
 
-    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID) {
+    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID, int certType) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -243,6 +244,7 @@ public class CryptoDAO {
             pst.setString(6, thumbPrint);
             pst.setInt(7, issuerCertificateID);
             pst.setInt(8, privKid);
+            pst.setInt(9, certType);
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {

@@ -14,6 +14,7 @@ import java.util.List;
  * @author Ender
  */
 public class EnigmaCertificate {
+
     //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
     private Integer id_cert;
     private String certname;
@@ -24,17 +25,29 @@ public class EnigmaCertificate {
     private String thumbprint;
     private Integer id_issuer_cert;
     private Integer id_private_key;
+    private Integer certtype;
     private List<EnigmaCertificate> childs;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
     }
 
-    
-    
-    public boolean hasChilds(){
+    public boolean isRoot() {
+        return certtype.intValue() == 1;
+    }
+
+    public boolean isSub() {
+        return certtype.intValue() == 2;
+    }
+
+    public boolean isUser() {
+        return certtype.intValue() == 3;
+    }
+
+    public boolean hasChilds() {
         return !childs.isEmpty();
     }
+
     /**
      * @return the id_cert
      */
@@ -174,5 +187,19 @@ public class EnigmaCertificate {
     public void setSHA256(String SHA256) {
         this.SHA256 = SHA256;
     }
-    
+
+    /**
+     * @return the certtype
+     */
+    public Integer getCerttype() {
+        return certtype;
+    }
+
+    /**
+     * @param certtype the certtype to set
+     */
+    public void setCerttype(Integer certtype) {
+        this.certtype = certtype;
+    }
+
 }

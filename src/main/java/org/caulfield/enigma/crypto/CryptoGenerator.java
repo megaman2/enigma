@@ -1403,7 +1403,7 @@ public class CryptoGenerator {
             String thumbPrint = hashc.getThumbprint(pubCert.getEncoded());
 
             // Save in DB
-            CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint);
+            CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint,1);
 
             return "Certificate successfully generated with " + pubCert.getSubjectDN().getName() + " and expiry date : " + pubCert.getNotAfter();
 
