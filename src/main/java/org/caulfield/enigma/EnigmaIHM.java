@@ -350,6 +350,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         outline.getColumnModel().getColumn(3).setPreferredWidth(260);
         outline.getColumnModel().getColumn(4).setPreferredWidth(100);
         outline.getColumnModel().getColumn(5).setPreferredWidth(100);
+        buildPopupMenuX509();
     }
 
     private void refreshPKObjects() {
