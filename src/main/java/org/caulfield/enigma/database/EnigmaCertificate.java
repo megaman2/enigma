@@ -26,7 +26,7 @@ public class EnigmaCertificate {
     private Integer id_issuer_cert;
     private Integer id_private_key;
     private Integer certtype;
-    private List<EnigmaCertificate> childs;
+    private ArrayList<EnigmaCertificate> childs;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
@@ -163,14 +163,14 @@ public class EnigmaCertificate {
     /**
      * @return the childs
      */
-    public List<EnigmaCertificate> getChilds() {
+    public ArrayList<EnigmaCertificate> getChilds() {
         return childs;
     }
 
     /**
      * @param childs the childs to set
      */
-    public void setChilds(List<EnigmaCertificate> childs) {
+    public void setChilds(ArrayList<EnigmaCertificate> childs) {
         this.childs = childs;
     }
 
@@ -202,4 +202,7 @@ public class EnigmaCertificate {
         this.certtype = certtype;
     }
 
+    public boolean equals(EnigmaCertificate certt){
+        return certt.getCertname().equals(this.getCertname());
+    }
 }

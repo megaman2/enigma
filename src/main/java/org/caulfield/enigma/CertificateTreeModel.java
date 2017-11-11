@@ -5,9 +5,7 @@
  */
 package org.caulfield.enigma;
 
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 import org.caulfield.enigma.database.EnigmaCertificate;
 
 /**
@@ -16,44 +14,82 @@ import org.caulfield.enigma.database.EnigmaCertificate;
  */
 public class CertificateTreeModel implements TreeModel {
 
+    private EnigmaCertificate root;
+
+    public CertificateTreeModel() {
+        this.root = new EnigmaCertificate();
+    }
+
+    public CertificateTreeModel(EnigmaCertificate rootBone) {
+        if (rootBone != null) {
+            this.root = rootBone;
+        } else {
+            this.root = new EnigmaCertificate();
+        }
+    }
+
+    public void setRoot(EnigmaCertificate rootBone) {
+        this.root = rootBone;
+    }
+
     @Override
-    public Object getRoot() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void addTreeModelListener(javax.swing.event.TreeModelListener l) {
+        //do nothing 
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        EnigmaCertificate f = (EnigmaCertificate) parent;
+
+        if (f.getChilds() == null) {
+            return null;
+        }
+        return f.getChilds().get(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+        EnigmaCertificate f = (EnigmaCertificate) parent;
 
-    @Override
-    public boolean isLeaf(Object node) {
-        return ((EnigmaCertificate) node).isUser();
-    }
+        if (f.getChilds() == null) {
+            return 0;
+        }
+        return f.getChilds().size();
 
-    @Override
-    public void valueForPathChanged(TreePath path, Object newValue) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        EnigmaCertificate par = (EnigmaCertificate) parent;
+        EnigmaCertificate ch = (EnigmaCertificate) child;
+
+        if (par.getChilds() == null) {
+            return 0;
+        }
+        return par.getChilds().indexOf(ch);
     }
 
     @Override
-    public void addTreeModelListener(TreeModelListener l) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Object getRoot() {
+        return root;
     }
 
     @Override
-    public void removeTreeModelListener(TreeModelListener l) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean isLeaf(Object node) {
+        EnigmaCertificate f = (EnigmaCertificate) node;
+        if (f.getChilds() == null) {
+            return true;
+        }
+        return f.getChilds().isEmpty();
     }
 
+    @Override
+    public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {
+        //do nothing 
+    }
+
+    @Override
+    public void valueForPathChanged(javax.swing.tree.TreePath path, Object newValue) {
+        //do nothing 
+    }
 }

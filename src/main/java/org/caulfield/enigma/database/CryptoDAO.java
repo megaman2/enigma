@@ -61,8 +61,8 @@ public class CryptoDAO {
 
     // A lancer sur tous les ROOT CERTS => créé l'arbre en dessous
     // ROOT CERT <=> ID ISSUER CERT = 0
-    public static List<EnigmaCertificate> getEnigmaCertTreeFromDB() {
-        List<EnigmaCertificate> certList = new ArrayList<>();
+    public static ArrayList<EnigmaCertificate> getEnigmaCertTreeFromDB() {
+        ArrayList<EnigmaCertificate> certList = new ArrayList<>();
 
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();

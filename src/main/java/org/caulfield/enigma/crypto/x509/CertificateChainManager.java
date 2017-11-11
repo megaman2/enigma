@@ -45,12 +45,12 @@ public class CertificateChainManager {
         return "";
     }
 
-    public String buildIntermediateCertificate(Integer idParentCert, String subject, String caPKPassword) {
+    public long buildIntermediateCertificate(Integer idParentCert, String subject, String caPKPassword) {
         InputStream caCertIS = CryptoDAO.getCertFromDB(idParentCert);
         CryptoGenerator cg = new CryptoGenerator();
         X509Certificate caCert = cg.getCertificate(caCertIS);
         HSQLLoader sql = new HSQLLoader();
-
+        long certID = 0;
         try {
             X509CertificateHolder caCertHolder = new JcaX509CertificateHolder(caCert);
 
@@ -78,10 +78,7 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                long certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert,2);
-                return "SUB_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
-            } else {
-                return "CA Cert not found";
+                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2);
             }
 
         } catch (SQLException ex) {
@@ -92,7 +89,7 @@ public class CertificateChainManager {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return "";
+        return certID;
     }
 
     public String buildUserCertificate(Integer idParentCert, String subject, String caPKPassword) {
@@ -128,7 +125,7 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                long certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert,3);
+                long certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3);
                 return "USER_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
             } else {
                 return "CA Cert not found";

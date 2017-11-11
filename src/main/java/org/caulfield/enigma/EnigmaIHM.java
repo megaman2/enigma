@@ -5,7 +5,6 @@
  */
 package org.caulfield.enigma;
 
-import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -17,17 +16,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static javafx.application.ConditionalFeature.SWT;
-import javafx.scene.control.TreeItem;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
@@ -37,12 +34,11 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.x509.CertificateChainManager;
@@ -124,7 +120,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
 
         });
-        
+
 //        outline.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 //    @Override
 //    public void valueChanged(ListSelectionEvent e) {
@@ -135,13 +131,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
 //        }
 //    }
 //});
-        
         fillCertificateVersionObjects();
         fillAlgoObjects();
         refreshX509KeyTable();
-        refreshX509CertTable();
         refreshPKObjects();
         refreshPubKObjects();
+        refreshX509CertOutline();
         buildPopupMenuX509();
     }
 
@@ -178,6 +173,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }
     }
 
+
+    
     private void buildPopupMenuX509() {
         final JPopupMenu popupMenu = new JPopupMenu();
 //        JMenuItem rootCert = new JMenuItem("+ Create New Root Certificate");
@@ -190,25 +187,32 @@ public class EnigmaIHM extends javax.swing.JFrame {
 //        popupMenu.add(rootCert);
         JMenuItem subCert = new JMenuItem("+ Create New Sub Certificate");
         subCert.addActionListener((ActionEvent e) -> {
-            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
             CertificateChainManager cm = new CertificateChainManager();
-            String outRet = cm.buildIntermediateCertificate(idCert, "CN=SUBTEST,O=SUB", "");
-            refreshX509CertTable();
+            long idGeneratedCert = cm.buildIntermediateCertificate(idCert, "CN=SUBTEST,O=SUB", "");
+            EnigmaCertificate resultCert = CryptoDAO.getEnigmaCertFromDB((int) idGeneratedCert);
+            refreshX509CertOutline();
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-            ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+//            Object[] oba = new Object[2];
+//oba[0] = outline.getModel().getValueAt(0, 0);
+//oba[1] = resultCert;
+//outline.expandPath(new TreePath(oba));
+//            outline.expandPath(new TreePath(resultCert));
+            ((DefaultListModel) jListEvents.getModel()).addElement("Generation successful");
         });
         popupMenu.add(subCert);
         JMenuItem userCert = new JMenuItem("+ Create New User Certificate");
         userCert.addActionListener((ActionEvent e) -> {
-            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
             CertificateChainManager cm = new CertificateChainManager();
             String outRet = cm.buildUserCertificate(idCert, "CN=USERTEST,O=USER", "");
-            refreshX509CertTable();
+            refreshX509CertOutline();
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
+
             ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
         });
         popupMenu.add(userCert);
@@ -222,14 +226,14 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 File targetCert = jFileChooserExportCert.getSelectedFile();
                 ImportManager xm = new ImportManager();
                 String outRet = xm.importCertificate(targetCert);
-                refreshX509CertTable();
+                refreshX509CertOutline();
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
         });
         popupMenu.add(importCert);
         JMenuItem exportCertPEM = new JMenuItem("> Export PEM");
         exportCertPEM.addActionListener((ActionEvent e) -> {
-            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
             FileFilter ft = new FileNameExtensionFilter("Certificate file (.crt, .cer)", "crt", "cer");
             jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
             jFileChooserExportCert.addChoosableFileFilter(ft);
@@ -244,7 +248,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         popupMenu.add(exportCertPEM);
         JMenuItem exportCertDER = new JMenuItem("> Export DER");
         exportCertDER.addActionListener((ActionEvent e) -> {
-            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
             FileFilter ft = new FileNameExtensionFilter("Certificate file (.cer, .der, .crt)", "cer", "der", "crt");
             jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
             jFileChooserExportCert.addChoosableFileFilter(ft);
@@ -259,21 +263,20 @@ public class EnigmaIHM extends javax.swing.JFrame {
         popupMenu.add(exportCertDER);
         JMenuItem deleteItem = new JMenuItem("- Delete");
         deleteItem.addActionListener((ActionEvent e) -> {
-            Integer idCert = (Integer) jTableCerts.getModel().getValueAt(jTableCerts.getSelectedRow(), 1);
+            Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
             String outRet = CryptoDAO.deleteCertFromDB(idCert);
             ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
-            refreshX509CertTable();
+            refreshX509CertOutline();
         });
         popupMenu.add(deleteItem);
-        jTableCerts.setComponentPopupMenu(popupMenu);
+        outline.setComponentPopupMenu(popupMenu);
         popupMenu.addPopupMenuListener(new PopupMenuListener() {
-
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 SwingUtilities.invokeLater(() -> {
-                    int rowAtPoint = jTableCerts.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), jTableCerts));
+                    int rowAtPoint = outline.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), outline));
                     if (rowAtPoint > -1) {
-                        jTableCerts.setRowSelectionInterval(rowAtPoint, rowAtPoint);
+                        outline.setRowSelectionInterval(rowAtPoint, rowAtPoint);
                     }
                 });
             }
@@ -281,13 +284,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 // TODO Auto-generated method stub
-
             }
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
                 // TODO Auto-generated method stub
-
             }
         });
     }
@@ -310,7 +311,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
             jTablePK.getColumnModel().getColumn(5).setPreferredWidth(460);
             jTablePK.getColumnModel().getColumn(6).setPreferredWidth(90);
             while (f.next()) {
-
                 ImageIcon icon = null;
                 if (1 == f.getInt("KEYTYPE")) {
                     icon = new ImageIcon(getClass().getResource("/key.png"));
@@ -318,191 +318,38 @@ public class EnigmaIHM extends javax.swing.JFrame {
                     icon = new ImageIcon(getClass().getResource("/keypub.png"));
                 }
                 model.addRow(new Object[]{icon, f.getInt("ID_KEY"), f.getString("KEYNAME"), f.getInt("KEYTYPE") == 1 ? "Private" : "Public", f.getString("ALGO"), f.getString("SHA256"), f.getInt("ID_ASSOCIATED_KEY")});
-
             }
-
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void refreshX509CertTable() {
-        // Fill X509 Certificates Table
-//        try {
-        // CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
-        DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
-        model.getDataVector().removeAllElements();
-        model.fireTableDataChanged();
-        HSQLLoader database = new HSQLLoader();
-
-        jTableCerts.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
-        jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
-        jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
-        jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(100);
-        jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(290);
-        jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
-        jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(410);
-        jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
-        jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
-        jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
-//            // GET ROOT CERTS
-//            ResultSet f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE C1.ID_ISSUER_CERT=0");
-//            while (f.next()) {
-//                ImageIcon icon = new ImageIcon(getClass().getResource("/AC.png"));
-//                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
-//            }
-//            // GET SUB CERTS
-//            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
-//            while (f.next()) {
-//                ImageIcon icon = new ImageIcon(getClass().getResource("/sub.png"));
-//                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
-//            }
-//            // GET END USER CERTS
-//            f = database.runQuery("select C1.ID_CERT,C1.CERTNAME,C1.CN,C1.ALGO, C1.SHA256,C1.THUMBPRINT,C1.ID_ISSUER_CERT,C1.ID_PRIVATEKEY  from CERTIFICATES C1 WHERE NOT EXISTS (SELECT C2.ID_CERT FROM CERTIFICATES C2 WHERE C2.ID_ISSUER_CERT=C1.ID_CERT) AND C1.ID_ISSUER_CERT<>0");
-//            while (f.next()) {
-//                ImageIcon icon = new ImageIcon(getClass().getResource("/usercert.png"));
-//                model.addRow(new Object[]{icon, f.getInt("ID_CERT"), f.getString("CERTNAME"), f.getString("CN"), f.getString("ALGO"), f.getString("SHA256"), f.getString("THUMBPRINT"), f.getInt("ID_ISSUER_CERT"), f.getInt("ID_PRIVATEKEY")});
-//            }
-        List<EnigmaCertificate> certs = CryptoDAO.getEnigmaCertTreeFromDB();
-        for (EnigmaCertificate cert : certs) {
-            addCertificateInTable(cert);
-        }
-//        } catch (SQLException ex) {
-//            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
-
-    private void addCertificateInTable(EnigmaCertificate cert) {
-        ImageIcon icon = null;
-        if (cert.isRoot()) {
-            icon = new ImageIcon(getClass().getResource("/AC.png"));
-        } else if (cert.isSub()) {
-            icon = new ImageIcon(getClass().getResource("/sub.png"));
-        } else if (cert.isUser()) {
-            icon = new ImageIcon(getClass().getResource("/usercert.png"));
-        }
-        DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
-        model.addRow(new Object[]{icon, cert.getId_cert(), cert.getCertname(), cert.getCN(), cert.getAlgo(), cert.getSHA256(), cert.getThumbprint(), cert.getId_issuer_cert(), cert.getId_private_key()});
-        for (EnigmaCertificate child : cert.getChilds()) {
-            addCertificateInTable(child);
-        }
-    }
-
     private void refreshX509CertOutline() {
-        // Fill X509 Certificates Tree
-         TreeNode root = new MutableTreeNode() {
-             @Override
-             public void insert(MutableTreeNode child, int index) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
+        // Fill X509 Certificates Outline
+        EnigmaCertificate root = new EnigmaCertificate();
+        root.setChilds(CryptoDAO.getEnigmaCertTreeFromDB());
 
-             @Override
-             public void remove(int index) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public void remove(MutableTreeNode node) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public void setUserObject(Object object) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public void removeFromParent() {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public void setParent(MutableTreeNode newParent) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public TreeNode getChildAt(int childIndex) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public int getChildCount() {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public TreeNode getParent() {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public int getIndex(TreeNode node) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public boolean getAllowsChildren() {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public boolean isLeaf() {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-
-             @Override
-             public Enumeration children() {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-             }
-         };
-                List<EnigmaCertificate> certs = CryptoDAO.getEnigmaCertTreeFromDB();
-        for (EnigmaCertificate cert : certs) {
-//            addCertificateToTreeItem(cert, rootNode);
-//            root.add(cert);
-        }
-  
-        TreeModel treeMdl = new DefaultTreeModel(root);
-        OutlineModel mdl = DefaultOutlineModel.createOutlineModel(treeMdl, new CertificateRowModel(), true);
-        Outline outline = new Outline();
+        TreeModel treeMdl = new CertificateTreeModel(root);
+        OutlineModel mdl = DefaultOutlineModel.createOutlineModel(treeMdl, new CertificateRowModel(), true, "Certificates");
+        outline = new Outline();
         outline.setRenderDataProvider(new CertificateDataProvider());
-        outline.setRootVisible(true);
+        outline.setRootVisible(false);
         outline.setModel(mdl);
+        jScrollPane1.setViewportView(outline);
 
-        jPanelScenarios.add(outline, BorderLayout.CENTER);
+        outline.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        outline.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        outline.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        outline.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
 
-//        jTableCerts.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
-//        jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-//        jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
-//        jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
-//        jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(100);
-//        jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(290);
-//        jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
-//        jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(410);
-//        jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
-//        jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
-//        jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
-        //create the root node
-
-
-    }
-//http://www.java2s.com/Code/Java/Swing-Components/JTreeTablecomponent.htm
-
-    private void addCertificateToTreeItem(EnigmaCertificate cert, DefaultMutableTreeNode parentNode) {
-        ImageIcon icon = null;
-        if (cert.isRoot()) {
-            icon = new ImageIcon(getClass().getResource("/AC.png"));
-        } else if (cert.isSub()) {
-            icon = new ImageIcon(getClass().getResource("/sub.png"));
-        } else if (cert.isUser()) {
-            icon = new ImageIcon(getClass().getResource("/usercert.png"));
-        }
-        DefaultMutableTreeNode item = new DefaultMutableTreeNode(parentNode);
-//        item.setValue(new Object[]{icon, cert.getId_cert(), cert.getCertname(), cert.getCN(), cert.getAlgo(), cert.getSHA256(), cert.getThumbprint(), cert.getId_issuer_cert(), cert.getId_private_key()});
-        for (EnigmaCertificate child : cert.getChilds()) {
-            addCertificateToTreeItem(child, item);
-        }
+        outline.getColumnModel().getColumn(0).setPreferredWidth(220);
+        outline.getColumnModel().getColumn(1).setPreferredWidth(30);
+        outline.getColumnModel().getColumn(2).setPreferredWidth(240);
+        outline.getColumnModel().getColumn(3).setPreferredWidth(260);
+        outline.getColumnModel().getColumn(4).setPreferredWidth(100);
+        outline.getColumnModel().getColumn(5).setPreferredWidth(100);
     }
 
     private void refreshPKObjects() {
@@ -772,8 +619,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
         label1 = new java.awt.Label();
         jPanelACManagement = new javax.swing.JPanel();
         jPanel19 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTableCerts = new javax.swing.JTable();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        outline = new org.netbeans.swing.outline.Outline();
         jPanel20 = new javax.swing.JPanel();
         jScrollPane9 = new javax.swing.JScrollPane();
         jTablePK = new javax.swing.JTable();
@@ -2747,35 +2594,17 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jPanel19.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Certificates", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
-        jTableCerts.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "", "ID", "Certificate Name", "CN", "Signing Algo", "SHA256", "Thumbprint", "Issuer Certificate ID", "Private Key ID"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, true, false, false, false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jTableCerts.getTableHeader().setReorderingAllowed(false);
-        jScrollPane2.setViewportView(jTableCerts);
-        jTableCerts.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        jScrollPane1.setViewportView(outline);
 
         javax.swing.GroupLayout jPanel19Layout = new javax.swing.GroupLayout(jPanel19);
         jPanel19.setLayout(jPanel19Layout);
         jPanel19Layout.setHorizontalGroup(
             jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1420, Short.MAX_VALUE)
         );
         jPanel19Layout.setVerticalGroup(
             jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
         );
 
         jPanel20.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Keys", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -2828,7 +2657,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addComponent(jPanel19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 141, Short.MAX_VALUE))
+                .addGap(0, 12, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Gestion des objets X509", jPanelACManagement);
@@ -2907,7 +2736,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                         .addGap(256, 256, 256)
                         .addComponent(jLabel58))
                     .addComponent(jButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(389, Short.MAX_VALUE))
+                .addContainerGap(482, Short.MAX_VALUE))
         );
         jPanelScenariosLayout.setVerticalGroup(
             jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2933,7 +2762,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addComponent(jButton13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton14)
-                .addContainerGap(402, Short.MAX_VALUE))
+                .addContainerGap(464, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Scenarios", jPanelScenarios);
@@ -2999,7 +2828,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel18Layout.setVerticalGroup(
             jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel18Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(14, Short.MAX_VALUE)
                 .addGroup(jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel54)
                     .addComponent(jLabel55))
@@ -3136,7 +2965,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1437, Short.MAX_VALUE)
+            .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1437, Short.MAX_VALUE)
             .addComponent(jPanelEvents, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -3402,7 +3231,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private void jButtonCertGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCertGenerateActionPerformed
         CryptoGenerator cg = new CryptoGenerator();
         String outRet = cg.generateCertificateFromPublicKeyAndPrivateKey(jTextFieldCertCN.getText(), (String) jComboBoxCertPubK.getSelectedItem(), (String) jComboBoxCertPk.getSelectedItem(), jTextFieldCertPkPw.getText(), jTextFieldCertTargetDirectory.getText(), jTextFieldCertTargetFilename.getText(), jDateChooserExpiry.getDate(), (String) jComboBoxCertAlgo.getSelectedItem(), (String) jComboBoxCertVersion.getSelectedItem(), jTextFieldPubTargetCertName.getText());
-        refreshX509CertTable();
+        refreshX509CertOutline();
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonCertGenerateActionPerformed
 
@@ -3870,7 +3699,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
@@ -3888,7 +3717,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPaneGenerate;
     private javax.swing.JTabbedPane jTabbedPaneScreens;
-    private javax.swing.JTable jTableCerts;
     private javax.swing.JTable jTablePK;
     private javax.swing.JTextArea jTextArea2;
     private javax.swing.JTextArea jTextArea3;
@@ -3935,6 +3763,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private java.awt.Label label1;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
+    private org.netbeans.swing.outline.Outline outline;
     private javax.swing.JMenuItem pasteMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     // End of variables declaration//GEN-END:variables

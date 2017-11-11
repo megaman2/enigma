@@ -26,8 +26,8 @@ public class CertificateDataProvider implements RenderDataProvider {
     }
 
     public java.awt.Color getForeground(Object o) {
-        File f = (File) o;
-        if (!f.isDirectory() && !f.canWrite()) {
+        EnigmaCertificate f = (EnigmaCertificate) o;
+        if (!f.isUser() && !f.isSub()) {
             return UIManager.getColor("controlShadow");
         }
         return null;

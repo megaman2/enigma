@@ -5,8 +5,6 @@
  */
 package org.caulfield.enigma;
 
-import java.io.File;
-import java.util.Date;
 import org.caulfield.enigma.database.EnigmaCertificate;
 import org.netbeans.swing.outline.RowModel;
 
@@ -26,6 +24,10 @@ public class CertificateRowModel implements RowModel {
                 return String.class;
             case 3:
                 return String.class;
+            case 4:
+                return Integer.class;
+            case 5:
+                return String.class;
             default:
                 assert false;
         }
@@ -33,7 +35,7 @@ public class CertificateRowModel implements RowModel {
     }
 
     public int getColumnCount() {
-        return 4;
+        return 6;
     }
 
     public String getColumnName(int column) {
@@ -41,11 +43,15 @@ public class CertificateRowModel implements RowModel {
             case 0:
                 return "ID";
             case 1:
-                return "DATA";
+                return "CN";
             case 2:
-                return "DATA";
+                return "Thumbprint";
             case 3:
-                return "DATA";
+                return "Algo";
+            case 4:
+                return "ID Private Key";
+            case 5:
+                return "Type";
             default:
                 assert false;
         }
@@ -53,16 +59,27 @@ public class CertificateRowModel implements RowModel {
     }
 
     public Object getValueFor(Object node, int column) {
-        File f = (File) node;
+        EnigmaCertificate f = (EnigmaCertificate) node;
         switch (column) {
             case 0:
-                return ((EnigmaCertificate)node).getId_cert();
+                return ((EnigmaCertificate) node).getId_cert();
             case 1:
-                return ((EnigmaCertificate)node).getCertname();
-                  case 2:
-                return ((EnigmaCertificate)node).getCN();
-                  case 3:
-                return ((EnigmaCertificate)node).getThumbprint();
+                return ((EnigmaCertificate) node).getCN();
+            case 2:
+                return ((EnigmaCertificate) node).getThumbprint();
+            case 3:
+                return ((EnigmaCertificate) node).getAlgo();
+            case 4:
+                return ((EnigmaCertificate) node).getId_private_key();
+            case 5:
+                if (((EnigmaCertificate) node).isUser()) {
+                    return "USER";
+                } else if (((EnigmaCertificate) node).isSub()) {
+                    return "SUB";
+                } else if (((EnigmaCertificate) node).isRoot()) {
+                    return "ROOT";
+                }
+
             default:
                 assert false;
         }
