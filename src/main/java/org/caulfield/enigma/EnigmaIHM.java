@@ -5,6 +5,7 @@
  */
 package org.caulfield.enigma;
 
+import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -16,10 +17,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javafx.application.ConditionalFeature.SWT;
+import javafx.scene.control.TreeItem;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
@@ -34,6 +38,11 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.x509.CertificateChainManager;
@@ -44,6 +53,9 @@ import org.caulfield.enigma.database.EnigmaCertificate;
 import org.caulfield.enigma.database.HSQLLoader;
 import org.caulfield.enigma.export.ExportManager;
 import org.caulfield.enigma.imp0rt.ImportManager;
+import org.netbeans.swing.outline.DefaultOutlineModel;
+import org.netbeans.swing.outline.Outline;
+import org.netbeans.swing.outline.OutlineModel;
 
 /**
  *
@@ -112,6 +124,18 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
 
         });
+        
+//        outline.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+//    @Override
+//    public void valueChanged(ListSelectionEvent e) {
+//        int row = outline.getSelectedRow();
+//        File f = (File) outline.getValueAt(row, 0);
+//        if (!e.getValueIsAdjusting()) {
+//            System.out.println(row + ": " + f);
+//        }
+//    }
+//});
+        
         fillCertificateVersionObjects();
         fillAlgoObjects();
         refreshX509KeyTable();
@@ -360,8 +384,124 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }
         DefaultTableModel model = (DefaultTableModel) jTableCerts.getModel();
         model.addRow(new Object[]{icon, cert.getId_cert(), cert.getCertname(), cert.getCN(), cert.getAlgo(), cert.getSHA256(), cert.getThumbprint(), cert.getId_issuer_cert(), cert.getId_private_key()});
-        for(EnigmaCertificate child : cert.getChilds()){
+        for (EnigmaCertificate child : cert.getChilds()) {
             addCertificateInTable(child);
+        }
+    }
+
+    private void refreshX509CertOutline() {
+        // Fill X509 Certificates Tree
+         TreeNode root = new MutableTreeNode() {
+             @Override
+             public void insert(MutableTreeNode child, int index) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public void remove(int index) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public void remove(MutableTreeNode node) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public void setUserObject(Object object) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public void removeFromParent() {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public void setParent(MutableTreeNode newParent) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public TreeNode getChildAt(int childIndex) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public int getChildCount() {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public TreeNode getParent() {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public int getIndex(TreeNode node) {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public boolean getAllowsChildren() {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public boolean isLeaf() {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+
+             @Override
+             public Enumeration children() {
+                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+             }
+         };
+                List<EnigmaCertificate> certs = CryptoDAO.getEnigmaCertTreeFromDB();
+        for (EnigmaCertificate cert : certs) {
+//            addCertificateToTreeItem(cert, rootNode);
+//            root.add(cert);
+        }
+  
+        TreeModel treeMdl = new DefaultTreeModel(root);
+        OutlineModel mdl = DefaultOutlineModel.createOutlineModel(treeMdl, new CertificateRowModel(), true);
+        Outline outline = new Outline();
+        outline.setRenderDataProvider(new CertificateDataProvider());
+        outline.setRootVisible(true);
+        outline.setModel(mdl);
+
+        jPanelScenarios.add(outline, BorderLayout.CENTER);
+
+//        jTableCerts.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
+//        jTableCerts.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        jTableCerts.getColumnModel().getColumn(0).setPreferredWidth(20);
+//        jTableCerts.getColumnModel().getColumn(1).setPreferredWidth(20);
+//        jTableCerts.getColumnModel().getColumn(2).setPreferredWidth(100);
+//        jTableCerts.getColumnModel().getColumn(3).setPreferredWidth(290);
+//        jTableCerts.getColumnModel().getColumn(4).setPreferredWidth(90);
+//        jTableCerts.getColumnModel().getColumn(5).setPreferredWidth(410);
+//        jTableCerts.getColumnModel().getColumn(6).setPreferredWidth(250);
+//        jTableCerts.getColumnModel().getColumn(7).setPreferredWidth(120);
+//        jTableCerts.getColumnModel().getColumn(8).setPreferredWidth(100);
+        //create the root node
+
+
+    }
+//http://www.java2s.com/Code/Java/Swing-Components/JTreeTablecomponent.htm
+
+    private void addCertificateToTreeItem(EnigmaCertificate cert, DefaultMutableTreeNode parentNode) {
+        ImageIcon icon = null;
+        if (cert.isRoot()) {
+            icon = new ImageIcon(getClass().getResource("/AC.png"));
+        } else if (cert.isSub()) {
+            icon = new ImageIcon(getClass().getResource("/sub.png"));
+        } else if (cert.isUser()) {
+            icon = new ImageIcon(getClass().getResource("/usercert.png"));
+        }
+        DefaultMutableTreeNode item = new DefaultMutableTreeNode(parentNode);
+//        item.setValue(new Object[]{icon, cert.getId_cert(), cert.getCertname(), cert.getCN(), cert.getAlgo(), cert.getSHA256(), cert.getThumbprint(), cert.getId_issuer_cert(), cert.getId_private_key()});
+        for (EnigmaCertificate child : cert.getChilds()) {
+            addCertificateToTreeItem(child, item);
         }
     }
 
@@ -1171,7 +1311,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                     .addComponent(jButtonDashScenarios)
                     .addComponent(jButtonDashAbout)
                     .addComponent(jButtonDashPGP1))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Dashboard", jPanelDashboard);
@@ -1342,7 +1482,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                                 .addComponent(jTextFieldP12TargetFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jCheckBoxP12Write)))
-                        .addGap(0, 45, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -1514,7 +1654,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(jCheckBoxPkCertainty)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 485, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButtonPkGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap())
                             .addGroup(jPanel3Layout.createSequentialGroup()
@@ -1668,7 +1808,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                         .addComponent(jButtonBrowseCertPk, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel28)
                             .addComponent(jLabel29))
@@ -1845,7 +1985,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                                 .addGap(73, 73, 73)
                                 .addComponent(jTextFieldPubTargetKeyName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel60))
-                        .addGap(0, 362, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -2022,7 +2162,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                             .addComponent(jCheckBoxP10PubKey)
                             .addComponent(jTextFieldP10Pub, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButtonBrowseP10Pub))
-                        .addContainerGap(17, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -2098,7 +2238,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jTextAreaDrop.setColumns(20);
         jTextAreaDrop.setRows(5);
         jTextAreaDrop.setBorder(null);
-        jTextAreaDrop.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jTextAreaDrop.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jTextAreaDrop.setFocusable(false);
         jScrollPane4.setViewportView(jTextAreaDrop);
 
@@ -2751,55 +2891,49 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanelScenariosLayout.setHorizontalGroup(
             jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelScenariosLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jButton13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton11, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton14, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
                 .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelScenariosLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton14, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanelScenariosLayout.createSequentialGroup()
-                                .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jButton13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jButton10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jButton12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jButton11, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanelScenariosLayout.createSequentialGroup()
-                                        .addGap(333, 333, 333)
-                                        .addComponent(jButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelScenariosLayout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                    .addGroup(jPanelScenariosLayout.createSequentialGroup()
-                        .addGap(612, 612, 612)
-                        .addComponent(jLabel58)))
-                .addGap(602, 602, 602))
+                        .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(256, 256, 256)
+                        .addComponent(jLabel58))
+                    .addComponent(jButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(389, Short.MAX_VALUE))
         );
         jPanelScenariosLayout.setVerticalGroup(
             jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelScenariosLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel18)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton12)
                 .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelScenariosLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel18)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton10))
+                        .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton12)
+                            .addComponent(jButton16)))
                     .addGroup(jPanelScenariosLayout.createSequentialGroup()
-                        .addGap(19, 19, 19)
-                        .addComponent(jButton15)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton11)
+                        .addGap(45, 45, 45)
+                        .addComponent(jLabel58)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanelScenariosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton13)
-                    .addComponent(jButton16))
+                    .addComponent(jButton10)
+                    .addComponent(jButton15))
+                .addGap(12, 12, 12)
+                .addComponent(jButton11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton14)
-                .addGap(130, 130, 130)
-                .addComponent(jLabel58)
-                .addContainerGap())
+                .addContainerGap(402, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Scenarios", jPanelScenarios);
@@ -2865,7 +2999,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel18Layout.setVerticalGroup(
             jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel18Layout.createSequentialGroup()
-                .addContainerGap(14, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel54)
                     .addComponent(jLabel55))
@@ -3002,7 +3136,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1437, Short.MAX_VALUE)
+            .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1437, Short.MAX_VALUE)
             .addComponent(jPanelEvents, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
