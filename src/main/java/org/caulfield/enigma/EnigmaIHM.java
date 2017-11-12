@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -196,6 +197,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             Integer fff = (int) (long) idGeneratedCert;
             EnigmaCertificate ddd = CryptoDAO.getEnigmaCertFromDB(fff, ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)));
             ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getChilds().add(ddd);
+           ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).setAcserialcursor( ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getAcserialcursor().add(BigInteger.ONE));
             final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
             TreePath path = layout.getPathForRow(outline.getSelectedRow());
 
@@ -222,6 +224,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             Integer fff = (int) (long) idGeneratedCert;
             EnigmaCertificate ddd = CryptoDAO.getEnigmaCertFromDB(fff, ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)));
             ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getChilds().add(ddd);
+            ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).setAcserialcursor( ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getAcserialcursor().add(BigInteger.ONE));
             final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
             TreePath path = layout.getPathForRow(outline.getSelectedRow());
             outline.collapsePath(path);
@@ -320,13 +323,13 @@ public class EnigmaIHM extends javax.swing.JFrame {
             ResultSet f = database.runQuery("select ID_KEY,KEYNAME,KEYTYPE,ALGO, SHA256,ID_ASSOCIATED_KEY from X509KEYS");
             jTablePK.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
             jTablePK.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            jTablePK.getColumnModel().getColumn(0).setPreferredWidth(20);
-            jTablePK.getColumnModel().getColumn(1).setPreferredWidth(20);
-            jTablePK.getColumnModel().getColumn(2).setPreferredWidth(120);
-            jTablePK.getColumnModel().getColumn(3).setPreferredWidth(90);
-            jTablePK.getColumnModel().getColumn(4).setPreferredWidth(90);
+            jTablePK.getColumnModel().getColumn(0).setPreferredWidth(30);
+            jTablePK.getColumnModel().getColumn(1).setPreferredWidth(40);
+            jTablePK.getColumnModel().getColumn(2).setPreferredWidth(140);
+            jTablePK.getColumnModel().getColumn(3).setPreferredWidth(100);
+            jTablePK.getColumnModel().getColumn(4).setPreferredWidth(100);
             jTablePK.getColumnModel().getColumn(5).setPreferredWidth(460);
-            jTablePK.getColumnModel().getColumn(6).setPreferredWidth(90);
+            jTablePK.getColumnModel().getColumn(6).setPreferredWidth(100);
             while (f.next()) {
                 ImageIcon icon = null;
                 if (1 == f.getInt("KEYTYPE")) {
@@ -359,6 +362,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
         outline.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
+        outline.getColumnModel().getColumn(8).setCellRenderer(centerRenderer);
+        outline.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
 
         outline.getColumnModel().getColumn(0).setPreferredWidth(220);
         outline.getColumnModel().getColumn(1).setPreferredWidth(30);
@@ -367,7 +372,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
         outline.getColumnModel().getColumn(4).setPreferredWidth(140);
         outline.getColumnModel().getColumn(5).setPreferredWidth(100);
         outline.getColumnModel().getColumn(6).setPreferredWidth(100);
-        outline.getColumnModel().getColumn(7).setPreferredWidth(100);
+        outline.getColumnModel().getColumn(7).setPreferredWidth(90);
+        outline.getColumnModel().getColumn(8).setPreferredWidth(90);
+        outline.getColumnModel().getColumn(9).setPreferredWidth(120);
         buildPopupMenuX509();
     }
 

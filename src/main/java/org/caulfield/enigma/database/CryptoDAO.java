@@ -105,6 +105,8 @@ public class CryptoDAO {
                 in.setCerttype(cert.getInt("CERTTYPE"));
                 in.setExpiryDate(cert.getDate("EXPIRYDATE"));
                 in.setParent(parent);
+                in.setSerial(new BigInteger(cert.getString("SERIAL")));
+                in.setAcserialcursor(new BigInteger(cert.getString("ACSERIALCURSOR")));
             }
 
             // ADD CHILDS
@@ -275,7 +277,7 @@ public class CryptoDAO {
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         try {
-            ResultSet cert = sql.runQuery("SELECT * FROM CERTIFICATES WHERE THUMBPRINT='" + thumbPrint+"'");
+            ResultSet cert = sql.runQuery("SELECT * FROM CERTIFICATES WHERE THUMBPRINT='" + thumbPrint + "'");
             //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
             if (cert.next()) {
                 in.setId_cert(cert.getInt("ID_CERT"));
@@ -303,7 +305,7 @@ public class CryptoDAO {
         HSQLLoader sql = new HSQLLoader();
         BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=? WHERE THUMBPRINT='" + thumbPrint+"'");
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=? WHERE THUMBPRINT='" + thumbPrint + "'");
             pst.setString(1, newAcSerialCursor.toString());
             pst.executeUpdate();
             pst.close();
