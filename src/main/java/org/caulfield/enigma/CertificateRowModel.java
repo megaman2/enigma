@@ -5,6 +5,7 @@
  */
 package org.caulfield.enigma;
 
+import java.util.Date;
 import org.caulfield.enigma.database.EnigmaCertificate;
 import org.netbeans.swing.outline.RowModel;
 
@@ -27,6 +28,8 @@ public class CertificateRowModel implements RowModel {
             case 4:
                 return Integer.class;
             case 5:
+                return Date.class;
+            case 6:
                 return String.class;
             default:
                 assert false;
@@ -35,7 +38,7 @@ public class CertificateRowModel implements RowModel {
     }
 
     public int getColumnCount() {
-        return 6;
+        return 7;
     }
 
     public String getColumnName(int column) {
@@ -51,6 +54,8 @@ public class CertificateRowModel implements RowModel {
             case 4:
                 return "ID Private Key";
             case 5:
+                return "Expiry Date";
+            case 6:
                 return "Type";
             default:
                 assert false;
@@ -72,6 +77,8 @@ public class CertificateRowModel implements RowModel {
             case 4:
                 return ((EnigmaCertificate) node).getId_private_key();
             case 5:
+                return ((EnigmaCertificate) node).getExpiryDate();
+            case 6:
                 if (((EnigmaCertificate) node).isUser()) {
                     return "USER";
                 } else if (((EnigmaCertificate) node).isSub()) {

@@ -38,7 +38,7 @@ public class ImportManager {
             }
 
             // DAO Write it
-            CryptoDAO.insertCertInDB(cert, certName, CN, realHash, algo, 0, thumbPrint,1);
+            CryptoDAO.insertCertInDB(cert, certName, CN, realHash, algo, 0, thumbPrint,1,certX.getNotAfter());
             return "Certificate imported successfully as "+certName;
 
         } catch (CertificateEncodingException | NoSuchAlgorithmException ex) {

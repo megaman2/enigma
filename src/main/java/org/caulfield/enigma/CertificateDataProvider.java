@@ -5,6 +5,7 @@
  */
 package org.caulfield.enigma;
 
+import java.awt.Color;
 import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
@@ -24,11 +25,15 @@ public class CertificateDataProvider implements RenderDataProvider {
     public String getDisplayName(Object o) {
         return ((EnigmaCertificate) o).getCertname();
     }
-
+    
     public java.awt.Color getForeground(Object o) {
         EnigmaCertificate f = (EnigmaCertificate) o;
-        if (!f.isUser() && !f.isSub()) {
-            return UIManager.getColor("controlShadow");
+        if (f.isRoot()) {
+            return new Color(0, 0, 0);
+        } else if (f.isSub()) {
+            return new Color(37, 44, 36);
+        } else if (f.isUser()) {
+            return new Color(67, 116, 62);
         }
         return null;
     }

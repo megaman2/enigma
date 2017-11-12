@@ -7,13 +7,16 @@ package org.caulfield.enigma.database;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import javax.swing.tree.TreeNode;
 
 /**
  *
  * @author Ender
  */
-public class EnigmaCertificate {
+public class EnigmaCertificate implements TreeNode, Comparable {
 
     //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
     private Integer id_cert;
@@ -27,6 +30,8 @@ public class EnigmaCertificate {
     private Integer id_private_key;
     private Integer certtype;
     private ArrayList<EnigmaCertificate> childs;
+    private EnigmaCertificate parent;
+    private Date expiryDate;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
@@ -202,7 +207,69 @@ public class EnigmaCertificate {
         this.certtype = certtype;
     }
 
-    public boolean equals(EnigmaCertificate certt){
+    public boolean equals(EnigmaCertificate certt) {
         return certt.getCertname().equals(this.getCertname());
+    }
+
+    @Override
+    public TreeNode getChildAt(int i) {
+        return childs.get(i);
+    }
+
+    @Override
+    public int getChildCount() {
+        return childs.size();
+    }
+
+    @Override
+    public TreeNode getParent() {
+        return parent;
+    }
+
+    @Override
+    public int getIndex(TreeNode tn) {
+        return childs.indexOf(tn);
+    }
+
+    @Override
+    public boolean getAllowsChildren() {
+        return !isUser();
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return isUser();
+    }
+
+    @Override
+    public Enumeration children() {
+        return Collections.enumeration(childs);
+    }
+
+    /**
+     * @param parent the parent to set
+     */
+    public void setParent(EnigmaCertificate parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * @return the expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * @param expiryDate the expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    @Override
+    public int compareTo(Object t) {
+        System.out.println("org.caulfield.enigma.database.EnigmaCertificate.compareTo()");
+        return this.certname.equals(((EnigmaCertificate)t).getCertname())?0:-1;
     }
 }

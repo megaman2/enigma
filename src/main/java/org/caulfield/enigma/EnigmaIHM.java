@@ -28,17 +28,26 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.AbstractLayoutCache;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import org.bouncycastle.util.encoders.Base64;
 import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.x509.CertificateChainManager;
@@ -52,6 +61,7 @@ import org.caulfield.enigma.imp0rt.ImportManager;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.netbeans.swing.outline.TreePathSupport;
 
 /**
  *
@@ -138,6 +148,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
         refreshPubKObjects();
         refreshX509CertOutline();
         buildPopupMenuX509();
+
+        TreePathSupport tps = outline.getOutlineModel().getTreePathSupport();
+        outline.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
     }
 
     private void fillCertificateVersionObjects() {
@@ -173,8 +187,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }
     }
 
-
-    
     private void buildPopupMenuX509() {
         final JPopupMenu popupMenu = new JPopupMenu();
 //        JMenuItem rootCert = new JMenuItem("+ Create New Root Certificate");
@@ -188,18 +200,21 @@ public class EnigmaIHM extends javax.swing.JFrame {
         JMenuItem subCert = new JMenuItem("+ Create New Sub Certificate");
         subCert.addActionListener((ActionEvent e) -> {
             Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
+            final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
+            TreePath path = layout.getPathForRow(outline.getSelectedRow());
+
             CertificateChainManager cm = new CertificateChainManager();
             long idGeneratedCert = cm.buildIntermediateCertificate(idCert, "CN=SUBTEST,O=SUB", "");
-            EnigmaCertificate resultCert = CryptoDAO.getEnigmaCertFromDB((int) idGeneratedCert);
+            EnigmaCertificate ccc = (EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0);
             refreshX509CertOutline();
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-//            Object[] oba = new Object[2];
-//oba[0] = outline.getModel().getValueAt(0, 0);
-//oba[1] = resultCert;
-//outline.expandPath(new TreePath(oba));
-//            outline.expandPath(new TreePath(resultCert));
+            buildPopupMenuX509();
+            System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + path);
+            System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + new TreePath(ccc));
+          outline.getOutlineModel().getTreePathSupport().expandPath(path);
+            outline.expandPath(path);
             ((DefaultListModel) jListEvents.getModel()).addElement("Generation successful");
         });
         popupMenu.add(subCert);
@@ -212,7 +227,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-
+            buildPopupMenuX509();
             ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
         });
         popupMenu.add(userCert);
@@ -227,6 +242,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 ImportManager xm = new ImportManager();
                 String outRet = xm.importCertificate(targetCert);
                 refreshX509CertOutline();
+                buildPopupMenuX509();
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
         });
@@ -267,6 +283,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             String outRet = CryptoDAO.deleteCertFromDB(idCert);
             ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             refreshX509CertOutline();
+            buildPopupMenuX509();
         });
         popupMenu.add(deleteItem);
         outline.setComponentPopupMenu(popupMenu);
@@ -331,6 +348,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         TreeModel treeMdl = new CertificateTreeModel(root);
         OutlineModel mdl = DefaultOutlineModel.createOutlineModel(treeMdl, new CertificateRowModel(), true, "Certificates");
+        outline.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         outline = new Outline();
         outline.setRenderDataProvider(new CertificateDataProvider());
         outline.setRootVisible(false);
@@ -343,14 +361,16 @@ public class EnigmaIHM extends javax.swing.JFrame {
         outline.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        outline.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
 
         outline.getColumnModel().getColumn(0).setPreferredWidth(220);
         outline.getColumnModel().getColumn(1).setPreferredWidth(30);
         outline.getColumnModel().getColumn(2).setPreferredWidth(240);
         outline.getColumnModel().getColumn(3).setPreferredWidth(260);
-        outline.getColumnModel().getColumn(4).setPreferredWidth(100);
+        outline.getColumnModel().getColumn(4).setPreferredWidth(140);
         outline.getColumnModel().getColumn(5).setPreferredWidth(100);
-        buildPopupMenuX509();
+        outline.getColumnModel().getColumn(6).setPreferredWidth(100);
+        outline.getColumnModel().getColumn(7).setPreferredWidth(100);
     }
 
     private void refreshPKObjects() {
@@ -2595,13 +2615,16 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jPanel19.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Certificates", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
+        outline.getTableHeader().setResizingAllowed(false);
         jScrollPane1.setViewportView(outline);
 
         javax.swing.GroupLayout jPanel19Layout = new javax.swing.GroupLayout(jPanel19);
         jPanel19.setLayout(jPanel19Layout);
         jPanel19Layout.setHorizontalGroup(
             jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1420, Short.MAX_VALUE)
+            .addGroup(jPanel19Layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1397, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 23, Short.MAX_VALUE))
         );
         jPanel19Layout.setVerticalGroup(
             jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2638,7 +2661,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel20.setLayout(jPanel20Layout);
         jPanel20Layout.setHorizontalGroup(
             jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane9)
+            .addGroup(jPanel20Layout.createSequentialGroup()
+                .addComponent(jScrollPane9, javax.swing.GroupLayout.PREFERRED_SIZE, 1397, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel20Layout.setVerticalGroup(
             jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
