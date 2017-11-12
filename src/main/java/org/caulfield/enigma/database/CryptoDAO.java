@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -155,13 +156,13 @@ public class CryptoDAO {
         }
     }
 
-    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType, Date expiryDate) {
+    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
             File file = new File(filePath);
             FileInputStream inputStream = new FileInputStream(file);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -172,6 +173,8 @@ public class CryptoDAO {
             pst.setInt(8, privKid);
             pst.setInt(9, certType);
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
+            pst.setString(11, serial.toString());
+            pst.setString(12, acSerialCursor.toString());
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -236,11 +239,11 @@ public class CryptoDAO {
         }
     }
 
-    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID, int certType, Date expiryDate) {
+    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -251,6 +254,8 @@ public class CryptoDAO {
             pst.setInt(8, privKid);
             pst.setInt(9, certType);
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
+            pst.setString(11, serial.toString());
+            pst.setString(12, acSerialCursor.toString());
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -264,4 +269,47 @@ public class CryptoDAO {
         }
     }
 
+    public static EnigmaCertificate getEnigmaCertFromDB(String thumbPrint) {
+        EnigmaCertificate in = new EnigmaCertificate();
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            ResultSet cert = sql.runQuery("SELECT * FROM CERTIFICATES WHERE THUMBPRINT='" + thumbPrint+"'");
+            //CREATE TABLE CERTIFICATES (ID_CERT INTEGER PRIMARY KEY, CERTNAME VARCHAR(200),CN VARCHAR(200),ALGO VARCHAR(64),CERTFILE BLOB,SHA256  VARCHAR(256),THUMBPRINT  VARCHAR(256),ID_ISSUER_CERT INTEGER, ID_PRIVATEKEY INTEGER);
+            if (cert.next()) {
+                in.setId_cert(cert.getInt("ID_CERT"));
+                in.setCertname(cert.getString("CERTNAME"));
+                in.setCN(cert.getString("CN"));
+                in.setAlgo(cert.getString("ALGO"));
+                in.setCertfile(cert.getBinaryStream("CERTFILE"));
+                in.setSHA256(cert.getString("SHA256"));
+                in.setThumbprint(cert.getString("THUMBPRINT"));
+                in.setId_issuer_cert(cert.getInt("ID_ISSUER_CERT"));
+                in.setId_private_key(cert.getInt("ID_PRIVATEKEY"));
+                in.setCerttype(cert.getInt("CERTTYPE"));
+                in.setExpiryDate(cert.getDate("EXPIRYDATE"));
+                in.setSerial(new BigInteger(cert.getString("SERIAL")));
+                in.setAcserialcursor(new BigInteger(cert.getString("ACSERIALCURSOR")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return in;
+    }
+
+    public static void getIncrementACSerialCursor(String thumbPrint, BigInteger currentAcSerialCursor) {
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
+        try {
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=? WHERE THUMBPRINT='" + thumbPrint+"'");
+            pst.setString(1, newAcSerialCursor.toString());
+            pst.executeUpdate();
+            pst.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+    }
 }

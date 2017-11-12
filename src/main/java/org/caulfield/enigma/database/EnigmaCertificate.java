@@ -6,6 +6,7 @@
 package org.caulfield.enigma.database;
 
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +33,8 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     private ArrayList<EnigmaCertificate> childs;
     private EnigmaCertificate parent;
     private Date expiryDate;
+    private BigInteger serial;
+    private BigInteger acserialcursor;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
@@ -273,5 +276,33 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     public int compareTo(Object t) {
         System.out.println("org.caulfield.enigma.database.EnigmaCertificate.compareTo()");
         return this.certname.equals(((EnigmaCertificate) t).getCertname()) ? 0 : -1;
+    }
+
+    /**
+     * @return the serial
+     */
+    public BigInteger getSerial() {
+        return serial;
+    }
+
+    /**
+     * @param serial the serial to set
+     */
+    public void setSerial(BigInteger serial) {
+        this.serial = serial;
+    }
+
+    /**
+     * @return the acserialcursor
+     */
+    public BigInteger getAcserialcursor() {
+        return acserialcursor;
+    }
+
+    /**
+     * @param acserialcursor the acserialcursor to set
+     */
+    public void setAcserialcursor(BigInteger acserialcursor) {
+        this.acserialcursor = acserialcursor;
     }
 }

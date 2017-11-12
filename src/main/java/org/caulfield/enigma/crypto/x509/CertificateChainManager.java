@@ -7,6 +7,7 @@ package org.caulfield.enigma.crypto.x509;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
@@ -28,6 +29,7 @@ import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
 import org.caulfield.enigma.database.CryptoDAO;
+import org.caulfield.enigma.database.EnigmaCertificate;
 import org.caulfield.enigma.database.HSQLLoader;
 import org.caulfield.enigma.stream.StreamManager;
 
@@ -77,7 +79,12 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2, cert.getNotAfter());
+                // GET ACSERIALCURSOR for this caCert in Database (start at 0)
+
+                String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
+                EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
+                BigInteger affectedSerial = caEnigCert.getAcserialcursor();
+                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2, cert.getNotAfter(), affectedSerial, BigInteger.ONE);
             }
         } catch (SQLException ex) {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -122,7 +129,10 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter());
+                String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
+                EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
+                BigInteger affectedSerial = caEnigCert.getAcserialcursor();
+                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter(), affectedSerial, BigInteger.ONE);
             }
 
         } catch (SQLException ex) {

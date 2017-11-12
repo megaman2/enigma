@@ -267,7 +267,8 @@ public class CryptoGenerator {
         try {
             Integer keyId = getKeyIDFromComboBox(pkFileName);
             InputStream stream = CryptoDAO.getKeyFromDB(keyId);
-
+            Integer pubkeyId = getKeyIDFromComboBox(pubFileName);
+            InputStream streamPub = CryptoDAO.getKeyFromDB(pubkeyId);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 // Fake code simulating the copy
 // You can generally do better with nio if you need...
@@ -287,7 +288,7 @@ public class CryptoGenerator {
             if ("".equals(pubFileName)) {
                 pubK = buildPublicKeyFromPrivateKey(is1, pkPassword);
             } else {
-                pubK = getPublicKeyV2(pubFileName);
+                pubK = getPublicKeyV2(streamPub);
             }
             PrivateKey privK = getPrivateKey(is2, pkPassword);
 
@@ -1403,7 +1404,7 @@ public class CryptoGenerator {
             String thumbPrint = hashc.getThumbprint(pubCert.getEncoded());
 
             // Save in DB
-            CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint,1,certHolder.getNotAfter());
+            CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint, 1, certHolder.getNotAfter(),BigInteger.ONE,BigInteger.ONE);
 
             return "Certificate successfully generated with " + pubCert.getSubjectDN().getName() + " and expiry date : " + pubCert.getNotAfter();
 
