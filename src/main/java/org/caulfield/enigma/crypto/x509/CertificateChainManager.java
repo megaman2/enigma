@@ -53,7 +53,6 @@ public class CertificateChainManager {
         long certID = 0;
         try {
             X509CertificateHolder caCertHolder = new JcaX509CertificateHolder(caCert);
-
             ResultSet set = sql.runQuery("select ALGO,ID_PRIVATEKEY, CERTNAME from CERTIFICATES WHERE ID_CERT=" + idParentCert);
             if (set.next()) {
                 String algo = set.getString("ALGO");
@@ -78,9 +77,8 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2,cert.getNotAfter());
+                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2, cert.getNotAfter());
             }
-
         } catch (SQLException ex) {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (CertificateEncodingException | EnigmaException ex) {
@@ -92,15 +90,14 @@ public class CertificateChainManager {
         return certID;
     }
 
-    public String buildUserCertificate(Integer idParentCert, String subject, String caPKPassword) {
+    public long buildUserCertificate(Integer idParentCert, String subject, String caPKPassword) {
         InputStream caCertIS = CryptoDAO.getCertFromDB(idParentCert);
         CryptoGenerator cg = new CryptoGenerator();
         X509Certificate caCert = cg.getCertificate(caCertIS);
         HSQLLoader sql = new HSQLLoader();
-
+        long certID = 0;
         try {
             X509CertificateHolder caCertHolder = new JcaX509CertificateHolder(caCert);
-
             ResultSet set = sql.runQuery("select ALGO,ID_PRIVATEKEY, CERTNAME from CERTIFICATES WHERE ID_CERT=" + idParentCert);
             if (set.next()) {
                 String algo = set.getString("ALGO");
@@ -125,10 +122,7 @@ public class CertificateChainManager {
                 InputStream certStream = StreamManager.convertCertificateToInputStream(cert);
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
-                long certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3,cert.getNotAfter());
-                return "USER_" + certName + " created along with keys " + privKeyID + " and " + pubKeyID + ".";
-            } else {
-                return "CA Cert not found";
+                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter());
             }
 
         } catch (SQLException ex) {
@@ -138,7 +132,6 @@ public class CertificateChainManager {
         } catch (Exception ex) {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        return "";
+        return certID;
     }
 }

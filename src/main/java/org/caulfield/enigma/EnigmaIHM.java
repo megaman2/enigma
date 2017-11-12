@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -147,8 +148,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
         refreshPKObjects();
         refreshPubKObjects();
         refreshX509CertOutline();
+        buildPopupMenuX509();
 
-        TreePathSupport tps = outline.getOutlineModel().getTreePathSupport();
         outline.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     }
@@ -199,42 +200,45 @@ public class EnigmaIHM extends javax.swing.JFrame {
         JMenuItem subCert = new JMenuItem("+ Create New Sub Certificate");
         subCert.addActionListener((ActionEvent e) -> {
             Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
+            CertificateChainManager cm = new CertificateChainManager();
+            long idGeneratedCert = cm.buildIntermediateCertificate(idCert, "CN=SUBTEST,O=SUB", "");
+            Integer fff = (int) (long) idGeneratedCert;
+            EnigmaCertificate ddd = CryptoDAO.getEnigmaCertFromDB(fff, ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)));
+            ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getChilds().add(ddd);
             final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
             TreePath path = layout.getPathForRow(outline.getSelectedRow());
 
-            CertificateChainManager cm = new CertificateChainManager();
-            long idGeneratedCert = cm.buildIntermediateCertificate(idCert, "CN=SUBTEST,O=SUB", "");
-            EnigmaCertificate ccc = (EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0);
-            refreshX509CertOutline();
+//  outline.collapsePath(new TreePath(          ((EnigmaCertificate) outline.getModel().getValueAt(0, 0))));
+//  outline.getOutlineModel().getLayout().setExpandedState(new TreePath(          ((EnigmaCertificate) outline.getModel().getValueAt(0, 0))), false);
+//  outline.getOutlineModel().getLayout().setExpandedState(path, false);
+//  outline.getOutlineModel().getTreePathSupport().collapsePath(new TreePath(          ((EnigmaCertificate) outline.getModel().getValueAt(0, 0))));
+//   outline.getOutlineModel().getTreePathSupport().clear();
+            outline.collapsePath(path);
+            outline.expandPath(path);
+//  outline.getOutlineModel().getTreePathSupport().collapsePath(path);
+//  outline.getOutlineModel().getLayout().setExpandedState(path, true);
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-
-            System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + path);
-            System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + new TreePath(ccc));
-            for (Object gg : path.getPath()) {
-                System.out.println(((EnigmaCertificate) gg).getCertname() + " TREE");
-            }
-            for (int d = 0; d < outline.getModel().getRowCount(); d++) {
-                System.out.println("d=" + d);
-                System.out.println(((EnigmaCertificate) outline.getModel().getValueAt(d, 0)).getCertname() + " ACTUAL LINE");
-            }
-            outline.getOutlineModel().getTreePathSupport().expandPath(new TreePath((EnigmaCertificate) outline.getModel().getValueAt(0, 0)));
-     outline.expandPath(new TreePath((EnigmaCertificate) outline.getModel().getValueAt(0, 0)));
-            System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + outline.getOutlineModel().getTreePathSupport().isExpanded(new TreePath((EnigmaCertificate) outline.getModel().getValueAt(0, 0))));
-            ((DefaultListModel) jListEvents.getModel()).addElement("Generation successful");
+            ((DefaultListModel) jListEvents.getModel()).addElement("Certificate " + idGeneratedCert + " successfully generated.");
         });
         popupMenu.add(subCert);
         JMenuItem userCert = new JMenuItem("+ Create New User Certificate");
         userCert.addActionListener((ActionEvent e) -> {
             Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
             CertificateChainManager cm = new CertificateChainManager();
-            String outRet = cm.buildUserCertificate(idCert, "CN=USERTEST,O=USER", "");
-            refreshX509CertOutline();
+            long idGeneratedCert = cm.buildUserCertificate(idCert, "CN=USERTEST,O=USER", "");
+            Integer fff = (int) (long) idGeneratedCert;
+            EnigmaCertificate ddd = CryptoDAO.getEnigmaCertFromDB(fff, ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)));
+            ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getChilds().add(ddd);
+            final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
+            TreePath path = layout.getPathForRow(outline.getSelectedRow());
+            outline.collapsePath(path);
+            outline.expandPath(path);
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-            ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            ((DefaultListModel) jListEvents.getModel()).addElement("Certificate " + idGeneratedCert + " successfully generated.");
         });
         popupMenu.add(userCert);
         JMenuItem importCert = new JMenuItem("+ Import Certificate");
@@ -247,6 +251,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 File targetCert = jFileChooserExportCert.getSelectedFile();
                 ImportManager xm = new ImportManager();
                 String outRet = xm.importCertificate(targetCert);
+                // TODO : ADD A FIND PARENT AND PRIVATE KEY AUTOMATICALLY ROUTINE
                 refreshX509CertOutline();
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
@@ -347,10 +352,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
     private void refreshX509CertOutline() {
         // Fill X509 Certificates Outline
-        EnigmaCertificate root = new EnigmaCertificate();
-        root.setChilds(CryptoDAO.getEnigmaCertTreeFromDB());
-
-        TreeModel treeMdl = new CertificateTreeModel(root);
+        TreeModel treeMdl = new CertificateTreeModel(CryptoDAO.getEnigmaCertTreeFromDB());
         OutlineModel mdl = DefaultOutlineModel.createOutlineModel(treeMdl, new CertificateRowModel(), true, "Certificates");
         outline.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         outline = new Outline();

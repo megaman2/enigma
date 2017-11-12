@@ -208,6 +208,7 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     }
 
     public boolean equals(EnigmaCertificate certt) {
+        System.out.println("org.caulfield.enigma.database.EnigmaCertificate.equals()");
         return certt.getCertname().equals(this.getCertname());
     }
 
@@ -223,6 +224,7 @@ public class EnigmaCertificate implements TreeNode, Comparable {
 
     @Override
     public TreeNode getParent() {
+        System.out.println("org.caulfield.enigma.database.EnigmaCertificate.getParent()");
         return parent;
     }
 
