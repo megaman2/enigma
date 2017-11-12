@@ -147,7 +147,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         refreshPKObjects();
         refreshPubKObjects();
         refreshX509CertOutline();
-        buildPopupMenuX509();
 
         TreePathSupport tps = outline.getOutlineModel().getTreePathSupport();
         outline.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -210,11 +209,19 @@ public class EnigmaIHM extends javax.swing.JFrame {
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-            buildPopupMenuX509();
+
             System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + path);
             System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + new TreePath(ccc));
-          outline.getOutlineModel().getTreePathSupport().expandPath(path);
-            outline.expandPath(path);
+            for (Object gg : path.getPath()) {
+                System.out.println(((EnigmaCertificate) gg).getCertname() + " TREE");
+            }
+            for (int d = 0; d < outline.getModel().getRowCount(); d++) {
+                System.out.println("d=" + d);
+                System.out.println(((EnigmaCertificate) outline.getModel().getValueAt(d, 0)).getCertname() + " ACTUAL LINE");
+            }
+            outline.getOutlineModel().getTreePathSupport().expandPath(new TreePath((EnigmaCertificate) outline.getModel().getValueAt(0, 0)));
+     outline.expandPath(new TreePath((EnigmaCertificate) outline.getModel().getValueAt(0, 0)));
+            System.out.println("org.caulfield.enigma.EnigmaIHM.buildPopupMenuX509()" + outline.getOutlineModel().getTreePathSupport().isExpanded(new TreePath((EnigmaCertificate) outline.getModel().getValueAt(0, 0))));
             ((DefaultListModel) jListEvents.getModel()).addElement("Generation successful");
         });
         popupMenu.add(subCert);
@@ -227,7 +234,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
-            buildPopupMenuX509();
             ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
         });
         popupMenu.add(userCert);
@@ -242,7 +248,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 ImportManager xm = new ImportManager();
                 String outRet = xm.importCertificate(targetCert);
                 refreshX509CertOutline();
-                buildPopupMenuX509();
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
         });
@@ -283,7 +288,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
             String outRet = CryptoDAO.deleteCertFromDB(idCert);
             ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             refreshX509CertOutline();
-            buildPopupMenuX509();
         });
         popupMenu.add(deleteItem);
         outline.setComponentPopupMenu(popupMenu);
@@ -371,6 +375,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         outline.getColumnModel().getColumn(5).setPreferredWidth(100);
         outline.getColumnModel().getColumn(6).setPreferredWidth(100);
         outline.getColumnModel().getColumn(7).setPreferredWidth(100);
+        buildPopupMenuX509();
     }
 
     private void refreshPKObjects() {

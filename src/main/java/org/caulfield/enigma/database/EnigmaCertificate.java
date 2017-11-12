@@ -38,7 +38,7 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     }
 
     public boolean isRoot() {
-        return certtype.intValue() == 1;
+        return certtype == null || certtype.intValue() == 1;
     }
 
     public boolean isSub() {
@@ -270,6 +270,6 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     @Override
     public int compareTo(Object t) {
         System.out.println("org.caulfield.enigma.database.EnigmaCertificate.compareTo()");
-        return this.certname.equals(((EnigmaCertificate)t).getCertname())?0:-1;
+        return this.certname.equals(((EnigmaCertificate) t).getCertname()) ? 0 : -1;
     }
 }
