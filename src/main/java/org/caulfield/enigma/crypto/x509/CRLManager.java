@@ -6,6 +6,7 @@
 package org.caulfield.enigma.crypto.x509;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -13,11 +14,13 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,10 +37,15 @@ import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.caulfield.enigma.crypto.CryptoGenerator;
+import org.caulfield.enigma.crypto.EnigmaException;
+import org.caulfield.enigma.database.CryptoDAO;
+import org.caulfield.enigma.database.EnigmaCertificate;
 
 /**
  *
@@ -47,23 +55,47 @@ public class CRLManager {
 
     public static final long MIN_IN_MS = 60L * 1000;
     public static final long DAY_IN_MS = 24L * 60 * MIN_IN_MS;
-    private final AtomicLong serialNumber = new AtomicLong(2); // alias ac current cursor here
-    private final AtomicLong crlNumber = new AtomicLong(2);
 
-    public synchronized CertificateList getCRL(
-            final X500Name issuer,
-            final BigInteger serialNumber)
+
+    // Transaction Level
+    public synchronized String createCRLandInsertSerial(Integer idCACert, BigInteger certSerial, String password){
+        try {
+            InputStream caCertStream = CryptoDAO.getCertFromDB(idCACert);
+            CryptoGenerator cg = new CryptoGenerator();
+            X509Certificate caCert= cg.getCertificate(caCertStream);
+                 X509CertificateHolder caCertHolder = new JcaX509CertificateHolder(caCert);
+            EnigmaCertificate caCertEnigma= CryptoDAO.getEnigmaCertFromDB(idCACert, null);
+            AtomicLong currentCRLcursor= caCertEnigma.getCrlserialcursor();
+            Integer idCAPk = caCertEnigma.getId_private_key();
+            InputStream caPKstream = CryptoDAO.getKeyFromDB(idCAPk);
+            PrivateKey caPK = cg.getPrivateKey(caPKstream, password);
+            X509CRLHolder currentCRL = null;
+            String sigAlgo = null;
+            CertificateList crl= getCRL(currentCRLcursor,caCertHolder,caPK,sigAlgo,certSerial,currentCRL);
+            
+            return null;
+        } catch (EnigmaException ex) {
+            Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CertificateEncodingException ex) {
+            Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    // X509 Level
+    public synchronized CertificateList getCRL(AtomicLong currentCRLcursor, X509CertificateHolder cACert, PrivateKey cAKey, 
+            String signatureAlgorithm, final BigInteger serialNumber, X509CRLHolder currentCRL)
             throws Exception {
         CertificateList crl = null;
         if (crl != null) {
             return crl;
         }
-
+        signatureAlgorithm = cAKey.getAlgorithm();
         Date thisUpdate = new Date();
-        X500Name cASubject = null;
+        X500Name cASubject = cACert.getSubject();
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(cASubject, thisUpdate);
-
-        X509CertificateHolder cACert = null;
         Date nextUpdate = new Date(thisUpdate.getTime() + 30 * DAY_IN_MS);
         crlBuilder.setNextUpdate(nextUpdate);
         Date cAStartTime = cACert.getNotBefore();
@@ -71,11 +103,11 @@ public class CRLManager {
         if (revocationTime.after(thisUpdate)) {
             revocationTime = cAStartTime;
         }
-        crlBuilder.addCRLEntry(BigInteger.valueOf(2), revocationTime, CRLReason.keyCompromise);
-        crlBuilder.addExtension(Extension.cRLNumber, false,
-                new ASN1Integer(crlNumber.getAndAdd(1)));
-        String signatureAlgorithm = null;
-        PrivateKey cAKey = null;
+
+        // Fill the CRL entries
+        crlBuilder.addCRL(currentCRL);
+        crlBuilder.addCRLEntry(serialNumber, revocationTime, CRLReason.keyCompromise);
+        crlBuilder.addExtension(Extension.cRLNumber, false, new ASN1Integer(currentCRLcursor.getAndAdd(1)));
 
         //String signatureAlgorithm = ScepUtil.getSignatureAlgorithm(cAKey, HashAlgoType.SHA256);
         ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(cAKey);

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.tree.TreeNode;
 
 /**
@@ -35,6 +36,7 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     private Date expiryDate;
     private BigInteger serial;
     private BigInteger acserialcursor;
+    private AtomicLong crlserialcursor;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
@@ -304,5 +306,19 @@ public class EnigmaCertificate implements TreeNode, Comparable {
      */
     public void setAcserialcursor(BigInteger acserialcursor) {
         this.acserialcursor = acserialcursor;
+    }
+
+    /**
+     * @return the crlserialcursor
+     */
+    public AtomicLong getCrlserialcursor() {
+        return crlserialcursor;
+    }
+
+    /**
+     * @param crlserialcursor the crlserialcursor to set
+     */
+    public void setCrlserialcursor(AtomicLong crlserialcursor) {
+        this.crlserialcursor = crlserialcursor;
     }
 }
