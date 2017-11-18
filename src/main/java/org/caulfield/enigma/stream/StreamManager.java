@@ -16,6 +16,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -100,6 +101,31 @@ public class StreamManager {
             JcaPEMWriter writer = new JcaPEMWriter(sw);
             JcaPEMWriter publicPemWriter = new JcaPEMWriter(writer);
             publicPemWriter.writeObject(cert);
+            publicPemWriter.flush();
+            publicPemWriter.close();
+            certStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8.name()));
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(StreamManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(StreamManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                certStream.close();
+            } catch (IOException ex) {
+                Logger.getLogger(StreamManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return certStream;
+    }
+    
+    
+        public static InputStream convertCRLToInputStream(X509CRLHolder crl) {
+        InputStream certStream = null;
+        try {
+            StringWriter sw = new StringWriter();
+            JcaPEMWriter writer = new JcaPEMWriter(sw);
+            JcaPEMWriter publicPemWriter = new JcaPEMWriter(writer);
+            publicPemWriter.writeObject(crl);
             publicPemWriter.flush();
             publicPemWriter.close();
             certStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8.name()));

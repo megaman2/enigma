@@ -75,7 +75,6 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
@@ -150,9 +149,12 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.caulfield.enigma.crypto.hash.HashCalculator;
+import org.caulfield.enigma.crypto.x509.CRLManager;
+import static org.caulfield.enigma.crypto.x509.CRLManager.DAY_IN_MS;
 import org.caulfield.enigma.crypto.x509.reader.PrivateKeyReader;
 import org.caulfield.enigma.database.CryptoDAO;
 import org.caulfield.enigma.database.HSQLLoader;
+import org.caulfield.enigma.stream.StreamManager;
 
 public class CryptoGenerator {
 
@@ -1405,8 +1407,19 @@ public class CryptoGenerator {
             String realHash = hashc.getStringChecksum(targetDirectory + targetFilename, HashCalculator.SHA256);
             String thumbPrint = hashc.getThumbprint(pubCert.getEncoded());
 
-            // Save in DB
-            CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint, 1, certHolder.getNotAfter(),BigInteger.ONE,BigInteger.ONE);
+            // Save the certificate in DB
+            long idCert = CryptoDAO.insertCertInDB(targetDirectory + targetFilename, certName, CN, realHash, algo, privKid, thumbPrint, 1, certHolder.getNotAfter(), BigInteger.ONE, BigInteger.ONE, new Date());
+
+            // Generate the associated CRL
+            CRLManager crlm = new CRLManager();
+            Date CRLstartDate = new Date();
+            Integer cycleId = 30;
+            Date CRLendDate = new Date(CRLstartDate.getTime() + cycleId * CRLManager.DAY_IN_MS);
+            X509CRLHolder crl = crlm.initializeCRL(certHolder, privateKey, "SHA512withRSA", cycleId, CRLstartDate, CRLendDate);
+            InputStream crlStream = StreamManager.convertCRLToInputStream(crl);
+
+            // Save the CRL in DB
+            CryptoDAO.insertCRLInDB(crlStream, (int) idCert, cycleId, CRLstartDate, CRLendDate);
 
             return "Certificate successfully generated with " + pubCert.getSubjectDN().getName() + " and expiry date : " + pubCert.getNotAfter();
 
@@ -1959,13 +1972,17 @@ public class CryptoGenerator {
     }
 
     public X509CRLHolder getCRL(InputStream targetStream) {
-           try {
+        try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
-//            X509CRLHolder crl = (X509CRLHolder) cf.generateCertificate(targetStream);
-               X509CRLHolder cer = null;
-            return cer;
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[16384];
+            while ((nRead = targetStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+            X509CRLHolder crl = new X509CRLHolder(buffer.toByteArray());
+            return crl;
         } catch (Exception ex) {
             ex.printStackTrace();
         }

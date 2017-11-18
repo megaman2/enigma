@@ -40,6 +40,22 @@ public class ExportManager {
         }
     }
 
+    public String exportCRL(Integer idCrl, String outputFileName) {
+        try {
+            InputStream is = CryptoDAO.getCRLFromDB(idCrl);
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            File targetFile = new File(outputFileName);
+            OutputStream outStream = new FileOutputStream(targetFile);
+            outStream.write(buffer);
+            outStream.flush();
+            outStream.close();
+            return "CRL exported successfully as PEM " + targetFile;
+        } catch (IOException ex) {
+            Logger.getLogger(ExportManager.class.getName()).log(Level.SEVERE, null, ex);
+            return "CRL export failed.";
+        }
+    }
     public InputStream convertDERstreamToPEMstream(InputStream derStream) {
         try {
             InputStream pemStream = null;

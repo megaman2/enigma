@@ -36,7 +36,7 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     private Date expiryDate;
     private BigInteger serial;
     private BigInteger acserialcursor;
-    private AtomicLong crlserialcursor;
+    private Date lastcrlupdate;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
@@ -309,16 +309,16 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     }
 
     /**
-     * @return the crlserialcursor
+     * @return the lastcrlupdate
      */
-    public AtomicLong getCrlserialcursor() {
-        return crlserialcursor;
+    public Date getLastcrlupdate() {
+        return lastcrlupdate;
     }
 
     /**
-     * @param crlserialcursor the crlserialcursor to set
+     * @param lastcrlupdate the lastcrlupdate to set
      */
-    public void setCrlserialcursor(AtomicLong crlserialcursor) {
-        this.crlserialcursor = crlserialcursor;
+    public void setLastcrlupdate(Date lastcrlupdate) {
+        this.lastcrlupdate = lastcrlupdate;
     }
 }

@@ -5,6 +5,8 @@
  */
 package org.caulfield.enigma;
 
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -17,6 +19,9 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -32,12 +37,15 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.AbstractLayoutCache;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -47,7 +55,9 @@ import org.caulfield.enigma.analyzer.FileAnalyzer;
 import org.caulfield.enigma.crypto.x509.CertificateChainManager;
 import org.caulfield.enigma.crypto.CryptoGenerator;
 import org.caulfield.enigma.crypto.EnigmaException;
+import org.caulfield.enigma.crypto.x509.CRLManager;
 import org.caulfield.enigma.database.CryptoDAO;
+import org.caulfield.enigma.database.EnigmaCRL;
 import org.caulfield.enigma.database.EnigmaCertificate;
 import org.caulfield.enigma.database.HSQLLoader;
 import org.caulfield.enigma.export.ExportManager;
@@ -124,16 +134,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         });
 
-//        outline.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-//    @Override
-//    public void valueChanged(ListSelectionEvent e) {
-//        int row = outline.getSelectedRow();
-//        File f = (File) outline.getValueAt(row, 0);
-//        if (!e.getValueIsAdjusting()) {
-//            System.out.println(row + ": " + f);
-//        }
-//    }
-//});
         fillCertificateVersionObjects();
         fillAlgoObjects();
         refreshX509KeyTable();
@@ -197,7 +197,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             Integer fff = (int) (long) idGeneratedCert;
             EnigmaCertificate ddd = CryptoDAO.getEnigmaCertFromDB(fff, ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)));
             ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getChilds().add(ddd);
-           ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).setAcserialcursor( ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getAcserialcursor().add(BigInteger.ONE));
+            ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).setAcserialcursor(((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getAcserialcursor().add(BigInteger.ONE));
             final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
             TreePath path = layout.getPathForRow(outline.getSelectedRow());
 
@@ -224,7 +224,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             Integer fff = (int) (long) idGeneratedCert;
             EnigmaCertificate ddd = CryptoDAO.getEnigmaCertFromDB(fff, ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)));
             ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getChilds().add(ddd);
-            ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).setAcserialcursor( ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getAcserialcursor().add(BigInteger.ONE));
+            ((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).setAcserialcursor(((EnigmaCertificate) outline.getModel().getValueAt(outline.getSelectedRow(), 0)).getAcserialcursor().add(BigInteger.ONE));
             final AbstractLayoutCache layout = outline.getOutlineModel().getLayout();
             TreePath path = layout.getPathForRow(outline.getSelectedRow());
             outline.collapsePath(path);
@@ -281,6 +281,15 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
         });
         popupMenu.add(exportCertDER);
+        JMenuItem revokeItem = new JMenuItem("/!\\ Revoke in parent CRL");
+        revokeItem.addActionListener((ActionEvent e) -> {
+            Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
+            CRLManager crlm = new CRLManager();
+            String outRet = crlm.revokeCert(idCert, "");
+            ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            refreshX509CertOutline();
+        });
+        popupMenu.add(revokeItem);
         JMenuItem deleteItem = new JMenuItem("- Delete");
         deleteItem.addActionListener((ActionEvent e) -> {
             Integer idCert = (Integer) outline.getModel().getValueAt(outline.getSelectedRow(), 1);
@@ -313,6 +322,49 @@ public class EnigmaIHM extends javax.swing.JFrame {
         });
     }
 
+    private void buildPopupMenuX509CRL() {
+        final JPopupMenu popupMenu = new JPopupMenu();
+
+        JMenuItem exportCertPEM = new JMenuItem("> Export CRL");
+        exportCertPEM.addActionListener((ActionEvent e) -> {
+            Integer idCrl = (Integer) jTableCRL.getModel().getValueAt(jTableCRL.getSelectedRow(), 0);
+            FileFilter ft = new FileNameExtensionFilter("CRL file (.crl)", "crl");
+            jFileChooserExportCert.setAcceptAllFileFilterUsed(false);
+            jFileChooserExportCert.addChoosableFileFilter(ft);
+            int ret = jFileChooserExportCert.showSaveDialog(this);
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                File targetCert = jFileChooserExportCert.getSelectedFile();
+                ExportManager xm = new ExportManager();
+                String outRet = xm.exportCRL(idCrl, targetCert.getAbsolutePath());
+                ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            }
+        });
+        popupMenu.add(exportCertPEM);
+
+        jTableCRL.setComponentPopupMenu(popupMenu);
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    int rowAtPoint = jTableCRL.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), jTableCRL));
+                    if (rowAtPoint > -1) {
+                        jTableCRL.setRowSelectionInterval(rowAtPoint, rowAtPoint);
+                    }
+                });
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                // TODO Auto-generated method stub
+            }
+        });
+    }
+
     private void refreshX509KeyTable() {
         // Fill X509 Keys Table
         try {
@@ -323,6 +375,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
             ResultSet f = database.runQuery("select ID_KEY,KEYNAME,KEYTYPE,ALGO, SHA256,ID_ASSOCIATED_KEY from X509KEYS");
             jTablePK.getColumnModel().getColumn(0).setCellRenderer(jTablePK.getDefaultRenderer(ImageIcon.class));
             jTablePK.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+            jTablePK.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+            jTablePK.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+            jTablePK.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+            jTablePK.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
             jTablePK.getColumnModel().getColumn(0).setPreferredWidth(30);
             jTablePK.getColumnModel().getColumn(1).setPreferredWidth(40);
             jTablePK.getColumnModel().getColumn(2).setPreferredWidth(140);
@@ -359,12 +417,13 @@ public class EnigmaIHM extends javax.swing.JFrame {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         outline.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        outline.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(8).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
-
+        outline.getColumnModel().getColumn(10).setCellRenderer(centerRenderer);
         outline.getColumnModel().getColumn(0).setPreferredWidth(220);
         outline.getColumnModel().getColumn(1).setPreferredWidth(30);
         outline.getColumnModel().getColumn(2).setPreferredWidth(240);
@@ -372,10 +431,61 @@ public class EnigmaIHM extends javax.swing.JFrame {
         outline.getColumnModel().getColumn(4).setPreferredWidth(140);
         outline.getColumnModel().getColumn(5).setPreferredWidth(100);
         outline.getColumnModel().getColumn(6).setPreferredWidth(100);
-        outline.getColumnModel().getColumn(7).setPreferredWidth(90);
-        outline.getColumnModel().getColumn(8).setPreferredWidth(90);
-        outline.getColumnModel().getColumn(9).setPreferredWidth(120);
+        outline.getColumnModel().getColumn(7).setPreferredWidth(60);
+        outline.getColumnModel().getColumn(8).setPreferredWidth(60);
+        outline.getColumnModel().getColumn(9).setPreferredWidth(100);
+        outline.getColumnModel().getColumn(10).setPreferredWidth(100);
         buildPopupMenuX509();
+        outline.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int row = outline.getSelectedRow();
+                EnigmaCertificate f = (EnigmaCertificate) outline.getValueAt(row, 0);
+                if (!e.getValueIsAdjusting()) {
+                    refreshCRLTable(f.getId_cert());
+                }
+            }
+        });
+    }
+
+    private void refreshCRLTable(Integer id_cert) {
+        System.out.println("org.caulfield.enigma.EnigmaIHM.refreshCRLTable()" + id_cert);
+        ArrayList<EnigmaCRL> crlList = CryptoDAO.getCRLforCertFromDB(id_cert);
+        DefaultTableModel model = (DefaultTableModel) jTableCRL.getModel();
+        model.getDataVector().removeAllElements();
+        model.fireTableDataChanged();
+        TableCellRenderer tableCellRenderer = new DefaultTableCellRenderer() {
+            SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
+
+            public Component getTableCellRendererComponent(JTable table,
+                    Object value, boolean isSelected, boolean hasFocus,
+                    int row, int column) {
+                if (value instanceof Date) {
+                    value = f.format(value);
+                }
+                JLabel parent = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                System.out.println(".getTableCellRendererComponent()" + row + "-" + parent.getFont());
+                System.out.println(".getTableCellRendererComponent()" + jTableCRL.getRowCount());
+
+                if (row == jTableCRL.getRowCount() - 1) {
+                    System.out.println(".getTableCellRendererComponent() update font");
+                    parent.setFont(parent.getFont().deriveFont(Font.BOLD));
+                }
+                return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            }
+        };
+        ((DefaultTableCellRenderer) tableCellRenderer).setHorizontalAlignment(JLabel.CENTER);
+        jTableCRL.getColumnModel().getColumn(0).setCellRenderer(tableCellRenderer);
+        jTableCRL.getColumnModel().getColumn(1).setCellRenderer(tableCellRenderer);
+        jTableCRL.getColumnModel().getColumn(2).setCellRenderer(tableCellRenderer);
+        jTableCRL.getColumnModel().getColumn(0).setPreferredWidth(30);
+        jTableCRL.getColumnModel().getColumn(1).setPreferredWidth(60);
+        jTableCRL.getColumnModel().getColumn(2).setPreferredWidth(60);
+
+        for (EnigmaCRL crl : crlList) {
+            model.addRow(new Object[]{crl.getIdcrl(), crl.getStartdate(), crl.getEnddate()});
+        }
+        buildPopupMenuX509CRL();
     }
 
     private void refreshPKObjects() {
@@ -650,6 +760,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel20 = new javax.swing.JPanel();
         jScrollPane9 = new javax.swing.JScrollPane();
         jTablePK = new javax.swing.JTable();
+        jPanel21 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTableCRL = new javax.swing.JTable();
         jPanelPGPKeyring = new javax.swing.JPanel();
         jLabel56 = new javax.swing.JLabel();
         jPanelScenarios = new javax.swing.JPanel();
@@ -1718,11 +1831,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonCertGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
                         .addComponent(jLabel67)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldPubTargetCertName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2625,7 +2736,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel19Layout.setHorizontalGroup(
             jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel19Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1410, Short.MAX_VALUE)
+                .addComponent(jScrollPane1)
                 .addContainerGap())
         );
         jPanel19Layout.setVerticalGroup(
@@ -2663,13 +2774,40 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel20.setLayout(jPanel20Layout);
         jPanel20Layout.setHorizontalGroup(
             jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel20Layout.createSequentialGroup()
-                .addComponent(jScrollPane9)
-                .addContainerGap())
+            .addComponent(jScrollPane9, javax.swing.GroupLayout.PREFERRED_SIZE, 986, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         jPanel20Layout.setVerticalGroup(
             jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane9, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
+            .addComponent(jScrollPane9, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+        );
+
+        jPanel21.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Associated CRLs", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+
+        jTableCRL.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null}
+            },
+            new String [] {
+                "ID", "Start Date", "End Date"
+            }
+        ));
+        jScrollPane2.setViewportView(jTableCRL);
+
+        javax.swing.GroupLayout jPanel21Layout = new javax.swing.GroupLayout(jPanel21);
+        jPanel21.setLayout(jPanel21Layout);
+        jPanel21Layout.setHorizontalGroup(
+            jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 416, Short.MAX_VALUE)
+            .addGroup(jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel21Layout.createSequentialGroup()
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+        jPanel21Layout.setVerticalGroup(
+            jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanelACManagementLayout = new javax.swing.GroupLayout(jPanelACManagement);
@@ -2677,15 +2815,20 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanelACManagementLayout.setHorizontalGroup(
             jPanelACManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanelACManagementLayout.createSequentialGroup()
+                .addComponent(jPanel20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelACManagementLayout.setVerticalGroup(
             jPanelACManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelACManagementLayout.createSequentialGroup()
                 .addComponent(jPanel19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(jPanelACManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Gestion des objets X509", jPanelACManagement);
@@ -3697,6 +3840,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
+    private javax.swing.JPanel jPanel21;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
@@ -3719,6 +3863,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
@@ -3736,6 +3881,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPaneGenerate;
     private javax.swing.JTabbedPane jTabbedPaneScreens;
+    private javax.swing.JTable jTableCRL;
     private javax.swing.JTable jTablePK;
     private javax.swing.JTextArea jTextArea2;
     private javax.swing.JTextArea jTextArea3;

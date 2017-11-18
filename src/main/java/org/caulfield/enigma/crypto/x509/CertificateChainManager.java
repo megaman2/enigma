@@ -5,7 +5,6 @@
  */
 package org.caulfield.enigma.crypto.x509;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -15,10 +14,12 @@ import java.security.cert.X509Certificate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -80,11 +81,20 @@ public class CertificateChainManager {
                 InputStream certStream2 = StreamManager.convertCertificateToInputStream(cert);
                 String thumbPrint = hc.getThumbprint(cert.getEncoded());
                 // GET ACSERIALCURSOR for this caCert in Database (start at 0)
-
                 String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
                 EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
                 BigInteger affectedSerial = caEnigCert.getAcserialcursor();
-                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2, cert.getNotAfter(), affectedSerial, BigInteger.ONE);
+
+                CRLManager crlm = new CRLManager();
+                Date CRLstartDate = new Date();
+                Integer cycleId = 30;
+                Date CRLendDate = new Date(CRLstartDate.getTime() + cycleId * CRLManager.DAY_IN_MS);
+                certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2, cert.getNotAfter(), affectedSerial, BigInteger.ONE, CRLstartDate);
+                // Generate the associated CRL
+                X509CRLHolder crl = crlm.initializeCRL(cert, intermediatePK, "SHA512withRSA", cycleId, CRLstartDate, CRLendDate);
+                InputStream crlStream = StreamManager.convertCRLToInputStream(crl);
+                // Save the CRL in DB
+                CryptoDAO.insertCRLInDB(crlStream, (int) certID, cycleId, CRLstartDate, CRLendDate);
             }
         } catch (SQLException ex) {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -132,7 +142,7 @@ public class CertificateChainManager {
                 String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
                 EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
                 BigInteger affectedSerial = caEnigCert.getAcserialcursor();
-                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter(), affectedSerial, BigInteger.ONE);
+                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter(), affectedSerial, BigInteger.ONE,null);
             }
 
         } catch (SQLException ex) {

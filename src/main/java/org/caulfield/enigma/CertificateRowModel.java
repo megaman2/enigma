@@ -35,6 +35,8 @@ public class CertificateRowModel implements RowModel {
                 return String.class;
             case 8:
                 return String.class;
+            case 9:
+                return Date.class;
             default:
                 assert false;
         }
@@ -42,7 +44,7 @@ public class CertificateRowModel implements RowModel {
     }
 
     public int getColumnCount() {
-        return 9;
+        return 10;
     }
 
     public String getColumnName(int column) {
@@ -65,6 +67,8 @@ public class CertificateRowModel implements RowModel {
                 return "Serial";
             case 8:
                 return "AC Serial Cursor";
+            case 9:
+                return "Last CRL update";
             default:
                 assert false;
         }
@@ -98,6 +102,8 @@ public class CertificateRowModel implements RowModel {
                 return ((EnigmaCertificate) node).getSerial();
             case 8:
                 return ((EnigmaCertificate) node).getAcserialcursor();
+            case 9:
+                return ((EnigmaCertificate) node).getLastcrlupdate();
             default:
                 assert false;
         }

@@ -107,6 +107,7 @@ public class CryptoDAO {
                 in.setParent(parent);
                 in.setSerial(new BigInteger(cert.getString("SERIAL")));
                 in.setAcserialcursor(new BigInteger(cert.getString("ACSERIALCURSOR")));
+                in.setLastcrlupdate(cert.getDate("CRLLASTUPDATE"));
             }
 
             // ADD CHILDS
@@ -122,14 +123,15 @@ public class CryptoDAO {
         }
         return in;
     }
+
     public static InputStream getCRLwithidCACertFromDB(Integer idCACert) {
         InputStream in = null;
 
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         try {
-            System.out.println("SELECT CRLFILE FROM CRLS WHERE ID_CA_CERT=" + idCACert);
-            ResultSet ff = sql.runQuery("SELECT CRLFILE FROM CRLS WHERE ID_CA_CERT=" + idCACert);
+//            System.out.println("SELECT CRLFILE FROM CRLS WHERE ID_CA_CERT=" + idCACert +" AND ID_CRL = (SELECT MAX(ID_CRL) FROM CLRS WHERE ID_CA_CERT=" + idCACert+")");
+            ResultSet ff = sql.runQuery("SELECT CRLFILE FROM CRLS WHERE ID_CA_CERT=" + idCACert + " AND ID_CRL = (SELECT MAX(ID_CRL) FROM CRLS WHERE ID_CA_CERT=" + idCACert + ")");
 
             if (ff.next()) {
                 in = ff.getBinaryStream("CRLFILE");
@@ -142,14 +144,15 @@ public class CryptoDAO {
         }
         return in;
     }
+
     public static InputStream getCRLFromDB(Integer idCrl) {
         InputStream in = null;
 
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         try {
-            System.out.println("SELECT CERTFILE FROM CRLS WHERE ID_CRL=" + idCrl);
-            ResultSet ff = sql.runQuery("SELECT CERTFILE FROM CRLS WHERE ID_CRL=" + idCrl);
+//            System.out.println("SELECT CERTFILE FROM CRLS WHERE ID_CRL=" + idCrl);
+            ResultSet ff = sql.runQuery("SELECT CRLFILE FROM CRLS WHERE ID_CRL=" + idCrl);
 
             if (ff.next()) {
                 in = ff.getBinaryStream("CRLFILE");
@@ -163,13 +166,39 @@ public class CryptoDAO {
         return in;
     }
 
+    public static ArrayList<EnigmaCRL> getCRLforCertFromDB(Integer idCert) {
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        ArrayList<EnigmaCRL> enigmaCRLList = new ArrayList();
+        try {
+//CREATE TABLE CRLS (ID_CRL INTEGER PRIMARY KEY, CRLFILE BLOB,ID_CA_CERT INTEGER, DAYCYCLE INTEGER, STARTDATE DATE, ENDDATE DATE);
+            ResultSet ff = sql.runQuery("SELECT * FROM CRLS WHERE ID_CA_CERT=" + idCert);
+            while (ff.next()) {
+                EnigmaCRL crl = new EnigmaCRL();
+                crl.setIdcrl(ff.getInt("ID_CRL"));
+                crl.setIdcacert(ff.getInt("ID_CA_CERT"));
+                crl.setDayCycle(ff.getInt("DAYCYCLE"));
+                crl.setStartdate(ff.getDate("STARTDATE"));
+                crl.setEnddate(ff.getDate("ENDDATE"));
+                enigmaCRLList.add(crl);
+            }
+            System.out.println("org.caulfield.enigma.database.CryptoDAO.getCRLforCertFromDB()");
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return enigmaCRLList;
+    }
+
     public static InputStream getCertFromDB(Integer idCert) {
         InputStream in = null;
 
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         try {
-            System.out.println("SELECT CERTFILE FROM CERTIFICATES WHERE ID_CERT=" + idCert);
+//            System.out.println("SELECT CERTFILE FROM CERTIFICATES WHERE ID_CERT=" + idCert);
             ResultSet ff = sql.runQuery("SELECT CERTFILE FROM CERTIFICATES WHERE ID_CERT=" + idCert);
 
             if (ff.next()) {
@@ -189,7 +218,7 @@ public class CryptoDAO {
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         try {
-            System.out.println("DELETE FROM CERTIFICATES WHERE ID_CERT=" + idCert);
+//            System.out.println("DELETE FROM CERTIFICATES WHERE ID_CERT=" + idCert);
             int ff = sql.runUpdate("DELETE FROM CERTIFICATES WHERE ID_CERT=" + idCert);
             return "Key successfully deleted.";
         } catch (SQLException ex) {
@@ -198,13 +227,36 @@ public class CryptoDAO {
         }
     }
 
-    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor) {
+    public static long insertCRLInDB(InputStream crlFile, Integer idCCACert, Integer dayCycle, Date startDate, Date endDate) {
+//CREATE TABLE CRLS (ID_CRL INTEGER PRIMARY KEY, CRLFILE BLOB,ID_CA_CERT INTEGER, DAYCYCLE INTEGER);
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CRLS (ID_CRL,CRLFILE,ID_CA_CERT,DAYCYCLE,STARTDATE,ENDDATE) VALUES (NEXT VALUE FOR CRLS_SEQ,?,?,?,?,?)", new String[]{"ID_CRL"});
+            pst.setBinaryStream(1, crlFile);
+            pst.setInt(2, idCCACert);
+            pst.setInt(3, dayCycle);
+            pst.setDate(4, new java.sql.Date(startDate.getTime()));
+            pst.setDate(5, new java.sql.Date(endDate.getTime()));
+            pst.executeUpdate();
+            ResultSet rs = pst.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            pst.close();
+            return 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return 0;
+        }
+    }
+
+    public static long insertCertInDB(String filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor, Date lastCRLUpdate) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
             File file = new File(filePath);
             FileInputStream inputStream = new FileInputStream(file);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR,CRLLASTUPDATE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -217,6 +269,7 @@ public class CryptoDAO {
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
             pst.setString(11, serial.toString());
             pst.setString(12, acSerialCursor.toString());
+            pst.setDate(13, new java.sql.Date(lastCRLUpdate.getTime()));
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -255,13 +308,13 @@ public class CryptoDAO {
         }
     }
 
-    public static String insertCertInDB(File filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType, Date expiryDate) {
+    public static String insertCertInDB(File filePath, String certName, String CN, String realHash, String algo, int privKid, String thumbPrint, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor, Date lastCRLUpdate) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
 
             FileInputStream inputStream = new FileInputStream(filePath);
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY, CERTTYPE, EXPIRYDATE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?)");
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR,CRLLASTUPDATE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -272,6 +325,9 @@ public class CryptoDAO {
             pst.setInt(8, privKid);
             pst.setInt(9, certType);
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
+            pst.setString(11, serial.toString());
+            pst.setString(12, acSerialCursor.toString());
+            pst.setDate(13, new java.sql.Date(lastCRLUpdate.getTime()));
             pst.execute();
             pst.close();
             return "Certificate successfully inserted.";
@@ -281,11 +337,11 @@ public class CryptoDAO {
         }
     }
 
-    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor) {
+    public static long insertCertInDB(InputStream fileStream, String certName, String CN, String realHash, String algo, Integer privKid, String thumbPrint, Integer issuerCertificateID, int certType, Date expiryDate, BigInteger serial, BigInteger acSerialCursor, Date lastCRLUpdate) {
 
         HSQLLoader sql = new HSQLLoader();
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
+            PreparedStatement pst = sql.getConnection().prepareStatement("INSERT INTO CERTIFICATES (ID_CERT,CERTNAME,CN,ALGO,CERTFILE,SHA256,THUMBPRINT,ID_ISSUER_CERT,ID_PRIVATEKEY,CERTTYPE,EXPIRYDATE,SERIAL,ACSERIALCURSOR,CRLLASTUPDATE) VALUES (NEXT VALUE FOR CERTIFICATES_SEQ,?,?,?,?,?,?,?,?,?,?,?,?,?)", new String[]{"ID_CERT"});
             pst.setString(1, certName);
             pst.setString(2, CN);
             pst.setString(3, algo);
@@ -298,6 +354,7 @@ public class CryptoDAO {
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
             pst.setString(11, serial.toString());
             pst.setString(12, acSerialCursor.toString());
+            pst.setDate(13, new java.sql.Date(lastCRLUpdate.getTime()));
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -333,6 +390,7 @@ public class CryptoDAO {
                 in.setExpiryDate(cert.getDate("EXPIRYDATE"));
                 in.setSerial(new BigInteger(cert.getString("SERIAL")));
                 in.setAcserialcursor(new BigInteger(cert.getString("ACSERIALCURSOR")));
+                in.setLastcrlupdate(cert.getDate("CRLLASTUPDATE"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
@@ -353,5 +411,42 @@ public class CryptoDAO {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
 
         }
+    }
+
+    public static void updateCertCRLUpdateInDB(Integer idCert) {
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET LASTUPDATECRL=? WHERE ID_CERT = (SELECT ID_CA_CERT FROM CERTIFICATES WHERE ID_CERT = " + idCert + ")");
+            pst.setDate(1, new java.sql.Date(System.currentTimeMillis()));
+            pst.executeUpdate();
+            pst.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static EnigmaCRL getEnigmaCRLwithidCACertFromDB(Integer idCACert) {
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        EnigmaCRL crl = new EnigmaCRL();
+        try {
+//CREATE TABLE CRLS (ID_CRL INTEGER PRIMARY KEY, CRLFILE BLOB,ID_CA_CERT INTEGER, DAYCYCLE INTEGER, STARTDATE DATE, ENDDATE DATE);
+            ResultSet ff = sql.runQuery("SELECT * FROM CRLS WHERE ID_CA_CERT=" + idCACert + " AND ID_CRL = (SELECT MAX(ID_CRL) FROM CRLS WHERE ID_CA_CERT=" + idCACert + ")");
+            if (ff.next()) {
+                crl.setIdcrl(ff.getInt("ID_CRL"));
+                crl.setDayCycle(ff.getInt("DAYCYCLE"));
+                crl.setIdcacert(ff.getInt("ID_CA_CERT"));
+                crl.setStartdate(ff.getDate("STARTDATE"));
+                crl.setEnddate(ff.getDate("ENDDATE"));
+            }
+            System.out.println("org.caulfield.enigma.database.CryptoDAO.getEnigmaCRLwithidCACertFromDB()");
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return crl;
     }
 }

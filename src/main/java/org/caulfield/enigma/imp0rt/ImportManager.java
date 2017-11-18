@@ -6,6 +6,7 @@
 package org.caulfield.enigma.imp0rt;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -38,7 +39,7 @@ public class ImportManager {
             }
 
             // DAO Write it
-            CryptoDAO.insertCertInDB(cert, certName, CN, realHash, algo, 0, thumbPrint,1,certX.getNotAfter());
+            CryptoDAO.insertCertInDB(cert, certName, CN, realHash, algo, 0, thumbPrint,1,certX.getNotAfter(),certX.getSerialNumber(),BigInteger.ZERO,null);
             return "Certificate imported successfully as "+certName;
 
         } catch (CertificateEncodingException | NoSuchAlgorithmException ex) {
