@@ -122,6 +122,46 @@ public class CryptoDAO {
         }
         return in;
     }
+    public static InputStream getCRLwithidCACertFromDB(Integer idCACert) {
+        InputStream in = null;
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            System.out.println("SELECT CRLFILE FROM CRLS WHERE ID_CA_CERT=" + idCACert);
+            ResultSet ff = sql.runQuery("SELECT CRLFILE FROM CRLS WHERE ID_CA_CERT=" + idCACert);
+
+            if (ff.next()) {
+                in = ff.getBinaryStream("CRLFILE");
+            }
+            System.out.println("org.caulfield.enigma.database.CryptoDAO.getCRLwithidCACertFromDB()" + in.toString());
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return in;
+    }
+    public static InputStream getCRLFromDB(Integer idCrl) {
+        InputStream in = null;
+
+        // Load key from Database
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            System.out.println("SELECT CERTFILE FROM CRLS WHERE ID_CRL=" + idCrl);
+            ResultSet ff = sql.runQuery("SELECT CERTFILE FROM CRLS WHERE ID_CRL=" + idCrl);
+
+            if (ff.next()) {
+                in = ff.getBinaryStream("CRLFILE");
+            }
+            System.out.println("org.caulfield.enigma.database.CryptoDAO.getCRLFromDB()" + in.toString());
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return in;
+    }
 
     public static InputStream getCertFromDB(Integer idCert) {
         InputStream in = null;

@@ -75,12 +75,14 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -1954,5 +1956,19 @@ public class CryptoGenerator {
         out.write("\n-----END PKCS #7 SIGNED DATA-----\n".getBytes("ISO-8859-1"));
         out.close();
         return new String(out.toByteArray(), "ISO-8859-1");
+    }
+
+    public X509CRLHolder getCRL(InputStream targetStream) {
+           try {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+//            X509CRLHolder crl = (X509CRLHolder) cf.generateCertificate(targetStream);
+               X509CRLHolder cer = null;
+            return cer;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

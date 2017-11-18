@@ -56,23 +56,23 @@ public class CRLManager {
     public static final long MIN_IN_MS = 60L * 1000;
     public static final long DAY_IN_MS = 24L * 60 * MIN_IN_MS;
 
-
     // Transaction Level
-    public synchronized String createCRLandInsertSerial(Integer idCACert, BigInteger certSerial, String password){
+    public synchronized String createCRLandInsertSerial(Integer idCACert, BigInteger certSerial, String password) {
         try {
             InputStream caCertStream = CryptoDAO.getCertFromDB(idCACert);
             CryptoGenerator cg = new CryptoGenerator();
-            X509Certificate caCert= cg.getCertificate(caCertStream);
-                 X509CertificateHolder caCertHolder = new JcaX509CertificateHolder(caCert);
-            EnigmaCertificate caCertEnigma= CryptoDAO.getEnigmaCertFromDB(idCACert, null);
-            AtomicLong currentCRLcursor= caCertEnigma.getCrlserialcursor();
+            X509Certificate caCert = cg.getCertificate(caCertStream);
+            X509CertificateHolder caCertHolder = new JcaX509CertificateHolder(caCert);
+            EnigmaCertificate caCertEnigma = CryptoDAO.getEnigmaCertFromDB(idCACert, null);
+            AtomicLong currentCRLcursor = caCertEnigma.getCrlserialcursor();
             Integer idCAPk = caCertEnigma.getId_private_key();
             InputStream caPKstream = CryptoDAO.getKeyFromDB(idCAPk);
             PrivateKey caPK = cg.getPrivateKey(caPKstream, password);
-            X509CRLHolder currentCRL = null;
             String sigAlgo = null;
-            CertificateList crl= getCRL(currentCRLcursor,caCertHolder,caPK,sigAlgo,certSerial,currentCRL);
-            
+            InputStream currentCRLstream = CryptoDAO.getCRLwithidCACertFromDB(idCACert);
+            X509CRLHolder currentCRL = cg.getCRL(currentCRLstream);
+            CertificateList newCRL = getCRL(currentCRLcursor, caCertHolder, caPK, sigAlgo, certSerial, currentCRL);
+
             return null;
         } catch (EnigmaException ex) {
             Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -83,9 +83,9 @@ public class CRLManager {
         }
         return null;
     }
-    
+
     // X509 Level
-    public synchronized CertificateList getCRL(AtomicLong currentCRLcursor, X509CertificateHolder cACert, PrivateKey cAKey, 
+    public synchronized CertificateList getCRL(AtomicLong currentCRLcursor, X509CertificateHolder cACert, PrivateKey cAKey,
             String signatureAlgorithm, final BigInteger serialNumber, X509CRLHolder currentCRL)
             throws Exception {
         CertificateList crl = null;
