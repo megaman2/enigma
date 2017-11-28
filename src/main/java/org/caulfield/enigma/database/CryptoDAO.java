@@ -398,13 +398,14 @@ public class CryptoDAO {
         return in;
     }
 
-    public static void getIncrementACSerialCursor(String thumbPrint, BigInteger currentAcSerialCursor) {
+    public static void updateACSerialCursorAndDate(Integer idCert, BigInteger currentAcSerialCursor) {
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=? WHERE THUMBPRINT='" + thumbPrint + "'");
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, LASTUPDATECRL=? WHERE ID_CERT=" + idCert);
             pst.setString(1, newAcSerialCursor.toString());
+            pst.setDate(2, new java.sql.Date(System.currentTimeMillis()));
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
@@ -412,13 +413,15 @@ public class CryptoDAO {
 
         }
     }
-
-    public static void updateCertCRLUpdateInDB(Integer idCert) {
+    
+        public static void updateACSerialCursorAndDate(String thumbprint, BigInteger currentAcSerialCursor) {
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
+        BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET LASTUPDATECRL=? WHERE ID_CERT = (SELECT ID_CA_CERT FROM CERTIFICATES WHERE ID_CERT = " + idCert + ")");
-            pst.setDate(1, new java.sql.Date(System.currentTimeMillis()));
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, LASTUPDATECRL=? WHERE THUMBPRINT='" +thumbprint+"'");
+            pst.setString(1, newAcSerialCursor.toString());
+            pst.setDate(2, new java.sql.Date(System.currentTimeMillis()));
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {

@@ -84,7 +84,7 @@ public class CertificateChainManager {
                 String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
                 EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
                 BigInteger affectedSerial = caEnigCert.getAcserialcursor();
-
+                System.out.println("AFFECTED TO NEXT CRL : "+affectedSerial.intValue());
                 CRLManager crlm = new CRLManager();
                 Date CRLstartDate = new Date();
                 Integer cycleId = 30;
@@ -95,6 +95,7 @@ public class CertificateChainManager {
                 InputStream crlStream = StreamManager.convertCRLToInputStream(crl);
                 // Save the CRL in DB
                 CryptoDAO.insertCRLInDB(crlStream, (int) certID, cycleId, CRLstartDate, CRLendDate);
+                CryptoDAO.updateACSerialCursorAndDate(caEnigCert.getId_cert(),affectedSerial.add(BigInteger.ONE));
             }
         } catch (SQLException ex) {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);

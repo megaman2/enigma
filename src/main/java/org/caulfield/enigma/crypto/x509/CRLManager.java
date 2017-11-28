@@ -100,7 +100,7 @@ public class CRLManager {
             Date CRLendDate = new Date(CRLstartDate.getTime() + cycleId * CRLManager.DAY_IN_MS);
             CryptoDAO.insertCRLInDB(newCRLStream, certEnigma.getId_issuer_cert(), crlEnigma.getDayCycle(), CRLstartDate, CRLendDate);
             // Update last CRL update Date
-            CryptoDAO.updateCertCRLUpdateInDB(certEnigma.getId_issuer_cert());
+            CryptoDAO.updateACSerialCursorAndDate(caCertEnigma.getId_cert(),caCertEnigma.getAcserialcursor().add(BigInteger.ONE));
             return "Certificate revoked successfully. New CRL created for " + caCertEnigma.getCertname() + ".";
         } catch (CertificateEncodingException | EnigmaException ex) {
             Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
