@@ -75,9 +75,6 @@ public class CRLManager {
             String sigAlgo = null;
             InputStream tempo = CryptoDAO.getCRLwithidCACertFromDB(certEnigma.getId_issuer_cert());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-// Fake code simulating the copy
-// You can generally do better with nio if you need...
-// And please, unlike me, do something about the Exceptions :D
             byte[] buffer = new byte[1024];
             int len;
             while ((len = tempo.read(buffer)) > -1) {

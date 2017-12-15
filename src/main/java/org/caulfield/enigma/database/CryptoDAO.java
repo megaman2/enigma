@@ -269,7 +269,7 @@ public class CryptoDAO {
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
             pst.setString(11, serial.toString());
             pst.setString(12, acSerialCursor.toString());
-            pst.setDate(13, new java.sql.Date(lastCRLUpdate.getTime()));
+            pst.setDate(13,(lastCRLUpdate==null)?null:new java.sql.Date(lastCRLUpdate.getTime()));
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -327,7 +327,7 @@ public class CryptoDAO {
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
             pst.setString(11, serial.toString());
             pst.setString(12, acSerialCursor.toString());
-            pst.setDate(13, new java.sql.Date(lastCRLUpdate.getTime()));
+            pst.setDate(13, (lastCRLUpdate==null)?null:new java.sql.Date(lastCRLUpdate.getTime()));
             pst.execute();
             pst.close();
             return "Certificate successfully inserted.";
@@ -354,7 +354,7 @@ public class CryptoDAO {
             pst.setDate(10, new java.sql.Date(expiryDate.getTime()));
             pst.setString(11, serial.toString());
             pst.setString(12, acSerialCursor.toString());
-            pst.setDate(13, new java.sql.Date(lastCRLUpdate.getTime()));
+            pst.setDate(13,  (lastCRLUpdate==null)?null:new java.sql.Date(lastCRLUpdate.getTime()));
             pst.executeUpdate();
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
@@ -403,7 +403,7 @@ public class CryptoDAO {
         HSQLLoader sql = new HSQLLoader();
         BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, LASTUPDATECRL=? WHERE ID_CERT=" + idCert);
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, CRLLASTUPDATE=? WHERE ID_CERT=" + idCert);
             pst.setString(1, newAcSerialCursor.toString());
             pst.setDate(2, new java.sql.Date(System.currentTimeMillis()));
             pst.executeUpdate();
@@ -419,7 +419,7 @@ public class CryptoDAO {
         HSQLLoader sql = new HSQLLoader();
         BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
-            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, LASTUPDATECRL=? WHERE THUMBPRINT='" +thumbprint+"'");
+            PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, CRLLASTUPDATE=? WHERE THUMBPRINT='" +thumbprint+"'");
             pst.setString(1, newAcSerialCursor.toString());
             pst.setDate(2, new java.sql.Date(System.currentTimeMillis()));
             pst.executeUpdate();
