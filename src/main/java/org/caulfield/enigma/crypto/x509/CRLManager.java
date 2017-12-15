@@ -72,7 +72,7 @@ public class CRLManager {
             Integer idCAPk = caCertEnigma.getId_private_key();
             InputStream caPKstream = CryptoDAO.getKeyFromDB(idCAPk);
             PrivateKey caPK = cg.getPrivateKey(caPKstream, password);
-            String sigAlgo = null;
+            String sigAlgo = "SHA512withRSA";
             InputStream tempo = CryptoDAO.getCRLwithidCACertFromDB(certEnigma.getId_issuer_cert());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
@@ -82,8 +82,9 @@ public class CRLManager {
             }
             baos.flush();
 //            System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()" + baos.toString());
-            System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()"+ baos.toString().replace("-----BEGIN X509 CRL-----", "").replace("-----END X509 CRL-----", ""));
-            InputStream currentCRLstream = new ByteArrayInputStream(baos.toString().replace("-----BEGIN X509 CRL-----", "").replace("-----END X509 CRL-----", "").getBytes(StandardCharsets.UTF_8.name()));
+String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace("-----END X509 CRL-----", "");
+            System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()"+ crlstr);
+            InputStream currentCRLstream = new ByteArrayInputStream(baos.toString().getBytes(StandardCharsets.UTF_8.name()));
 // Open new InputStreams using the recorded bytes
 // Can be repeated as many times as you wish
 //            InputStream currentCRLstream = new ByteArrayInputStream(baos.toByteArray());

@@ -84,18 +84,19 @@ public class CertificateChainManager {
                 String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
                 EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
                 BigInteger affectedSerial = caEnigCert.getAcserialcursor();
-                System.out.println("AFFECTED TO NEXT CRL : "+affectedSerial.intValue());
                 CRLManager crlm = new CRLManager();
                 Date CRLstartDate = new Date();
                 Integer cycleId = 30;
                 Date CRLendDate = new Date(CRLstartDate.getTime() + cycleId * CRLManager.DAY_IN_MS);
+                System.out.println("SERIAL AFFECTED TO SUB CERTIFICATE : " + affectedSerial.intValue());
                 certID = CryptoDAO.insertCertInDB(certStream, "SUB_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 2, cert.getNotAfter(), affectedSerial, BigInteger.ONE, CRLstartDate);
                 // Generate the associated CRL
                 X509CRLHolder crl = crlm.initializeCRL(cert, intermediatePK, "SHA512withRSA", cycleId, CRLstartDate, CRLendDate);
                 InputStream crlStream = StreamManager.convertCRLToInputStream(crl);
-                // Save the CRL in DB
+                // Save the CRL of the sub in DB
                 CryptoDAO.insertCRLInDB(crlStream, (int) certID, cycleId, CRLstartDate, CRLendDate);
-                CryptoDAO.updateACSerialCursorAndDate(caEnigCert.getId_cert(),affectedSerial.add(BigInteger.ONE));
+                // Update the parent AC Serial Cursor as we used the affected one
+                CryptoDAO.updateACSerialCursorAndDate(caEnigCert.getId_cert(), affectedSerial);
             }
         } catch (SQLException ex) {
             Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -143,7 +144,10 @@ public class CertificateChainManager {
                 String thumbPrintAC = hc.getThumbprint(caCert.getEncoded());
                 EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrintAC);
                 BigInteger affectedSerial = caEnigCert.getAcserialcursor();
-                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter(), affectedSerial, BigInteger.ONE,null);
+                System.out.println("SERIAL AFFECTED TO USER CERTIFICATE : " + affectedSerial.intValue());
+                certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter(), affectedSerial, BigInteger.ONE, null);
+                        // Update the parent AC Serial Cursor as we used the affected one
+                CryptoDAO.updateACSerialCursorAndDate(caEnigCert.getId_cert(), affectedSerial);
             }
 
         } catch (SQLException ex) {

@@ -147,7 +147,7 @@ public class PKCS12Builder {
         EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrint);
         BigInteger nextSerial = caEnigCert.getAcserialcursor();
         // INCREMENT ACSERIALCURSOR for this caCert in Database
-        CryptoDAO.updateACSerialCursorAndDate(thumbPrint,nextSerial);
+//        CryptoDAO.updateACSerialCursorAndDate(thumbPrint,nextSerial);
         //
         // create the certificate - version 3
         //
@@ -208,7 +208,7 @@ public class PKCS12Builder {
         EnigmaCertificate caEnigCert = CryptoDAO.getEnigmaCertFromDB(thumbPrint);
         BigInteger nextSerial = caEnigCert.getAcserialcursor();
         // INCREMENT ACSERIALCURSOR for this caCert in Database
-        CryptoDAO.updateACSerialCursorAndDate(thumbPrint,nextSerial);
+//        CryptoDAO.updateACSerialCursorAndDate(thumbPrint,nextSerial);
         //
         // create the certificate - version 3
         //

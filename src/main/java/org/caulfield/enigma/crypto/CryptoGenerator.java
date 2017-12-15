@@ -31,10 +31,13 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.cert.CRL;
+import java.security.cert.CRLException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
@@ -63,9 +66,11 @@ import javax.crypto.spec.DHParameterSpec;
 
 import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.DatatypeConverter;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 
 import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 
@@ -75,6 +80,7 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
@@ -86,6 +92,8 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
@@ -1971,18 +1979,58 @@ public class CryptoGenerator {
         return new String(out.toByteArray(), "ISO-8859-1");
     }
 
+//    private CRL readPKCS7CRL(
+//            InputStream in)
+//            throws IOException, CRLException {
+//        ASN1InputStream dIn = new ASN1InputStream(in, getLimit(in));
+//        ASN1Sequence seq = (ASN1Sequence) dIn.readObject();
+//
+//        if (seq.size() > 1
+//                && seq.getObjectAt(0) instanceof DERObjectIdentifier) {
+//            if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData)) {
+//                sCrlData = new SignedData(ASN1Sequence.getInstance(
+//                        (ASN1TaggedObject) seq.getObjectAt(1), true));
+//
+//                return new X509CRLObject(
+//                        CertificateList.getInstance(
+//                                sCrlData.getCRLs().getObjectAt(sCrlDataObjectCount++)));
+//            }
+//        }
+//
+//        return new X509CRLObject(
+//                CertificateList.getInstance(seq));
+//    }
+//
+//    private CRL readPEMCRL(
+//            InputStream in)
+//            throws IOException, CRLException {
+//        ASN1Sequence seq = PEM_CRL_PARSER.readPEMObject(in);
+//
+//        if (seq != null) {
+//            return createCRL(
+//                    CertificateList.getInstance(seq));
+//        }
+//
+//        return null;
+//    }
+
     public X509CRLHolder getCRL(InputStream targetStream) {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            int nRead;
-            byte[] data = new byte[16384];
-            while ((nRead = targetStream.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
-            }
-            buffer.flush();
-            X509CRLHolder crl = new X509CRLHolder(buffer.toByteArray());
-            return crl;
+//            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+//            int nRead;
+//            byte[] data = new byte[16384];
+//            while ((nRead = targetStream.read(data, 0, data.length)) != -1) {
+//                buffer.write(data, 0, nRead);
+//            }
+//            buffer.flush();
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            X509CRL crl = (X509CRL) cf.generateCRL(targetStream);
+            // X509CRLHolder crlHolder = (X509CRLHolder) pemObject;
+            JcaX509CRLHolder holder = new JcaX509CRLHolder(crl);
+//            CertificateList clist = new CertificateList(ASN1Sequence.getInstance(data));
+//            X509CRLHolder crl = new X509CRLHolder(buffer.toByteArray());
+            return holder;
         } catch (Exception ex) {
             ex.printStackTrace();
         }

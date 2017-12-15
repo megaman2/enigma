@@ -403,6 +403,7 @@ public class CryptoDAO {
         HSQLLoader sql = new HSQLLoader();
         BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
+            System.out.println("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, CRLLASTUPDATE=? WHERE ID_CERT=" + idCert);
             PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, CRLLASTUPDATE=? WHERE ID_CERT=" + idCert);
             pst.setString(1, newAcSerialCursor.toString());
             pst.setDate(2, new java.sql.Date(System.currentTimeMillis()));
@@ -413,12 +414,13 @@ public class CryptoDAO {
 
         }
     }
-    
+    // TODO FIX
         public static void updateACSerialCursorAndDate(String thumbprint, BigInteger currentAcSerialCursor) {
         // Load key from Database
         HSQLLoader sql = new HSQLLoader();
         BigInteger newAcSerialCursor = currentAcSerialCursor.add(BigInteger.ONE);
         try {
+            System.out.println("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, CRLLASTUPDATE=? WHERE THUMBPRINT='" +thumbprint+"'");
             PreparedStatement pst = sql.getConnection().prepareStatement("UPDATE CERTIFICATES SET ACSERIALCURSOR=?, CRLLASTUPDATE=? WHERE THUMBPRINT='" +thumbprint+"'");
             pst.setString(1, newAcSerialCursor.toString());
             pst.setDate(2, new java.sql.Date(System.currentTimeMillis()));
