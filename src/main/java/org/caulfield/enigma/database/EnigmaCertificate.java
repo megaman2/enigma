@@ -37,6 +37,7 @@ public class EnigmaCertificate implements TreeNode, Comparable {
     private BigInteger serial;
     private BigInteger acserialcursor;
     private Date lastcrlupdate;
+    private String status;
 
     public EnigmaCertificate() {
         childs = new ArrayList<>();
@@ -320,5 +321,19 @@ public class EnigmaCertificate implements TreeNode, Comparable {
      */
     public void setLastcrlupdate(Date lastcrlupdate) {
         this.lastcrlupdate = lastcrlupdate;
+    }
+
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

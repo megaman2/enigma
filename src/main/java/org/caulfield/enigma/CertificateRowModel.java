@@ -33,10 +33,12 @@ public class CertificateRowModel implements RowModel {
                 return String.class;
             case 7:
                 return String.class;
+//            case 8:
+//                return String.class;
             case 8:
-                return String.class;
-            case 9:
                 return Date.class;
+            case 9:
+                return String.class;
             default:
                 assert false;
         }
@@ -65,10 +67,12 @@ public class CertificateRowModel implements RowModel {
                 return "Type";
             case 7:
                 return "Serial";
+//            case 8:
+//                return "AC Serial Cursor";
             case 8:
-                return "AC Serial Cursor";
-            case 9:
                 return "Last CRL update";
+            case 9:
+                return "Status";
             default:
                 assert false;
         }
@@ -100,10 +104,12 @@ public class CertificateRowModel implements RowModel {
                 }
             case 7:
                 return ((EnigmaCertificate) node).getSerial();
+//            case 8:
+//                return ((EnigmaCertificate) node).getAcserialcursor();
             case 8:
-                return ((EnigmaCertificate) node).getAcserialcursor();
-            case 9:
                 return ((EnigmaCertificate) node).getLastcrlupdate();
+            case 9:
+                return ((EnigmaCertificate) node).getStatus();
             default:
                 assert false;
         }

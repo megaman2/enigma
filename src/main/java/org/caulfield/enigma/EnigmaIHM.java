@@ -5,6 +5,7 @@
  */
 package org.caulfield.enigma;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Point;
@@ -414,6 +415,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jScrollPane1.setViewportView(outline);
 
         outline.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        DefaultTableCellRenderer redRenderer = new DefaultTableCellRenderer();
+//        redRenderer.setForeground(new Color(230, 76, 76));
+//        redRenderer.setHorizontalAlignment(JLabel.CENTER);
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         outline.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);

@@ -6,9 +6,7 @@
 package org.caulfield.enigma;
 
 import java.awt.Color;
-import java.io.File;
 import javax.swing.ImageIcon;
-import javax.swing.UIManager;
 import org.caulfield.enigma.database.EnigmaCertificate;
 import org.netbeans.swing.outline.RenderDataProvider;
 
@@ -25,27 +23,35 @@ public class CertificateDataProvider implements RenderDataProvider {
     public String getDisplayName(Object o) {
         return ((EnigmaCertificate) o).getCertname();
     }
-    
+
     public java.awt.Color getForeground(Object o) {
+        Color c = null;
         EnigmaCertificate f = (EnigmaCertificate) o;
         if (f.isRoot()) {
-            return new Color(0, 0, 0);
+            c = new Color(0, 0, 0);
         } else if (f.isSub()) {
-            return new Color(37, 44, 36);
+            c = new Color(37, 44, 36);
         } else if (f.isUser()) {
-            return new Color(67, 116, 62);
+            c = new Color(67, 116, 62);
         }
-        return null;
+        if ("REVOKED".equals(f.getStatus())) {
+            c = new Color(230, 76, 76);
+        }
+        return c;
     }
 
     public javax.swing.Icon getIcon(Object o) {
         ImageIcon icon = null;
-        if (((EnigmaCertificate) o).isRoot()) {
+        EnigmaCertificate f = (EnigmaCertificate) o;
+        if (f.isRoot()) {
             icon = new ImageIcon(getClass().getResource("/AC.png"));
-        } else if (((EnigmaCertificate) o).isSub()) {
+        } else if (f.isSub()) {
             icon = new ImageIcon(getClass().getResource("/sub.png"));
-        } else if (((EnigmaCertificate) o).isUser()) {
+        } else if (f.isUser()) {
             icon = new ImageIcon(getClass().getResource("/usercert.png"));
+        }
+        if ("REVOKED".equals(f.getStatus())) {
+            icon = new ImageIcon(getClass().getResource("/revoked.png"));
         }
         return icon;
     }

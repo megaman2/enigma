@@ -81,13 +81,13 @@ public class CRLManager {
                 baos.write(buffer, 0, len);
             }
             baos.flush();
-//            System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()" + baos.toString());
-String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace("-----END X509 CRL-----", "");
-            System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()"+ crlstr);
+            // System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()" + baos.toString());
+            String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace("-----END X509 CRL-----", "");
+            System.out.println("org.caulfield.enigma.crypto.x509.CRLManager.revokeCert()" + crlstr);
             InputStream currentCRLstream = new ByteArrayInputStream(baos.toString().getBytes(StandardCharsets.UTF_8.name()));
-// Open new InputStreams using the recorded bytes
-// Can be repeated as many times as you wish
-//            InputStream currentCRLstream = new ByteArrayInputStream(baos.toByteArray());
+            // Open new InputStreams using the recorded bytes
+            // Can be repeated as many times as you wish
+            // InputStream currentCRLstream = new ByteArrayInputStream(baos.toByteArray());
             EnigmaCRL crlEnigma = CryptoDAO.getEnigmaCRLwithidCACertFromDB(caCertEnigma.getId_cert());
             X509CRLHolder currentCRL = cg.getCRL(currentCRLstream);
             X509CRLHolder newCRL = getCurrentCRL(caCertHolder, caPK, sigAlgo, certSerial, currentCRL, crlEnigma.getDayCycle());
@@ -98,7 +98,9 @@ String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace(
             Date CRLendDate = new Date(CRLstartDate.getTime() + cycleId * CRLManager.DAY_IN_MS);
             CryptoDAO.insertCRLInDB(newCRLStream, certEnigma.getId_issuer_cert(), crlEnigma.getDayCycle(), CRLstartDate, CRLendDate);
             // Update last CRL update Date
-            CryptoDAO.updateACSerialCursorAndDate(caCertEnigma.getId_cert(),caCertEnigma.getAcserialcursor().add(BigInteger.ONE));
+            CryptoDAO.updateACSerialCursorAndDate(caCertEnigma.getId_cert(), caCertEnigma.getAcserialcursor().add(BigInteger.ONE));
+            // Update certificate status
+            CryptoDAO.revokeCertificate(idCert);
             return "Certificate revoked successfully. New CRL created for " + caCertEnigma.getCertname() + ".";
         } catch (CertificateEncodingException | EnigmaException ex) {
             Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -108,7 +110,6 @@ String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace(
         return null;
     }
 
-    // Transaction Level
     public synchronized X509CRLHolder createCRLandInsertSerial(Integer idCACert, BigInteger certSerial, String password, Integer dayCycle) {
         try {
             InputStream caCertStream = CryptoDAO.getCertFromDB(idCACert);
@@ -135,7 +136,6 @@ String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace(
         return null;
     }
 
-    // X509 Level
     public synchronized X509CRLHolder initializeCRL(X509CertificateHolder cACert, PrivateKey cAKey, String signatureAlgorithm, Integer dayCycle, Date startDate, Date endDate) {
 
         try {
@@ -156,7 +156,6 @@ String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace(
         }
     }
 
-    // X509 Level
     public synchronized X509CRLHolder getCurrentCRL(X509CertificateHolder cACert, PrivateKey cAKey, String signatureAlgorithm, final BigInteger serialNumber, X509CRLHolder currentCRL, Integer dayCycle) {
         try {
 
@@ -233,31 +232,5 @@ String crlstr = baos.toString().replace("-----BEGIN X509 CRL-----", "").replace(
             Logger.getLogger(CRLManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
-    }
-
-    public X509CRL updateCRL() {
-        return null;
-//        X509V2CRLGenerator crlGen = new X509V2CRLGenerator();
-//        Date nextUpdate = ...;
-//X509Certificate caCrlCert = ...;
-//PrivateKey caCrlPrivateKey = ...;
-//X509CRL existingCRL = ...
-// 
-// 
-//crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
-//
-//        crlGen.setThisUpdate(now);
-//        crlGen.setNextUpdate(nextUpdate);
-//        crlGen.setSignatureAlgorithm(signatureAlgorithm);
-//        crlGen.addCRL(existingCRL);
-//
-//        crlGen.addCRLEntry(BigInteger.valueOf(2), now, CRLReason.privilegeWithdrawn);
-//
-//        crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier,
-//                false, new AuthorityKeyIdentifierStructure(caCrlCert));
-//        crlGen.addExtension(X509Extensions.CRLNumber,
-//                false, new CRLNumber(crlNumber));
-//
-//        X509CRL crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
     }
 }
