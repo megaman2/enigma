@@ -112,8 +112,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
             }
         });
-        jComboBoxAC.addItem("None");
         CertificateChainManager acm = new CertificateChainManager();
+        for (String AC : acm.getFullCertList()) {
+            jComboBoxSignSignerCert.addItem(AC);
+        }
+
+        jComboBoxAC.addItem("None");
         for (String AC : acm.getFullACList()) {
             jComboBoxAC.addItem(AC);
         }
@@ -184,6 +188,18 @@ public class EnigmaIHM extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
+        // Fill Cipher Algo Combobox
+             try {
+            HSQLLoader database = new HSQLLoader();
+            ResultSet f = database.runQuery("select ALGONAME from ALGO WHERE TYPE='CIPHER'");
+            while (f.next()) {
+                jComboBoxAlgoCipher.addItem(f.getString("ALGONAME"));
+            }
+            jComboBoxAlgoCipher.setSelectedIndex(0);
+        } catch (SQLException ex) {
+            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     private void buildPopupMenuX509() {
@@ -745,8 +761,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel42 = new javax.swing.JLabel();
         jTextFieldSignFile = new javax.swing.JTextField();
         jButtonBrowseSignFile = new javax.swing.JButton();
-        jTextFieldSignPkFile = new javax.swing.JTextField();
-        jButtonBrowseSignPkFile = new javax.swing.JButton();
         jComboBoxSignPK = new javax.swing.JComboBox<>();
         jLabel43 = new javax.swing.JLabel();
         jComboBoxAlgoSign = new javax.swing.JComboBox<>();
@@ -756,16 +770,26 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jButtonBrowseSignOutput = new javax.swing.JButton();
         jLabel46 = new javax.swing.JLabel();
         jTextFieldSignPkPassword = new javax.swing.JTextField();
-        jLabel47 = new javax.swing.JLabel();
         jCheckBox2 = new javax.swing.JCheckBox();
         jLabel52 = new javax.swing.JLabel();
         jComboBoxSignSignerCert = new javax.swing.JComboBox<>();
-        jLabel51 = new javax.swing.JLabel();
-        jTextFieldSignSignerCert = new javax.swing.JTextField();
-        jButtonBrowseSignSignerCert = new javax.swing.JButton();
         jLabel44 = new javax.swing.JLabel();
         jTextFieldSignOutputFilename = new javax.swing.JTextField();
         jPanel13 = new javax.swing.JPanel();
+        jLabel47 = new javax.swing.JLabel();
+        jTextFieldCipherFile = new javax.swing.JTextField();
+        jButtonBrowseCipherFile = new javax.swing.JButton();
+        jButtonCipher = new javax.swing.JButton();
+        jComboBoxAlgoCipher = new javax.swing.JComboBox<>();
+        jLabel51 = new javax.swing.JLabel();
+        jLabel68 = new javax.swing.JLabel();
+        jTextFieldCipherOutputDirectory = new javax.swing.JTextField();
+        jButtonBrowseCipherOutput = new javax.swing.JButton();
+        jLabel69 = new javax.swing.JLabel();
+        jTextFieldCipherOutputFilename = new javax.swing.JTextField();
+        jCheckBoxCustomCipher = new javax.swing.JCheckBox();
+        jLabel70 = new javax.swing.JLabel();
+        jComboBoxCipherCert = new javax.swing.JComboBox<>();
         jPanel15 = new javax.swing.JPanel();
         jPanel16 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
@@ -2505,7 +2529,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jLabel41.setText("Target File :");
 
-        jLabel42.setText("Private Key used to sign :");
+        jLabel42.setText("Private Key for sign :");
 
         jTextFieldSignFile.addInputMethodListener(new java.awt.event.InputMethodListener() {
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
@@ -2524,13 +2548,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jButtonBrowseSignFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonBrowseSignFileActionPerformed(evt);
-            }
-        });
-
-        jButtonBrowseSignPkFile.setText("Parcourir...");
-        jButtonBrowseSignPkFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowseSignPkFileActionPerformed(evt);
             }
         });
 
@@ -2562,8 +2579,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jLabel46.setText("Private Key Password :");
 
-        jLabel47.setText("or");
-
         jCheckBox2.setText("Use custom name");
         jCheckBox2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2572,15 +2587,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         });
 
         jLabel52.setText("Signer certificate :");
-
-        jLabel51.setText("or");
-
-        jButtonBrowseSignSignerCert.setText("Parcourir...");
-        jButtonBrowseSignSignerCert.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowseSignSignerCertActionPerformed(evt);
-            }
-        });
 
         jLabel44.setText("Output Filename : ");
 
@@ -2592,118 +2598,226 @@ public class EnigmaIHM extends javax.swing.JFrame {
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel11Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addComponent(jLabel42, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jComboBoxSignPK, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addComponent(jLabel41)
-                                .addGap(78, 78, 78)
-                                .addComponent(jTextFieldSignFile, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel41)
+                        .addGap(78, 78, 78)
+                        .addComponent(jTextFieldSignFile, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(8, 8, 8)
-                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addComponent(jLabel47)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jTextFieldSignPkFile, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonBrowseSignPkFile, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jButtonBrowseSignFile, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jButtonBrowseSignFile, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel11Layout.createSequentialGroup()
                         .addComponent(jLabel52, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jComboBoxSignSignerCert, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel51)
+                        .addComponent(jComboBoxSignSignerCert, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addComponent(jLabel42, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextFieldSignSignerCert, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonBrowseSignSignerCert, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(29, 29, 29)
+                        .addComponent(jComboBoxSignPK, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 105, Short.MAX_VALUE)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel43)
-                    .addComponent(jLabel44)
-                    .addComponent(jLabel46))
+                    .addComponent(jLabel46)
+                    .addComponent(jLabel44))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldSignOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBoxAlgoSign, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addComponent(jCheckBox2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButtonSign, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel11Layout.createSequentialGroup()
-                                .addGap(50, 50, 50)
-                                .addComponent(jLabel45)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextFieldSignOutputDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonBrowseSignOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 116, Short.MAX_VALUE))))
-                    .addComponent(jTextFieldSignPkPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jTextFieldSignOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(2, 2, 2)
+                        .addComponent(jCheckBox2))
+                    .addComponent(jTextFieldSignPkPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxAlgoSign, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addGap(291, 291, 291)
+                        .addComponent(jButtonSign, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(jLabel45)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldSignOutputDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonBrowseSignOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel11Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel11Layout.createSequentialGroup()
                         .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel41)
                             .addComponent(jTextFieldSignFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButtonBrowseSignFile))
                         .addGap(18, 18, 18)
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel42)
+                            .addComponent(jComboBoxSignPK, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
                         .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel46)
-                                .addComponent(jTextFieldSignPkPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel52)
+                                .addComponent(jComboBoxSignSignerCert, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jButtonSign)))
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel11Layout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel46)
+                                    .addComponent(jTextFieldSignPkPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel47)
-                                .addComponent(jLabel42)
-                                .addComponent(jTextFieldSignPkFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jButtonBrowseSignPkFile)
-                                .addComponent(jComboBoxSignPK, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel45)
-                        .addComponent(jButtonBrowseSignOutput)
-                        .addComponent(jTextFieldSignOutputDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel43)
-                        .addComponent(jComboBoxAlgoSign, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel44)
-                        .addComponent(jLabel52)
-                        .addComponent(jComboBoxSignSignerCert, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel51)
-                        .addComponent(jTextFieldSignSignerCert, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButtonBrowseSignSignerCert))
-                    .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextFieldSignOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jCheckBox2)
-                        .addComponent(jButtonSign)))
+                                .addComponent(jLabel43)
+                                .addComponent(jComboBoxAlgoSign, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel45)
+                                .addComponent(jButtonBrowseSignOutput)
+                                .addComponent(jTextFieldSignOutputDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldSignOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jCheckBox2)
+                            .addComponent(jLabel44))
+                        .addGap(4, 4, 4)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel13.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Chiffrer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
+        jLabel47.setText("Target File :");
+
+        jTextFieldCipherFile.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+                jTextFieldCipherFileInputMethodTextChanged(evt);
+            }
+        });
+        jTextFieldCipherFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldCipherFileActionPerformed(evt);
+            }
+        });
+
+        jButtonBrowseCipherFile.setText("Parcourir...");
+        jButtonBrowseCipherFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseCipherFileActionPerformed(evt);
+            }
+        });
+
+        jButtonCipher.setBackground(new java.awt.Color(0, 153, 255));
+        jButtonCipher.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonCipher.setText("Cipher File");
+        jButtonCipher.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCipherActionPerformed(evt);
+            }
+        });
+
+        jComboBoxAlgoCipher.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxAlgoCipherActionPerformed(evt);
+            }
+        });
+
+        jLabel51.setText("Algorithm :");
+
+        jLabel68.setText("Output Directory : ");
+
+        jButtonBrowseCipherOutput.setText("Parcourir...");
+        jButtonBrowseCipherOutput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseCipherOutputActionPerformed(evt);
+            }
+        });
+
+        jLabel69.setText("Output Filename : ");
+
+        jTextFieldCipherOutputFilename.setEnabled(false);
+
+        jCheckBoxCustomCipher.setText("Use custom name");
+        jCheckBoxCustomCipher.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxCustomCipherActionPerformed(evt);
+            }
+        });
+
+        jLabel70.setText("Certificate for cipher :");
+
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel13Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jLabel47)
+                        .addGap(78, 78, 78)
+                        .addComponent(jTextFieldCipherFile, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(8, 8, 8)
+                        .addComponent(jButtonBrowseCipherFile, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jLabel70, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jComboBoxCipherCert, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(102, 102, 102)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel51)
+                    .addComponent(jLabel69))
+                .addGap(43, 43, 43)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jComboBoxAlgoCipher, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(116, 116, 116)
+                        .addComponent(jLabel68)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldCipherOutputDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonBrowseCipherOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jTextFieldCipherOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(2, 2, 2)
+                        .addComponent(jCheckBoxCustomCipher)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel13Layout.createSequentialGroup()
+                    .addContainerGap(1185, Short.MAX_VALUE)
+                    .addComponent(jButtonCipher, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap()))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 122, Short.MAX_VALUE)
+            .addGroup(jPanel13Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel51)
+                            .addComponent(jComboBoxAlgoCipher, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel68)
+                            .addComponent(jButtonBrowseCipherOutput)
+                            .addComponent(jTextFieldCipherOutputDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldCipherOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jCheckBoxCustomCipher)
+                            .addComponent(jLabel69)))
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel47)
+                            .addComponent(jTextFieldCipherFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonBrowseCipherFile))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel70)
+                            .addComponent(jComboBoxCipherCert, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(35, Short.MAX_VALUE))
+            .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel13Layout.createSequentialGroup()
+                    .addGap(87, 87, 87)
+                    .addComponent(jButtonCipher)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         jPanel15.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Déchiffrer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -3306,18 +3420,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         }        // TODO add your handling code here:
     }//GEN-LAST:event_jButtonBrowseSignFileActionPerformed
 
-    private void jButtonBrowseSignPkFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseSignPkFileActionPerformed
-        int retour = jFileChooserFileOnly.showOpenDialog(this);
-        if (retour == JFileChooser.APPROVE_OPTION) {
-            // un fichier a été choisi (sortie par OK)
-            // nom du fichier  choisi
-            //            jFileChooser1.getSelectedFile().getName();
-            // chemin absolu du fichier choisi
-            jTextFieldSignPkFile.setText(jFileChooserFileOnly.getSelectedFile().
-                    getAbsolutePath());
-        }        // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonBrowseSignPkFileActionPerformed
-
     private void jComboBoxAlgoSignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxAlgoSignActionPerformed
 
     }//GEN-LAST:event_jComboBoxAlgoSignActionPerformed
@@ -3325,7 +3427,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private void jButtonSignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSignActionPerformed
         CryptoGenerator cg = new CryptoGenerator();
         String algo = String.valueOf(jComboBoxAlgoSign.getSelectedItem());
-        String outRet = cg.signFile(jTextFieldSignFile.getText(), jTextFieldSignPkFile.getText(), jTextFieldSignPkPassword.getText(), jTextFieldSignOutputDirectory.getText(), jTextFieldSignOutputFilename.getText(), algo, jTextFieldSignSignerCert.getText());
+        String outRet = cg.signFile(jTextFieldSignFile.getText(), (String) jComboBoxSignPK.getSelectedItem(), jTextFieldSignPkPassword.getText(), jTextFieldSignOutputDirectory.getText(), jTextFieldSignOutputFilename.getText(), algo, (String) jComboBoxSignSignerCert.getSelectedItem());
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonSignActionPerformed
 
@@ -3365,18 +3467,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private void jTextFieldSignFileInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jTextFieldSignFileInputMethodTextChanged
 
     }//GEN-LAST:event_jTextFieldSignFileInputMethodTextChanged
-
-    private void jButtonBrowseSignSignerCertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseSignSignerCertActionPerformed
-        int retour = jFileChooserFileOnly.showOpenDialog(this);
-        if (retour == JFileChooser.APPROVE_OPTION) {
-            // un fichier a été choisi (sortie par OK)
-            // nom du fichier  choisi
-            //            jFileChooser1.getSelectedFile().getName();
-            // chemin absolu du fichier choisi
-            jTextFieldSignSignerCert.setText(jFileChooserFileOnly.getSelectedFile().
-                    getAbsolutePath());
-        }        // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonBrowseSignSignerCertActionPerformed
 
     private void jButtonDashAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAboutActionPerformed
         jFrameAbout.setDefaultCloseOperation(jFrameAbout.EXIT_ON_CLOSE);
@@ -3569,6 +3659,36 @@ public class EnigmaIHM extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBoxACActionPerformed
 
+    private void jTextFieldCipherFileInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jTextFieldCipherFileInputMethodTextChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldCipherFileInputMethodTextChanged
+
+    private void jTextFieldCipherFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldCipherFileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldCipherFileActionPerformed
+
+    private void jButtonBrowseCipherFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseCipherFileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseCipherFileActionPerformed
+
+    private void jButtonCipherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCipherActionPerformed
+    CryptoGenerator cg = new CryptoGenerator();
+        String outRet = cg.cipherFile(jTextFieldCipherFile.getText(), (String) jComboBoxCipherCert.getSelectedItem(),  jTextFieldCipherOutputDirectory.getText(), jTextFieldCipherOutputFilename.getText(), (String) jComboBoxAlgoCipher.getSelectedItem());
+        ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+    }//GEN-LAST:event_jButtonCipherActionPerformed
+
+    private void jComboBoxAlgoCipherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxAlgoCipherActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxAlgoCipherActionPerformed
+
+    private void jButtonBrowseCipherOutputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseCipherOutputActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseCipherOutputActionPerformed
+
+    private void jCheckBoxCustomCipherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxCustomCipherActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jCheckBoxCustomCipherActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -3631,6 +3751,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonBrowseCertPk;
     private javax.swing.JButton jButtonBrowseCertPub;
     private javax.swing.JButton jButtonBrowseCertTargetDir;
+    private javax.swing.JButton jButtonBrowseCipherFile;
+    private javax.swing.JButton jButtonBrowseCipherOutput;
     private javax.swing.JButton jButtonBrowseP10Pk;
     private javax.swing.JButton jButtonBrowseP10PubK;
     private javax.swing.JButton jButtonBrowseP10TargetDir;
@@ -3638,10 +3760,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonBrowsePubPk;
     private javax.swing.JButton jButtonBrowseSignFile;
     private javax.swing.JButton jButtonBrowseSignOutput;
-    private javax.swing.JButton jButtonBrowseSignPkFile;
-    private javax.swing.JButton jButtonBrowseSignSignerCert;
     private javax.swing.JButton jButtonCSRGenerate;
     private javax.swing.JButton jButtonCertGenerate;
+    private javax.swing.JButton jButtonCipher;
     private javax.swing.JButton jButtonConvertDER;
     private javax.swing.JButton jButtonConvertPEM;
     private javax.swing.JButton jButtonConvertSourceFile;
@@ -3666,6 +3787,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonPubTargetDir;
     private javax.swing.JButton jButtonSign;
     private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JCheckBox jCheckBoxCustomCipher;
     private javax.swing.JCheckBox jCheckBoxP10PubKey;
     private javax.swing.JCheckBox jCheckBoxP12Certainty;
     private javax.swing.JCheckBox jCheckBoxP12Expo;
@@ -3673,6 +3795,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBoxPkCertainty;
     private javax.swing.JCheckBox jCheckBoxPkExpo;
     private javax.swing.JComboBox<String> jComboBoxAC;
+    private javax.swing.JComboBox<String> jComboBoxAlgoCipher;
     private javax.swing.JComboBox<String> jComboBoxAlgoP12;
     private javax.swing.JComboBox<String> jComboBoxAlgoPk;
     private javax.swing.JComboBox<String> jComboBoxAlgoSign;
@@ -3682,6 +3805,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> jComboBoxCertPk;
     private javax.swing.JComboBox<String> jComboBoxCertPubK;
     private javax.swing.JComboBox<String> jComboBoxCertVersion;
+    private javax.swing.JComboBox<String> jComboBoxCipherCert;
     private javax.swing.JComboBox<String> jComboBoxPubPK;
     private javax.swing.JComboBox<String> jComboBoxSignPK;
     private javax.swing.JComboBox<String> jComboBoxSignSignerCert;
@@ -3759,7 +3883,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel65;
     private javax.swing.JLabel jLabel66;
     private javax.swing.JLabel jLabel67;
+    private javax.swing.JLabel jLabel68;
+    private javax.swing.JLabel jLabel69;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel70;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JList<String> jListEvents;
@@ -3829,6 +3956,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldCertPkPw;
     private javax.swing.JTextField jTextFieldCertTargetDirectory;
     private javax.swing.JTextField jTextFieldCertTargetFilename;
+    private javax.swing.JTextField jTextFieldCipherFile;
+    private javax.swing.JTextField jTextFieldCipherOutputDirectory;
+    private javax.swing.JTextField jTextFieldCipherOutputFilename;
     private javax.swing.JTextField jTextFieldConvertSourceFile;
     private javax.swing.JTextField jTextFieldDirectory;
     private javax.swing.JTextField jTextFieldDrop;
@@ -3855,9 +3985,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldSignFile;
     private javax.swing.JTextField jTextFieldSignOutputDirectory;
     private javax.swing.JTextField jTextFieldSignOutputFilename;
-    private javax.swing.JTextField jTextFieldSignPkFile;
     private javax.swing.JTextField jTextFieldSignPkPassword;
-    private javax.swing.JTextField jTextFieldSignSignerCert;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private org.netbeans.swing.outline.Outline outline;

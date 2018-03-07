@@ -896,7 +896,7 @@ public class CryptoGenerator {
         return output;
     }
 
-    public static String generatePKCS12(int size, String CN, String p12Password, String keyPassword, String directory, String publicExponent, int certainty, Date expiryDate, String targetFilename, boolean writeCrtPk) {
+    public static String generatePKCS12(int size, String CN, String p12Password, String keyPassword, String directory, String publicExponent, int certainty, Date expiryDate, String targetFilename, boolean writeCrtPk, String issuer) {
         String returnString = "OK";
         AsymmetricCipherKeyPair pair = createRSAKey(size, publicExponent, certainty);
         AsymmetricKeyParameter privateKey = pair.getPrivate();
@@ -1621,13 +1621,19 @@ public class CryptoGenerator {
         return signer.sign();
     }
 
-    public String signFile(String targetFile, String privateKey, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm, String signerCertificate) {
+    public String signFile(String targetFile, String privateKeyFilename, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm, String signerCertificate) {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         try {
+            Integer idPrivateKey = getKeyIDFromComboBox(privateKeyFilename);
+            Integer idCert = getKeyIDFromComboBox(signerCertificate);
+            InputStream is = CryptoDAO.getKeyFromDB(idPrivateKey);
+            PrivateKey pk = getPrivateKey(is, privateKeyPassword);
+            InputStream isc = CryptoDAO.getCertFromDB(idCert);
+            Certificate certificate = getCertificate(isc);
+
             Path path = Paths.get(targetFile);
             byte[] data = Files.readAllBytes(path);
-            PrivateKey pk = getPrivateKey(privateKey, privateKeyPassword);
-            Certificate certificate = getCertificate(signerCertificate);
+
             X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());
 
             List certList = new ArrayList();
@@ -2006,7 +2012,6 @@ public class CryptoGenerator {
 //
 //        return null;
 //    }
-
     public X509CRLHolder getCRL(InputStream targetStream) {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -2028,5 +2033,9 @@ public class CryptoGenerator {
             ex.printStackTrace();
         }
         return null;
+    }
+//(jTextFieldCipherFile.getText(), (String) jComboBoxCipherCert.getSelectedItem(),  jTextFieldCipherOutputDirectory.getText(), jTextFieldCipherOutputFilename.getText(), (String) jComboBoxAlgoCipher.getSelectedItem());
+    public String cipherFile(String cipherFile, String cipherCert, String outputDirectory, String outputFilename, String algoCipher) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

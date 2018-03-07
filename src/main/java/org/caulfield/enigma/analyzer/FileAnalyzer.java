@@ -100,7 +100,7 @@ public class FileAnalyzer {
             b = pgpm.detectPGP(ff);
         } catch (NoSuchProviderException | SignatureException | PGPException ex) {
             Logger.getLogger(FileAnalyzer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ioException) {
+        } catch (Exception ioException) {
             Logger.getLogger(FileAnalyzer.class.getName()).log(Level.SEVERE, null, ioException);
         }
         return (b ? "PGP file detected !" : "Not a PGP file");

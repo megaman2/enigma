@@ -40,8 +40,36 @@ import org.caulfield.enigma.stream.StreamManager;
  */
 public class CertificateChainManager {
 
+    public Iterable<String> getFullCertList() {
+        ArrayList<String> list = new ArrayList<String>();
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            ResultSet set = sql.runQuery("select ID_CERT, CERTNAME from CERTIFICATES ");
+            while (set.next()) {
+                list.add(set.getString("ID_CERT") + ". " + set.getString("CERTNAME"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+
     public Iterable<String> getFullACList() {
-        return new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<String>();
+        HSQLLoader sql = new HSQLLoader();
+        try {
+            ResultSet set = sql.runQuery("select ID_CERT, CERTNAME from CERTIFICATES WHERE CERTTYPE in (1,2)");
+            while (set.next()) {
+                list.add(set.getString("ID_CERT") + ". " + set.getString("CERTNAME"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(CertificateChainManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
     }
 
     public String matchKeysAndCerts() {
@@ -146,7 +174,7 @@ public class CertificateChainManager {
                 BigInteger affectedSerial = caEnigCert.getAcserialcursor();
                 System.out.println("SERIAL AFFECTED TO USER CERTIFICATE : " + affectedSerial.intValue());
                 certID = CryptoDAO.insertCertInDB(certStream, "USER_" + certName, subject, hc.getStringChecksum(certStream2, HashCalculator.SHA256), algo, (int) (long) privKeyID, thumbPrint, idParentCert, 3, cert.getNotAfter(), affectedSerial, BigInteger.ONE, null);
-                        // Update the parent AC Serial Cursor as we used the affected one
+                // Update the parent AC Serial Cursor as we used the affected one
                 CryptoDAO.updateACSerialCursorAndDate(caEnigCert.getId_cert(), affectedSerial);
             }
 
