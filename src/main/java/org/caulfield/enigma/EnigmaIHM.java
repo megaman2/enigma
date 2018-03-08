@@ -189,7 +189,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
         // Fill Cipher Algo Combobox
-             try {
+        try {
             HSQLLoader database = new HSQLLoader();
             ResultSet f = database.runQuery("select ALGONAME from ALGO WHERE TYPE='CIPHER'");
             while (f.next()) {
@@ -199,7 +199,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     private void buildPopupMenuX509() {
@@ -3672,8 +3672,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonBrowseCipherFileActionPerformed
 
     private void jButtonCipherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCipherActionPerformed
-    CryptoGenerator cg = new CryptoGenerator();
-        String outRet = cg.cipherFile(jTextFieldCipherFile.getText(), (String) jComboBoxCipherCert.getSelectedItem(),  jTextFieldCipherOutputDirectory.getText(), jTextFieldCipherOutputFilename.getText(), (String) jComboBoxAlgoCipher.getSelectedItem());
+        CryptoGenerator cg = new CryptoGenerator();
+        String outRet = cg.cipherFile(jTextFieldCipherFile.getText(), (String) jComboBoxCipherCert.getSelectedItem(), jTextFieldCipherOutputDirectory.getText(), jTextFieldCipherOutputFilename.getText(), (String) jComboBoxAlgoCipher.getSelectedItem());
         ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
     }//GEN-LAST:event_jButtonCipherActionPerformed
 
