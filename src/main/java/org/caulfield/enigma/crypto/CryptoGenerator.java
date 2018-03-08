@@ -2040,7 +2040,7 @@ public class CryptoGenerator {
     public String cipherFile(String cipherFile, String cipherCert, String outputDirectory, String outputFilename, String algoCipher) {
         try {
             Cipher cipher = Cipher.getInstance(algoCipher, "BC");
-            
+            //cipher.init(0, crtfct);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchProviderException ex) {
