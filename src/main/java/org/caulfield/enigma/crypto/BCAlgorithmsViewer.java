@@ -21,7 +21,7 @@ public class BCAlgorithmsViewer {
         for (Provider.Service s : p.getServices()) {
             if (s.getType().equals("Cipher")) {
                 System.out.println(s.getAlgorithm());
-                System.out.println("\t" + s.getType() + " " + s.getAlgorithm() + " " + s.toString());
+                //System.out.println( "++++++++++++ " + s.toString());     
             }
         }
     }
