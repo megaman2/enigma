@@ -117,6 +117,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
             jComboBoxSignSignerCert.addItem(AC);
         }
 
+        jTextFieldGlobalOutput.setText(System.getProperty("user.dir") + "\\");
+
         jComboBoxAC.addItem("None");
         for (String AC : acm.getFullACList()) {
             jComboBoxAC.addItem(AC);
@@ -135,6 +137,24 @@ public class EnigmaIHM extends javax.swing.JFrame {
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent de) {
                 jTextFieldSignOutputFilename.setText(getFileName(jTextFieldSignFile.getText()) + ".sig");
+            }
+
+        });
+
+        jTextFieldCipherFile.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent de) {
+                jTextFieldCipherOutputFilename.setText(getFileName(jTextFieldCipherFile.getText()) + ".enc");
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent de) {
+                jTextFieldCipherOutputFilename.setText(getFileName(jTextFieldCipherFile.getText()) + ".enc");
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent de) {
+                jTextFieldCipherOutputFilename.setText(getFileName(jTextFieldCipherFile.getText()) + ".enc");
             }
 
         });
@@ -730,17 +750,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jButtonBrowseP10PubK = new javax.swing.JButton();
         jPanel14 = new javax.swing.JPanel();
         jLabel57 = new javax.swing.JLabel();
-        jPanelAnalyze = new javax.swing.JPanel();
-        jLabel7 = new javax.swing.JLabel();
-        jTextFieldDrop = new javax.swing.JTextField();
-        jButton7 = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jEditorPaneIdentifierResults = new javax.swing.JEditorPane();
-        jLabel8 = new javax.swing.JLabel();
-        jPanel12 = new javax.swing.JPanel();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jTextAreaDrop = new javax.swing.JTextArea();
-        jButton8 = new javax.swing.JButton();
         jPanelTransform = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel9 = new javax.swing.JPanel();
@@ -775,6 +784,17 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jPanel15 = new javax.swing.JPanel();
         jPanel16 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
+        jPanelAnalyze = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        jTextFieldDrop = new javax.swing.JTextField();
+        jButton7 = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jEditorPaneIdentifierResults = new javax.swing.JEditorPane();
+        jLabel8 = new javax.swing.JLabel();
+        jPanel12 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTextAreaDrop = new javax.swing.JTextArea();
+        jButton8 = new javax.swing.JButton();
         jPanel17 = new javax.swing.JPanel();
         jPanel18 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -1838,9 +1858,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGap(73, 73, 73)
                                 .addComponent(jTextFieldPkTargetKeyName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel59)
-                                .addGap(168, 168, 168)))
+                            .addComponent(jLabel59))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -1850,12 +1868,13 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(jSpinnerKeySizePkSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel59)
-                                .addComponent(jTextFieldPkTargetKeyName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jTextFieldPkTargetKeyName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel12)
+                                .addComponent(jSpinnerKeySizePkSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(5, 5, 5)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel15)
@@ -2244,14 +2263,15 @@ public class EnigmaIHM extends javax.swing.JFrame {
                         .addComponent(jTextFieldP10TargetFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel37)))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel32)
-                    .addComponent(jComboBoxCSRPk, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonBrowseP10Pk)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jCheckBoxP10PubKey)
                         .addComponent(jComboBoxCSRPubK, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButtonBrowseP10PubK)))
+                        .addComponent(jButtonBrowseP10PubK))
+                    .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel32)
+                        .addComponent(jComboBoxCSRPk, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonBrowseP10Pk)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldP10PkPw, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2313,98 +2333,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jTabbedPaneScreens.addTab("Générer", jTabbedPaneGenerate);
 
-        jLabel7.setText("Target file : ");
-
-        jButton7.setText("Browse...");
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
-            }
-        });
-
-        jEditorPaneIdentifierResults.setEditable(false);
-        jEditorPaneIdentifierResults.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jScrollPane3.setViewportView(jEditorPaneIdentifierResults);
-
-        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel8.setText("Results :");
-
-        jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Drag & Drop Zone : ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-        jPanel12.setName(""); // NOI18N
-
-        jTextAreaDrop.setBackground(javax.swing.UIManager.getDefaults().getColor("Panel.background"));
-        jTextAreaDrop.setColumns(20);
-        jTextAreaDrop.setRows(5);
-        jTextAreaDrop.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jTextAreaDrop.setFocusable(false);
-        jScrollPane4.setViewportView(jTextAreaDrop);
-
-        javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
-        jPanel12.setLayout(jPanel12Layout);
-        jPanel12Layout.setHorizontalGroup(
-            jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
-        );
-        jPanel12Layout.setVerticalGroup(
-            jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
-        );
-
-        jButton8.setBackground(new java.awt.Color(107, 184, 11));
-        jButton8.setForeground(new java.awt.Color(255, 255, 255));
-        jButton8.setText("Start Analysis");
-        jButton8.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton8ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanelAnalyzeLayout = new javax.swing.GroupLayout(jPanelAnalyze);
-        jPanelAnalyze.setLayout(jPanelAnalyzeLayout);
-        jPanelAnalyzeLayout.setHorizontalGroup(
-            jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 1432, Short.MAX_VALUE)
-            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
-                .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel8))
-                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
-                        .addGap(618, 618, 618)
-                        .addComponent(jButton8))
-                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
-                        .addGap(427, 427, 427)
-                        .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(jLabel7)
-                                .addGap(18, 18, 18)
-                                .addComponent(jTextFieldDrop, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton7))
-                            .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanelAnalyzeLayout.setVerticalGroup(
-            jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(jTextFieldDrop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton7))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton8)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
-        );
-
-        jTabbedPaneScreens.addTab("Analyser", jPanelAnalyze);
-
         jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Signer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
         jPanel11.setMaximumSize(new java.awt.Dimension(1427, 149));
         jPanel11.setMinimumSize(new java.awt.Dimension(1427, 149));
@@ -2465,6 +2393,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel44.setText("Output Filename : ");
 
         jTextFieldSignOutputFilename.setEnabled(false);
+        jTextFieldSignOutputFilename.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldSignOutputFilenameActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
@@ -2743,6 +2676,98 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jTabbedPaneScreens.addTab("Transformer", jPanelTransform);
 
+        jLabel7.setText("Target file : ");
+
+        jButton7.setText("Browse...");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        jEditorPaneIdentifierResults.setEditable(false);
+        jEditorPaneIdentifierResults.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jScrollPane3.setViewportView(jEditorPaneIdentifierResults);
+
+        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel8.setText("Results :");
+
+        jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Drag & Drop Zone : ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        jPanel12.setName(""); // NOI18N
+
+        jTextAreaDrop.setBackground(javax.swing.UIManager.getDefaults().getColor("Panel.background"));
+        jTextAreaDrop.setColumns(20);
+        jTextAreaDrop.setRows(5);
+        jTextAreaDrop.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jTextAreaDrop.setFocusable(false);
+        jScrollPane4.setViewportView(jTextAreaDrop);
+
+        javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
+        jPanel12.setLayout(jPanel12Layout);
+        jPanel12Layout.setHorizontalGroup(
+            jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
+        );
+        jPanel12Layout.setVerticalGroup(
+            jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
+        );
+
+        jButton8.setBackground(new java.awt.Color(107, 184, 11));
+        jButton8.setForeground(new java.awt.Color(255, 255, 255));
+        jButton8.setText("Start Analysis");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanelAnalyzeLayout = new javax.swing.GroupLayout(jPanelAnalyze);
+        jPanelAnalyze.setLayout(jPanelAnalyzeLayout);
+        jPanelAnalyzeLayout.setHorizontalGroup(
+            jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 1432, Short.MAX_VALUE)
+            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel8))
+                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                        .addGap(618, 618, 618)
+                        .addComponent(jButton8))
+                    .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                        .addGap(427, 427, 427)
+                        .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                                .addGap(8, 8, 8)
+                                .addComponent(jLabel7)
+                                .addGap(18, 18, 18)
+                                .addComponent(jTextFieldDrop, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton7))
+                            .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanelAnalyzeLayout.setVerticalGroup(
+            jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelAnalyzeLayout.createSequentialGroup()
+                .addGap(31, 31, 31)
+                .addGroup(jPanelAnalyzeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jTextFieldDrop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton8)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
+        );
+
+        jTabbedPaneScreens.addTab("Analyser", jPanelAnalyze);
+
         jPanel18.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Base64 Encode/Decode", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         jTextAreaOriginalData.setColumns(20);
@@ -2963,6 +2988,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
+        jTextFieldGlobalOutput.setMargin(new java.awt.Insets(1, 5, 1, 1));
+
         jLabel38.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel38.setText("Global Output Directory :");
 
@@ -3069,10 +3096,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.PREFERRED_SIZE, 693, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel38)
-                    .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel38))
+                    .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelEvents, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0))
@@ -3509,7 +3537,13 @@ public class EnigmaIHM extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBoxAlgoCipherActionPerformed
 
     private void jCheckBoxCustomCipherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxCustomCipherActionPerformed
-        // TODO add your handling code here:
+        JCheckBox cbLog = (JCheckBox) evt.getSource();
+        if (cbLog.isSelected()) {
+            jTextFieldCipherOutputFilename.setEnabled(true);
+        } else {
+            jTextFieldCipherOutputFilename.setEnabled(false);
+            jTextFieldCipherOutputFilename.setText(getFileName(jTextFieldCipherFile.getText()) + ".sig");
+        }
     }//GEN-LAST:event_jCheckBoxCustomCipherActionPerformed
 
     private void jButtonBrowseGlobalOutputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseGlobalOutputActionPerformed
@@ -3523,6 +3557,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
                     getAbsolutePath() + "\\");
         }
     }//GEN-LAST:event_jButtonBrowseGlobalOutputActionPerformed
+
+    private void jTextFieldSignOutputFilenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldSignOutputFilenameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldSignOutputFilenameActionPerformed
 
     /**
      * @param args the command line arguments

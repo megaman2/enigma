@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -63,6 +64,7 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.OAEPParameterSpec;
 
 import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.DatatypeConverter;
@@ -93,12 +95,17 @@ import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSTypedData;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
@@ -133,6 +140,7 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaAlgorithmParametersConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -2037,17 +2045,51 @@ public class CryptoGenerator {
         return null;
     }
 //(jTextFieldCipherFile.getText(), (String) jComboBoxCipherCert.getSelectedItem(),  jTextFieldCipherOutputDirectory.getText(), jTextFieldCipherOutputFilename.getText(), (String) jComboBoxAlgoCipher.getSelectedItem());
-    public String cipherFile(String cipherFile, String cipherCert, String outputDirectory, String outputFilename, String algoCipher) {
+
+    public String cipherFile(String targetFile, String cipherCert, String targetDirectory, String outputFilename, String algorithm) {
+
+        //     Cipher cipher = Cipher.getInstance(algoCipher, "BC");
+        Security.addProvider(new BouncyCastleProvider());
         try {
-            Cipher cipher = Cipher.getInstance(algoCipher, "BC");
-            //cipher.init(0, crtfct);
-        } catch (NoSuchAlgorithmException ex) {
+            Integer idCert = getKeyIDFromComboBox(cipherCert);
+            InputStream isc = CryptoDAO.getCertFromDB(idCert);
+            Certificate certificate = getCertificate(isc);
+
+            Path path = Paths.get(targetFile);
+            byte[] data = Files.readAllBytes(path);
+
+            X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());
+            X509Certificate x509cert = new JcaX509CertificateConverter().getCertificate(certificateHolder);
+
+            CMSEnvelopedDataGenerator envelopedGen = new CMSEnvelopedDataGenerator();
+            envelopedGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(x509cert));
+
+            CMSEnvelopedData cypheredData = envelopedGen.generate(new CMSProcessableByteArray(data), new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).build());
+            ContentInfo outDatas = cypheredData.toASN1Structure();
+            
+            final File cihperedFile = new File(targetDirectory + outputFilename);
+            final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
+                    new FileWriter(cihperedFile));
+            publicPemWriter.writeObject(outDatas);
+            publicPemWriter.flush();
+            publicPemWriter.close();
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.cipherFile()" + cypheredData);
+
+            return "File " + outputFilename + " successfuly cyphered.";
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
+
+        } catch (IOException | CMSException | CertificateEncodingException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
+        } catch (CertificateException ex) {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchProviderException ex) {
-            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchPaddingException ex) {
-            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
         }
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 }
