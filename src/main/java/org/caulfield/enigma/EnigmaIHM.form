@@ -879,7 +879,7 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="4" max="32767" attributes="0"/>
               <Component id="jTabbedPaneScreens" max="-2" attributes="0"/>
           </Group>
           <Component id="jPanelEvents" alignment="1" max="32767" attributes="0"/>
@@ -887,9 +887,11 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jLabel38" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTextFieldGlobalOutput" min="-2" pref="1068" max="-2" attributes="0"/>
+              <Component id="jTextFieldGlobalOutput" min="-2" pref="1000" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jButtonBrowseGlobalOutput" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jButtonBrowseGlobalOutput1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -899,12 +901,11 @@
           <Group type="102" alignment="1" attributes="0">
               <Component id="jTabbedPaneScreens" min="-2" pref="693" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                      <Component id="jTextFieldGlobalOutput" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
-                      <Component id="jLabel38" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Component id="jButtonBrowseGlobalOutput" alignment="1" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jTextFieldGlobalOutput" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                  <Component id="jLabel38" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jButtonBrowseGlobalOutput" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                  <Component id="jButtonBrowseGlobalOutput1" alignment="1" pref="31" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanelEvents" min="-2" max="-2" attributes="0"/>
@@ -1726,6 +1727,9 @@
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
                         </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/gears.png"/>
+                        </Property>
                         <Property name="text" type="java.lang.String" value="G&#xe9;n&#xe9;rer un keystore (PKCS#12)"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
@@ -1908,6 +1912,9 @@
                         </Property>
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/gears.png"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="G&#xe9;n&#xe9;rer une clef priv&#xe9;e (PKCS#8)"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -2178,6 +2185,9 @@
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
                         </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/gears.png"/>
+                        </Property>
                         <Property name="text" type="java.lang.String" value="G&#xe9;n&#xe9;rer un certificat"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
@@ -2412,6 +2422,9 @@
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
                         </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/gears.png"/>
+                        </Property>
                         <Property name="text" type="java.lang.String" value="G&#xe9;n&#xe9;rer une clef publique "/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
@@ -2583,7 +2596,7 @@
                                   <Component id="jTextFieldP10PkPw" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="jLabel34" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="19" max="32767" attributes="0"/>
+                              <EmptySpace pref="17" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
                               <EmptySpace max="32767" attributes="0"/>
@@ -2601,6 +2614,9 @@
                         </Property>
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/gears.png"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="G&#xe9;n&#xe9;rer un CSR (PKCS#10)"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -2757,7 +2773,7 @@
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="675" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="677" max="32767" attributes="0"/>
                   <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                       <Component id="jTabbedPane1" alignment="0" max="32767" attributes="0"/>
                   </Group>
@@ -2981,6 +2997,9 @@
                             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                               <Color blue="ff" green="ff" red="ff" type="rgb"/>
                             </Property>
+                            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/sign.png"/>
+                            </Property>
                             <Property name="text" type="java.lang.String" value="Sign File"/>
                           </Properties>
                           <Events>
@@ -3117,7 +3136,7 @@
                                           </Group>
                                       </Group>
                                   </Group>
-                                  <EmptySpace pref="37" max="32767" attributes="0"/>
+                                  <EmptySpace pref="39" max="32767" attributes="0"/>
                               </Group>
                               <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
@@ -3156,6 +3175,9 @@
                             </Property>
                             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                               <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                            </Property>
+                            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/keypub.png"/>
                             </Property>
                             <Property name="text" type="java.lang.String" value="Cipher File"/>
                           </Properties>
@@ -3850,10 +3872,30 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
         </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/look.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Parcourir..."/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonBrowseGlobalOutputActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="jButtonBrowseGlobalOutput1">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="68" green="86" red="d2" type="rgb"/>
+        </Property>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="ff" red="ff" type="rgb"/>
+        </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/directory.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Open Explorer"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonBrowseGlobalOutput1ActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

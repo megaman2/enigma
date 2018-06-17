@@ -68,6 +68,7 @@ import javax.crypto.spec.OAEPParameterSpec;
 
 import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.DatatypeConverter;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 
 import org.bouncycastle.asn1.DERBMPString;
@@ -2063,10 +2064,36 @@ public class CryptoGenerator {
 
             CMSEnvelopedDataGenerator envelopedGen = new CMSEnvelopedDataGenerator();
             envelopedGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(x509cert));
+            ASN1ObjectIdentifier algo = null;
+            if (algorithm.equals("AES128_CBC")) {
+                algo = CMSAlgorithm.AES128_CBC;
+            } else if (algorithm.equals("AES192_CBC")) {
+                algo = CMSAlgorithm.AES192_CBC;
+            } else if (algorithm.equals("AES256_CBC")) {
+                algo = CMSAlgorithm.AES256_CBC;
+            } else if (algorithm.equals("CAMELLIA128_CBC")) {
+                algo = CMSAlgorithm.CAMELLIA128_CBC;
+            } else if (algorithm.equals("CAMELLIA192_CBC")) {
+                algo = CMSAlgorithm.CAMELLIA192_CBC;
+            } else if (algorithm.equals("CAMELLIA256_CBC")) {
+                algo = CMSAlgorithm.CAMELLIA256_CBC;
+            } else if (algorithm.equals("CAST5_CBC")) {
+                algo = CMSAlgorithm.CAST5_CBC;
+            } else if (algorithm.equals("DES_CBC")) {
+                algo = CMSAlgorithm.DES_CBC;
+            } else if (algorithm.equals("DES_EDE3_CBC")) {
+                algo = CMSAlgorithm.DES_EDE3_CBC;
+            } else if (algorithm.equals("IDEA_CBC")) {
+                algo = CMSAlgorithm.IDEA_CBC;
+            } else if (algorithm.equals("RC2_CBC")) {
+                algo = CMSAlgorithm.RC2_CBC;
+            } else if (algorithm.equals("SEED_CBC")) {
+                algo = CMSAlgorithm.SEED_CBC;
+            }
 
-            CMSEnvelopedData cypheredData = envelopedGen.generate(new CMSProcessableByteArray(data), new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).build());
+            CMSEnvelopedData cypheredData = envelopedGen.generate(new CMSProcessableByteArray(data), new JceCMSContentEncryptorBuilder(algo).build());
             ContentInfo outDatas = cypheredData.toASN1Structure();
-            
+
             final File cihperedFile = new File(targetDirectory + outputFilename);
             final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
                     new FileWriter(cihperedFile));

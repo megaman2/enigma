@@ -821,6 +821,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jTextFieldGlobalOutput = new javax.swing.JTextField();
         jLabel38 = new javax.swing.JLabel();
         jButtonBrowseGlobalOutput = new javax.swing.JButton();
+        jButtonBrowseGlobalOutput1 = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -1613,6 +1614,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonPKCS12Generate.setBackground(new java.awt.Color(153, 153, 255));
         jButtonPKCS12Generate.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonPKCS12Generate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gears.png"))); // NOI18N
         jButtonPKCS12Generate.setText("Générer un keystore (PKCS#12)");
         jButtonPKCS12Generate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonPKCS12Generate.addActionListener(new java.awt.event.ActionListener() {
@@ -1749,6 +1751,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonPkGenerate.setBackground(new java.awt.Color(255, 102, 102));
         jButtonPkGenerate.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonPkGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gears.png"))); // NOI18N
         jButtonPkGenerate.setText("Générer une clef privée (PKCS#8)");
         jButtonPkGenerate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonPkGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -1906,6 +1909,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonCertGenerate.setBackground(new java.awt.Color(50, 219, 35));
         jButtonCertGenerate.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonCertGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gears.png"))); // NOI18N
         jButtonCertGenerate.setText("Générer un certificat");
         jButtonCertGenerate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonCertGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -2069,6 +2073,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonPubGenerate.setBackground(new java.awt.Color(102, 204, 255));
         jButtonPubGenerate.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonPubGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gears.png"))); // NOI18N
         jButtonPubGenerate.setText("Générer une clef publique ");
         jButtonPubGenerate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonPubGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -2162,6 +2167,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonCSRGenerate.setBackground(new java.awt.Color(255, 153, 51));
         jButtonCSRGenerate.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonCSRGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gears.png"))); // NOI18N
         jButtonCSRGenerate.setText("Générer un CSR (PKCS#10)");
         jButtonCSRGenerate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonCSRGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -2276,7 +2282,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldP10PkPw, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel34))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonCSRGenerate)
@@ -2372,6 +2378,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonSign.setBackground(new java.awt.Color(107, 94, 242));
         jButtonSign.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonSign.setIcon(new javax.swing.ImageIcon(getClass().getResource("/sign.png"))); // NOI18N
         jButtonSign.setText("Sign File");
         jButtonSign.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2502,6 +2509,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonCipher.setBackground(new java.awt.Color(0, 153, 255));
         jButtonCipher.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonCipher.setIcon(new javax.swing.ImageIcon(getClass().getResource("/keypub.png"))); // NOI18N
         jButtonCipher.setText("Cipher File");
         jButtonCipher.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2588,7 +2596,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                         .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel70)
                             .addComponent(jComboBoxCipherCert, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
             .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel13Layout.createSequentialGroup()
                     .addGap(87, 87, 87)
@@ -2669,7 +2677,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         );
         jPanelTransformLayout.setVerticalGroup(
             jPanelTransformLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 675, Short.MAX_VALUE)
+            .addGap(0, 677, Short.MAX_VALUE)
             .addGroup(jPanelTransformLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(jTabbedPane1))
         );
@@ -2995,10 +3003,21 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonBrowseGlobalOutput.setBackground(new java.awt.Color(102, 204, 0));
         jButtonBrowseGlobalOutput.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonBrowseGlobalOutput.setIcon(new javax.swing.ImageIcon(getClass().getResource("/look.png"))); // NOI18N
         jButtonBrowseGlobalOutput.setText("Parcourir...");
         jButtonBrowseGlobalOutput.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonBrowseGlobalOutputActionPerformed(evt);
+            }
+        });
+
+        jButtonBrowseGlobalOutput1.setBackground(new java.awt.Color(210, 134, 104));
+        jButtonBrowseGlobalOutput1.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonBrowseGlobalOutput1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/directory.png"))); // NOI18N
+        jButtonBrowseGlobalOutput1.setText("Open Explorer");
+        jButtonBrowseGlobalOutput1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseGlobalOutput1ActionPerformed(evt);
             }
         });
 
@@ -3079,16 +3098,18 @@ public class EnigmaIHM extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 4, Short.MAX_VALUE)
                 .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addComponent(jPanelEvents, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel38)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 1068, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 1000, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonBrowseGlobalOutput1)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -3096,11 +3117,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.PREFERRED_SIZE, 693, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel38))
-                    .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel38)
+                    .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBrowseGlobalOutput1, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelEvents, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0))
@@ -3562,6 +3583,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextFieldSignOutputFilenameActionPerformed
 
+    private void jButtonBrowseGlobalOutput1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseGlobalOutput1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseGlobalOutput1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -3624,6 +3649,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonBrowseCertPub;
     private javax.swing.JButton jButtonBrowseCipherFile;
     private javax.swing.JButton jButtonBrowseGlobalOutput;
+    private javax.swing.JButton jButtonBrowseGlobalOutput1;
     private javax.swing.JButton jButtonBrowseP10Pk;
     private javax.swing.JButton jButtonBrowseP10PubK;
     private javax.swing.JButton jButtonBrowsePubPk;
