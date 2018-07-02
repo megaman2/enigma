@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -56,15 +55,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
 
 import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.DatatypeConverter;
@@ -100,11 +98,16 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -141,7 +144,6 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaAlgorithmParametersConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -1631,26 +1633,42 @@ public class CryptoGenerator {
         signer.update(data);
         return signer.sign();
     }
+    public CMSSignedData testCMSAlgorithmProtection(CMSTypedData        msg, PrivateKey pk, X509Certificate _origCert, X509Certificate _signCert, String algorithm)
+        throws Exception
+    {
+        List                certList = new ArrayList();
+ 
+        certList.add(_origCert);
+     //   certList.add(_signCert);
 
-    public String signFile(String targetFile, String privateKeyFilename, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm, String signerCertificate) {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        try {
-            Integer idPrivateKey = getKeyIDFromComboBox(privateKeyFilename);
-            Integer idCert = getKeyIDFromComboBox(signerCertificate);
-            InputStream is = CryptoDAO.getKeyFromDB(idPrivateKey);
-            PrivateKey pk = getPrivateKey(is, privateKeyPassword);
-            InputStream isc = CryptoDAO.getCertFromDB(idCert);
-            Certificate certificate = getCertificate(isc);
+        Store           certs = new JcaCertStore(certList);
 
-            Path path = Paths.get(targetFile);
-            byte[] data = Files.readAllBytes(path);
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-            X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());
+        JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder().setProvider(new BouncyCastleProvider());
 
+        gen.addSignerInfoGenerator(builder.build(algorithm, pk, _origCert));
+
+        gen.addCertificates(certs);
+
+        CMSSignedData sigData = gen.generate(msg, true);
+
+        sigData = new CMSSignedData(sigData.getEncoded());
+
+               System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.testCMSAlgorithmProtection()"+ sigData.isDetachedSignature());
+       System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.testCMSAlgorithmProtection()"+sigData.isCertificateManagementMessage());
+        return sigData;
+    }
+    
+      public CMSSignedData testCMSAlgorithmProtection2(CMSTypedData        msg, PrivateKey pk, X509Certificate _origCert, X509Certificate _signCert, String algorithm)
+        throws Exception
+    {
+        
+            X509CertificateHolder certificateHolder = new X509CertificateHolder(_signCert.getEncoded());
             List certList = new ArrayList();
-            CMSTypedData msg = new CMSProcessableByteArray(data); //Data to sign
+            
 
-            certList.add(certificateHolder); //Adding the X509 Certificate
+                certList.add(certificateHolder); //Adding the X509 Certificate
 
             Store certs = new JcaCertStore(certList);
 
@@ -1665,18 +1683,60 @@ public class CryptoGenerator {
             //adding the certificate
             gen.addCertificates(certs);
             //Getting the signed data
-            CMSSignedData sigData = gen.generate(msg, false);
+            CMSSignedData sigData = gen.generate(msg);
+            
+        sigData = new CMSSignedData(sigData.getEncoded());
+         System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.testCMSAlgorithmProtection()"+ sigData.isDetachedSignature());
+       System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.testCMSAlgorithmProtection()"+sigData.isCertificateManagementMessage());
+        return sigData;
+          
+    }
+    public String signFile(String targetFile, String privateKeyFilename, String privateKeyPassword, String targetDirectory, String targetFileName, String algorithm, String signerCertificate) {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        try {
+            Integer idPrivateKey = getKeyIDFromComboBox(privateKeyFilename);
+            Integer idCert = getKeyIDFromComboBox(signerCertificate);
+            InputStream is = CryptoDAO.getKeyFromDB(idPrivateKey);
+            PrivateKey pk = getPrivateKey(is, privateKeyPassword);
+            InputStream isc = CryptoDAO.getCertFromDB(idCert);
+            Certificate certificate = getCertificate(isc);
+
+            Path path = Paths.get(targetFile);
+            byte[] data = Files.readAllBytes(path);
+X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());
+     X509Certificate pubCert = new JcaX509CertificateConverter()
+                    .setProvider("BC").getCertificate(certificateHolder);
+CMSTypedData msg = new CMSProcessableByteArray(data); //Data to sign
+
+CMSSignedData sigData = testCMSAlgorithmProtection(msg,pk,pubCert,pubCert,algorithm);
             //byte[] signedDatas = sigData.getEncoded();
 
-            //  Write the file 
-            ContentInfo ci = sigData.toASN1Structure();
-            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.signFile()" + ci.getContent());
-            final File signedFile = new File(targetDirectory + targetFileName);
-            final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
-                    new FileWriter(signedFile));
-            publicPemWriter.writeObject(ci);
-            publicPemWriter.flush();
-            publicPemWriter.close();
+            //  Write the file METHOD1
+//            ContentInfo ci = sigData.toASN1Structure();
+//            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.signFile()" + ci.getContent());
+//            final File signedFile = new File(targetDirectory + targetFileName);
+//            final JcaPEMWriter publicPemWriter = new JcaPEMWriter(
+//                    new FileWriter(signedFile));
+//            publicPemWriter.writeObject(ci);
+//            publicPemWriter.flush();
+//            publicPemWriter.close();
+
+// WRITE FILE METHOD 2
+    byte[] signeddata = sigData.getEncoded();
+
+            // Write signature to Fi File
+            FileOutputStream envfos = new FileOutputStream(targetDirectory + targetFileName);
+            byte[] outputString = Base64.encode(signeddata);
+            int fullLines = (int)Math.floor(outputString.length / 64);
+            for (int i = 0; i < fullLines; i++) {
+                envfos.write(outputString, i * 64, 64);
+                envfos.write("\r\n".getBytes());
+            }
+
+            envfos.write(outputString, fullLines * 64, outputString.length % 64);
+            envfos.close();
+
+
             return "File " + targetFileName + " successfuly signed.";
 
         } catch (FileNotFoundException ex) {
@@ -1687,6 +1747,9 @@ public class CryptoGenerator {
         } catch (IOException | CMSException | CertificateEncodingException | EnigmaException | OperatorCreationException ex) {
             Logger.getLogger(CryptoGenerator.class
                     .getName()).log(Level.SEVERE, null, ex);
+            return "Failed to sign file " + targetFileName + " : " + ex.getMessage();
+        } catch (Exception ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
             return "Failed to sign file " + targetFileName + " : " + ex.getMessage();
         }
     }
@@ -2117,6 +2180,211 @@ public class CryptoGenerator {
             Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
             return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
         }
+
+    }
+
+    public byte[] removeDelimiters(byte[] buffer) {
+        String pemFormated = new String(buffer);
+        String base64 = pemFormated.replaceAll("\\s", "");
+        base64 = base64.replace("-----BEGINCERTIFICATE-----", "");
+        base64 = base64.replace("-----ENDCERTIFICATE-----", "");
+        base64 = base64.replace("-----BEGINX509CERTIFICATE-----", "");
+        base64 = base64.replace("-----ENDX509CERTIFICATE-----", "");
+        base64 = base64.replace("-----BEGINPKCS7-----", "");
+        base64 = base64.replace("-----ENDPKCS7-----", "");
+        base64 = base64.replace("-----BEGINPKCS#7SIGNEDDATA-----", "");
+        base64 = base64.replace("-----ENDPKCS#7SIGNEDDATA-----", "");
+        System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.removeDelimiters() >>>>>>>>>>>>>> " + base64);
+        return base64.getBytes();
+    }
+
+    public String verifyFile(String targetFile, String verifyCert, String targetDirectory, String outputFilename, boolean tryAll) {
+
+        //     Cipher cipher = Cipher.getInstance(algoCipher, "BC");
+        Security.addProvider(new BouncyCastleProvider());
+        boolean verif = false;
+        try {
+
+            Path path = Paths.get(targetFile);
+            byte[] data = Files.readAllBytes(path);
+            data = removeDelimiters(data);
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.verifyFile() DATAS:" + new String(data));
+            // Approach No.1 to verify detached signature with encapsulated data
+            //sig is the Signature object
+            CMSSignedData signedData = new CMSSignedData(Base64.decode(data));
+            // CMSSignedData signedData = new CMSSignedData(Base64.decode(data));
+
+            // Main verify block
+            Store store = signedData.getCertificates();
+            SignerInformationStore signers = signedData.getSignerInfos();
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.verifyFile()" + signedData.getSignedContentTypeOID());
+
+            Collection c = signers.getSigners();
+            Iterator it = c.iterator();
+            byte[] dataS = null;
+            while (it.hasNext()) {
+                SignerInformation signer = (SignerInformation) it.next();
+
+                Collection certCollection = store.getMatches(signer.getSID());
+                Iterator certIt = certCollection.iterator();
+
+                X509CertificateHolder certHolder = (X509CertificateHolder) certIt.next();
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certHolder);
+                System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.verifyFile() CN:" + cert.getSubjectDN().getName());
+
+                // Si contenu encapsulé alors renvoie les données
+                CMSProcessable sc = signedData.getSignedContent();
+                if (sc != null) {
+                    dataS = (byte[]) sc.getContent();
+                }
+                // System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.verifyFile() Signed Datas : " + new String(dataS));
+
+                //get CA public key
+                // Create a X509 certificat
+                CertificateFactory certificatefactory = CertificateFactory.getInstance("X.509");
+
+                // Open the certificate file
+                //     FileInputStream fileinputstream = new FileInputStream("myCA.cert");
+                //get CA public key
+                //     PublicKey pk = certificatefactory.generateCertificate(fileinputstream).getPublicKey();
+                // cert.verify(pk);
+                System.out.println("Verfication done successfully ");
+
+                if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert))) {
+                    verif = true;
+                    return "File " + targetFile + " verified successfully.";
+                }
+            }
+        } catch (IOException | CMSException | CertificateEncodingException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
+        } catch (OperatorCreationException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+        } catch (CertificateException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+//        } catch (NoSuchAlgorithmException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InvalidKeyException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (NoSuchProviderException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SignatureException ex) {
+//            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            Path path = Paths.get(targetFile);
+            byte[] data = Files.readAllBytes(path);
+            //  data = removeDelimiters(data);
+
+            // Approach No.2 to verify detached signature without encapsulated data, just the detached signature
+            //Create a CMSProcessable object, specify any encoding, I have used mine 
+            CMSProcessable signedContent = new CMSProcessableByteArray(data);
+            //Create a InputStream object
+            InputStream is = new ByteArrayInputStream(Base64.decode(data));
+            //Pass them both to CMSSignedData constructor
+            CMSSignedData signedData2 = new CMSSignedData(signedContent, is);
+            // Main verify block
+            Store store2 = signedData2.getCertificates();
+            SignerInformationStore signers2 = signedData2.getSignerInfos();
+
+            Collection c2 = signers2.getSigners();
+            Iterator it2 = c2.iterator();
+
+            while (it2.hasNext()) {
+                SignerInformation signer = (SignerInformation) it2.next();
+
+                Collection certCollection = store2.getMatches(signer.getSID());
+                Iterator certIt = certCollection.iterator();
+
+                X509CertificateHolder certHolder = (X509CertificateHolder) certIt.next();
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certHolder);
+
+                if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert))) {
+                    verif = true;
+                    return "File " + outputFilename + " verified successfully.";
+                }
+            }
+
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.verifyFile()" + verif);
+
+            return "File " + targetFile + " verification failed.";
+        } catch (IOException | CMSException | CertificateEncodingException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return "File " + targetFile + " verification failed." + ex.getMessage();
+        } catch (OperatorCreationException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "File " + targetFile + " verification failed." + ex.getMessage();
+        } catch (CertificateException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "File " + targetFile + " verification failed." + ex.getMessage();
+        }
+    }
+
+    public String validateCertificate(String targetFile, String verifyCert, String targetDirectory, String outputFilename, boolean tryAll) {
+
+        //     Cipher cipher = Cipher.getInstance(algoCipher, "BC");
+        Security.addProvider(new BouncyCastleProvider());
+        boolean verif = false;
+        try {
+            Integer idCert = getKeyIDFromComboBox(verifyCert);
+            InputStream isc = CryptoDAO.getCertFromDB(idCert);
+            Certificate certificate = getCertificate(isc);
+
+            Path path = Paths.get(targetFile);
+            byte[] data = Files.readAllBytes(path);
+
+            X509CertificateHolder certificateHolder = new X509CertificateHolder(certificate.getEncoded());
+            X509Certificate x509cert = new JcaX509CertificateConverter().getCertificate(certificateHolder);
+
+            //sig is the Signature object
+            CMSSignedData signedData = new CMSSignedData(Base64.decode(data));
+
+            // Main verify block
+            Store store = signedData.getCertificates();
+            SignerInformationStore signers = signedData.getSignerInfos();
+
+            Collection c = signers.getSigners();
+            Iterator it = c.iterator();
+
+            while (it.hasNext()) {
+                SignerInformation signer = (SignerInformation) it.next();
+
+                Collection certCollection = store.getMatches(signer.getSID());
+                Iterator certIt = certCollection.iterator();
+
+                X509CertificateHolder certHolder = (X509CertificateHolder) certIt.next();
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certHolder);
+
+                if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert))) {
+                    verif = true;
+                }
+            }
+
+            System.out.println("org.caulfield.enigma.crypto.CryptoGenerator.verifyFile()" + verif);
+
+            return "File " + targetFile + " verified successfully.";
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
+
+        } catch (IOException | CMSException | CertificateEncodingException ex) {
+            Logger.getLogger(CryptoGenerator.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
+        } catch (CertificateException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            return "Failed to cypher file " + targetFile + " : " + ex.getMessage();
+        } catch (OperatorCreationException ex) {
+            Logger.getLogger(CryptoGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
 
     }
 }

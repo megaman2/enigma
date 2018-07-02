@@ -6,6 +6,7 @@
 package org.caulfield.enigma;
 
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -164,7 +165,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         bG.add(jRadioButtonPEMorDER);
         jRadioButtonPEM.setSelected(true);
         jButtonConvertPEM.setEnabled(false);
-        fillCertificateCiphers();
+        refreshCertificateCombos();
         fillCertificateVersionObjects();
         fillAlgoObjects();
         refreshX509KeyTable();
@@ -183,12 +184,15 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jComboBoxCertVersion.setSelectedIndex(1);
     }
 
-    private void fillCertificateCiphers() {
+    private void refreshCertificateCombos() {
         // Fill SIGNATURE Algo combobox
         try {
+            jComboBoxSignSignerCert.removeAllItems();
+            jComboBoxCipherCert.removeAllItems();
             HSQLLoader database = new HSQLLoader();
             ResultSet f = database.runQuery("select ID_CERT, CERTNAME from CERTIFICATES");
             while (f.next()) {
+                jComboBoxSignSignerCert.addItem(f.getInt("ID_CERT") + ". " + f.getString("CERTNAME"));
                 jComboBoxCipherCert.addItem(f.getInt("ID_CERT") + ". " + f.getString("CERTNAME"));
             }
         } catch (SQLException ex) {
@@ -223,6 +227,47 @@ public class EnigmaIHM extends javax.swing.JFrame {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    private void buildPopupMenuX509Keys() {
+        final JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem exportKeyPEM = new JMenuItem("> Export Key as PEM");
+        exportKeyPEM.addActionListener((ActionEvent e) -> {
+            Integer idKey = (Integer) jTablePK.getModel().getValueAt(jTablePK.getSelectedRow(), 1);
+            FileFilter ft = new FileNameExtensionFilter("Key file (.key)", "key");
+            jFileChooserExportCert.resetChoosableFileFilters();
+            jFileChooserExportCert.setFileFilter(ft);
+            int ret = jFileChooserExportCert.showSaveDialog(this);
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                File targetCert = jFileChooserExportCert.getSelectedFile();
+                ExportManager xm = new ExportManager();
+                String outRet = xm.exportKey(idKey, targetCert.getAbsolutePath());
+                ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+            }
+        });
+        popupMenu.add(exportKeyPEM);
+        jTablePK.setComponentPopupMenu(popupMenu);
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    int rowAtPoint = jTablePK.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), jTablePK));
+                    if (rowAtPoint > -1) {
+                        jTablePK.setRowSelectionInterval(rowAtPoint, rowAtPoint);
+                    }
+                });
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                // TODO Auto-generated method stub
+            }
+        });
     }
 
     private void buildPopupMenuX509() {
@@ -278,6 +323,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             refreshX509KeyTable();
             refreshPKObjects();
             refreshPubKObjects();
+            refreshCertificateCombos();
             ((DefaultListModel) jListEvents.getModel()).addElement("Certificate " + idGeneratedCert + " successfully generated.");
         });
         popupMenu.add(userCert);
@@ -293,6 +339,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 String outRet = xm.importCertificate(targetCert);
                 // TODO : ADD A FIND PARENT AND PRIVATE KEY AUTOMATICALLY ROUTINE
                 refreshX509CertOutline();
+                refreshCertificateCombos();
                 ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
             }
         });
@@ -553,7 +600,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 jComboBoxSignPK.addItem(f.getInt("ID_KEY") + ". " + f.getString("KEYNAME") + " (" + f.getString("ALGO") + ")");
                 jComboBoxCertPk.addItem(f.getInt("ID_KEY") + ". " + f.getString("KEYNAME") + " (" + f.getString("ALGO") + ")");
             }
-
+            buildPopupMenuX509Keys();
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -568,7 +615,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             while (f.next()) {
                 jComboBoxCertPubK.addItem(f.getInt("ID_KEY") + ". " + f.getString("KEYNAME") + " (" + f.getString("ALGO") + ")");
             }
-
+            buildPopupMenuX509Keys();
         } catch (SQLException ex) {
             Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -645,7 +692,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jButtonDashConvert = new javax.swing.JButton();
         jButtonDashX509 = new javax.swing.JButton();
         jButtonDashAbout = new javax.swing.JButton();
-        jButtonDashPGP1 = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
         jPanelACManagement = new javax.swing.JPanel();
         jPanel19 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -782,7 +830,29 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel70 = new javax.swing.JLabel();
         jComboBoxCipherCert = new javax.swing.JComboBox<>();
         jPanel15 = new javax.swing.JPanel();
+        jLabel45 = new javax.swing.JLabel();
+        jTextFieldSignFile1 = new javax.swing.JTextField();
+        jButtonBrowseSignFile1 = new javax.swing.JButton();
+        jLabel73 = new javax.swing.JLabel();
+        jComboBoxSignPK1 = new javax.swing.JComboBox<>();
+        jLabel74 = new javax.swing.JLabel();
+        jTextFieldSignPkPassword1 = new javax.swing.JTextField();
+        jLabel75 = new javax.swing.JLabel();
+        jTextFieldDecryptOutputFilename = new javax.swing.JTextField();
+        jCheckBoxCustomDecrypt = new javax.swing.JCheckBox();
+        jButtonDecrypt = new javax.swing.JButton();
         jPanel16 = new javax.swing.JPanel();
+        jCheckBoxCustomVerify = new javax.swing.JCheckBox();
+        jTextFieldVerifyOutputFilename = new javax.swing.JTextField();
+        jLabel71 = new javax.swing.JLabel();
+        jComboBoxVerifyCert = new javax.swing.JComboBox<>();
+        jLabel72 = new javax.swing.JLabel();
+        jLabel68 = new javax.swing.JLabel();
+        jTextFieldVerifyFile = new javax.swing.JTextField();
+        jButtonBrowseVerifyFile = new javax.swing.JButton();
+        jButtonValidate = new javax.swing.JButton();
+        jCheckBoxCustomVerifyTryAll = new javax.swing.JCheckBox();
+        jButtonVerify = new javax.swing.JButton();
         jPanel10 = new javax.swing.JPanel();
         jPanelAnalyze = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
@@ -833,7 +903,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         pasteMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
         aboutMenuItem = new javax.swing.JMenuItem();
 
@@ -844,6 +913,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jFrameAbout.setTitle("About Enigma");
         jFrameAbout.setAlwaysOnTop(true);
+        jFrameAbout.setResizable(false);
         jFrameAbout.setSize(new java.awt.Dimension(565, 709));
 
         jButton1.setBackground(new java.awt.Color(204, 255, 204));
@@ -1298,6 +1368,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         setResizable(false);
         setSize(new java.awt.Dimension(1427, 846));
 
+        jTabbedPaneScreens.setFont(new java.awt.Font("Segoe UI Symbol", 0, 14)); // NOI18N
         jTabbedPaneScreens.setMaximumSize(new java.awt.Dimension(1437, 693));
         jTabbedPaneScreens.setMinimumSize(new java.awt.Dimension(1437, 693));
         jTabbedPaneScreens.setPreferredSize(new java.awt.Dimension(1437, 693));
@@ -1376,57 +1447,55 @@ public class EnigmaIHM extends javax.swing.JFrame {
             }
         });
 
-        jButtonDashPGP1.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
-        jButtonDashPGP1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/outil.png"))); // NOI18N
-        jButtonDashPGP1.setText("Outils");
-        jButtonDashPGP1.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-        jButtonDashPGP1.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        jButtonDashPGP1.setIconTextGap(10);
-        jButtonDashPGP1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDashPGP1ActionPerformed(evt);
-            }
-        });
+        jLabel5.setBackground(new java.awt.Color(51, 51, 51));
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/brain.gif"))); // NOI18N
+
+        jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/enigma_logo_das.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanelDashboardLayout = new javax.swing.GroupLayout(jPanelDashboard);
         jPanelDashboard.setLayout(jPanelDashboardLayout);
         jPanelDashboardLayout.setHorizontalGroup(
             jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelDashboardLayout.createSequentialGroup()
-                .addContainerGap(363, Short.MAX_VALUE)
-                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jButtonDashGenerate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButtonDashX509, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButtonDashTransform, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButtonDashConvert, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButtonDashAnalyze, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButtonDashPGP1, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(164, 164, 164)
-                .addComponent(jButtonDashAbout)
-                .addContainerGap())
+            .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                        .addGap(113, 113, 113)
+                        .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButtonDashTransform, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonDashX509, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonDashGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(36, 36, 36)
+                        .addComponent(jLabel5)
+                        .addGap(30, 30, 30)
+                        .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButtonDashAnalyze, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonDashAbout, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonDashConvert, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                        .addGap(541, 541, 541)
+                        .addComponent(jLabel25)))
+                .addContainerGap(127, Short.MAX_VALUE))
         );
         jPanelDashboardLayout.setVerticalGroup(
             jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelDashboardLayout.createSequentialGroup()
-                .addGap(42, 42, 42)
-                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonDashAnalyze)
-                    .addComponent(jButtonDashGenerate))
-                .addGap(40, 40, 40)
-                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonDashTransform)
-                    .addComponent(jButtonDashConvert))
-                .addGap(53, 53, 53)
-                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonDashX509)
-                    .addComponent(jButtonDashPGP1))
-                .addContainerGap(100, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelDashboardLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButtonDashAbout)
-                .addContainerGap())
+                .addComponent(jLabel25)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanelDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                        .addComponent(jButtonDashGenerate)
+                        .addGap(57, 57, 57)
+                        .addComponent(jButtonDashTransform)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonDashX509))
+                    .addGroup(jPanelDashboardLayout.createSequentialGroup()
+                        .addComponent(jButtonDashAnalyze)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonDashConvert)
+                        .addGap(43, 43, 43)
+                        .addComponent(jButtonDashAbout))
+                    .addComponent(jLabel5))
+                .addGap(65, 65, 65))
         );
 
         jTabbedPaneScreens.addTab("Dashboard", jPanelDashboard);
@@ -2282,7 +2351,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldP10PkPw, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel34))
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonCSRGenerate)
@@ -2332,7 +2401,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
             .addGroup(jPanel14Layout.createSequentialGroup()
                 .addGap(293, 293, 293)
                 .addComponent(jLabel57)
-                .addContainerGap(328, Short.MAX_VALUE))
+                .addContainerGap(322, Short.MAX_VALUE))
         );
 
         jTabbedPaneGenerate.addTab("PGP", jPanel14);
@@ -2509,8 +2578,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jButtonCipher.setBackground(new java.awt.Color(0, 153, 255));
         jButtonCipher.setForeground(new java.awt.Color(255, 255, 255));
-        jButtonCipher.setIcon(new javax.swing.ImageIcon(getClass().getResource("/keypub.png"))); // NOI18N
-        jButtonCipher.setText("Cipher File");
+        jButtonCipher.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lock.gif"))); // NOI18N
+        jButtonCipher.setText("Encrypt File");
         jButtonCipher.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonCipherActionPerformed(evt);
@@ -2606,28 +2675,248 @@ public class EnigmaIHM extends javax.swing.JFrame {
 
         jPanel15.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Déchiffrer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
+        jLabel45.setText("Target File :");
+
+        jTextFieldSignFile1.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+                jTextFieldSignFile1InputMethodTextChanged(evt);
+            }
+        });
+        jTextFieldSignFile1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldSignFile1ActionPerformed(evt);
+            }
+        });
+
+        jButtonBrowseSignFile1.setText("Parcourir...");
+        jButtonBrowseSignFile1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseSignFile1ActionPerformed(evt);
+            }
+        });
+
+        jLabel73.setText("Private Key for sign :");
+
+        jLabel74.setText("Private Key Password :");
+
+        jLabel75.setText("Output Filename : ");
+
+        jTextFieldDecryptOutputFilename.setEnabled(false);
+        jTextFieldDecryptOutputFilename.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldDecryptOutputFilenameActionPerformed(evt);
+            }
+        });
+
+        jCheckBoxCustomDecrypt.setText("Use custom name");
+        jCheckBoxCustomDecrypt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxCustomDecryptActionPerformed(evt);
+            }
+        });
+
+        jButtonDecrypt.setBackground(new java.awt.Color(153, 51, 0));
+        jButtonDecrypt.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonDecrypt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/keypub.png"))); // NOI18N
+        jButtonDecrypt.setText("Decrypt File");
+        jButtonDecrypt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDecryptActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
         jPanel15.setLayout(jPanel15Layout);
         jPanel15Layout.setHorizontalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel15Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addComponent(jLabel45)
+                        .addGap(78, 78, 78)
+                        .addComponent(jTextFieldSignFile1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(8, 8, 8)
+                        .addComponent(jButtonBrowseSignFile1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addComponent(jLabel73, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jComboBoxSignPK1, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel74)
+                    .addComponent(jLabel75))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTextFieldSignPkPassword1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addComponent(jTextFieldDecryptOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCheckBoxCustomDecrypt)))
+                .addGap(521, 521, 521))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonDecrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel15Layout.setVerticalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 151, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel45)
+                            .addComponent(jTextFieldSignFile1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonBrowseSignFile1)
+                            .addComponent(jLabel75))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel73)
+                            .addComponent(jComboBoxSignPK1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(63, 63, 63))
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldDecryptOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jCheckBoxCustomDecrypt))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel74)
+                            .addComponent(jTextFieldSignPkPassword1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(29, 29, 29)
+                        .addComponent(jButtonDecrypt)
+                        .addContainerGap())))
         );
 
         jPanel16.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Vérifier signature", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+
+        jCheckBoxCustomVerify.setText("Use custom name");
+        jCheckBoxCustomVerify.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxCustomVerifyActionPerformed(evt);
+            }
+        });
+
+        jTextFieldVerifyOutputFilename.setEnabled(false);
+
+        jLabel71.setText("Output Filename : ");
+
+        jLabel72.setText("Validation certificate :");
+
+        jLabel68.setText("Target File :");
+
+        jTextFieldVerifyFile.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+                jTextFieldVerifyFileInputMethodTextChanged(evt);
+            }
+        });
+        jTextFieldVerifyFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldVerifyFileActionPerformed(evt);
+            }
+        });
+
+        jButtonBrowseVerifyFile.setText("Parcourir...");
+        jButtonBrowseVerifyFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseVerifyFileActionPerformed(evt);
+            }
+        });
+
+        jButtonValidate.setBackground(new java.awt.Color(102, 0, 102));
+        jButtonValidate.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonValidate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bluval.png"))); // NOI18N
+        jButtonValidate.setText("Validate Signature");
+        jButtonValidate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonValidateActionPerformed(evt);
+            }
+        });
+
+        jCheckBoxCustomVerifyTryAll.setText("Try everything !");
+        jCheckBoxCustomVerifyTryAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxCustomVerifyTryAllActionPerformed(evt);
+            }
+        });
+
+        jButtonVerify.setBackground(new java.awt.Color(0, 153, 0));
+        jButtonVerify.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonVerify.setIcon(new javax.swing.ImageIcon(getClass().getResource("/validd.png"))); // NOI18N
+        jButtonVerify.setText("Verify Signature");
+        jButtonVerify.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonVerifyActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel16Layout = new javax.swing.GroupLayout(jPanel16);
         jPanel16.setLayout(jPanel16Layout);
         jPanel16Layout.setHorizontalGroup(
             jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel16Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel16Layout.createSequentialGroup()
+                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel16Layout.createSequentialGroup()
+                                .addComponent(jLabel68)
+                                .addGap(78, 78, 78)
+                                .addComponent(jTextFieldVerifyFile, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(8, 8, 8)
+                                .addComponent(jButtonBrowseVerifyFile, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel16Layout.createSequentialGroup()
+                                .addComponent(jLabel72, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jComboBoxVerifyCert, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel16Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCheckBoxCustomVerifyTryAll)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButtonVerify, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel16Layout.createSequentialGroup()
+                                .addGap(101, 101, 101)
+                                .addComponent(jLabel71)
+                                .addGap(44, 44, 44)
+                                .addComponent(jTextFieldVerifyOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCheckBoxCustomVerify)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel16Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButtonValidate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         jPanel16Layout.setVerticalGroup(
             jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 144, Short.MAX_VALUE)
+            .addGroup(jPanel16Layout.createSequentialGroup()
+                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel16Layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel68)
+                            .addComponent(jTextFieldVerifyFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonBrowseVerifyFile)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel16Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel71)
+                            .addComponent(jTextFieldVerifyOutputFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jCheckBoxCustomVerify))))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel72)
+                    .addComponent(jComboBoxVerifyCert, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxCustomVerifyTryAll)
+                    .addComponent(jButtonVerify))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonValidate)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
@@ -2646,10 +2935,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGap(1, 1, 1)
                 .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("X509", jPanel9);
@@ -2677,7 +2965,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
         );
         jPanelTransformLayout.setVerticalGroup(
             jPanelTransformLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 677, Short.MAX_VALUE)
+            .addGap(0, 662, Short.MAX_VALUE)
             .addGroup(jPanelTransformLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(jTabbedPane1))
         );
@@ -2771,12 +3059,13 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE))
         );
 
         jTabbedPaneScreens.addTab("Analyser", jPanelAnalyze);
 
         jPanel18.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Base64 Encode/Decode", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        jPanel18.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
 
         jTextAreaOriginalData.setColumns(20);
         jTextAreaOriginalData.setRows(5);
@@ -2969,10 +3258,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
                 .addComponent(jPanel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 203, Short.MAX_VALUE))
+                .addGap(0, 197, Short.MAX_VALUE))
         );
 
-        jTabbedPaneScreens.addTab("Outils", jPanel17);
+        jTabbedPaneScreens.addTab("Convertir", jPanel17);
 
         jListEvents.setModel(new DefaultListModel<String>());
         jScrollPaneForEvents.setViewportView(jListEvents);
@@ -3001,10 +3290,10 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jLabel38.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel38.setText("Global Output Directory :");
 
-        jButtonBrowseGlobalOutput.setBackground(new java.awt.Color(102, 204, 0));
+        jButtonBrowseGlobalOutput.setBackground(new java.awt.Color(153, 153, 255));
         jButtonBrowseGlobalOutput.setForeground(new java.awt.Color(255, 255, 255));
         jButtonBrowseGlobalOutput.setIcon(new javax.swing.ImageIcon(getClass().getResource("/look.png"))); // NOI18N
-        jButtonBrowseGlobalOutput.setText("Parcourir...");
+        jButtonBrowseGlobalOutput.setText("Set output dir");
         jButtonBrowseGlobalOutput.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonBrowseGlobalOutputActionPerformed(evt);
@@ -3072,9 +3361,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
         jMenuItem1.setText("Objets X509");
         editMenu.add(jMenuItem1);
 
-        jMenuItem3.setText("Scenarios");
-        editMenu.add(jMenuItem3);
-
         menuBar.add(editMenu);
 
         helpMenu.setMnemonic('h');
@@ -3117,11 +3403,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jTabbedPaneScreens, javax.swing.GroupLayout.PREFERRED_SIZE, 693, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel38)
-                    .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonBrowseGlobalOutput1, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonBrowseGlobalOutput1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jTextFieldGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel38)
+                        .addComponent(jButtonBrowseGlobalOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelEvents, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0))
@@ -3343,23 +3630,23 @@ public class EnigmaIHM extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonDashAboutActionPerformed
 
     private void jButtonDashScenariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashScenariosActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(7);
+        //  jTabbedPaneScreens.setSelectedIndex(6);
     }//GEN-LAST:event_jButtonDashScenariosActionPerformed
 
     private void jButtonDashPGPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashPGPActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(6);
+        // jTabbedPaneScreens.setSelectedIndex(6);
     }//GEN-LAST:event_jButtonDashPGPActionPerformed
 
     private void jButtonDashX509ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashX509ActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(5);
+        jTabbedPaneScreens.setSelectedIndex(1);
     }//GEN-LAST:event_jButtonDashX509ActionPerformed
 
     private void jButtonDashConvertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashConvertActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(4);
+        jTabbedPaneScreens.setSelectedIndex(5);
     }//GEN-LAST:event_jButtonDashConvertActionPerformed
 
     private void jButtonDashAnalyzeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashAnalyzeActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(2);
+        jTabbedPaneScreens.setSelectedIndex(4);
     }//GEN-LAST:event_jButtonDashAnalyzeActionPerformed
 
     private void jButtonDashTransformActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashTransformActionPerformed
@@ -3367,8 +3654,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonDashTransformActionPerformed
 
     private void jButtonDashGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashGenerateActionPerformed
-        jTabbedPaneGenerate.setSelectedIndex(0);
-        jTabbedPaneScreens.setSelectedIndex(1);
+        //jTabbedPaneGenerate.setSelectedIndex(0);
+        jTabbedPaneScreens.setSelectedIndex(2);
     }//GEN-LAST:event_jButtonDashGenerateActionPerformed
 
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
@@ -3398,10 +3685,6 @@ public class EnigmaIHM extends javax.swing.JFrame {
             jTextAreaBase64Data.setText(encoded);
         }
     }//GEN-LAST:event_jButtonEncodeBase64ActionPerformed
-
-    private void jButtonDashPGP1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashPGP1ActionPerformed
-        jTabbedPaneScreens.setSelectedIndex(8);
-    }//GEN-LAST:event_jButtonDashPGP1ActionPerformed
 
     private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
 
@@ -3584,8 +3867,84 @@ public class EnigmaIHM extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextFieldSignOutputFilenameActionPerformed
 
     private void jButtonBrowseGlobalOutput1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseGlobalOutput1ActionPerformed
-        // TODO add your handling code here:
+        try {
+            Desktop.getDesktop().open(new File(jTextFieldGlobalOutput.getText()));
+        } catch (IOException ex) {
+            Logger.getLogger(EnigmaIHM.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButtonBrowseGlobalOutput1ActionPerformed
+
+    private void jTextFieldVerifyFileInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jTextFieldVerifyFileInputMethodTextChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldVerifyFileInputMethodTextChanged
+
+    private void jTextFieldVerifyFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldVerifyFileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldVerifyFileActionPerformed
+
+    private void jButtonBrowseVerifyFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseVerifyFileActionPerformed
+        int retour = jFileChooserFileOnly.showOpenDialog(this);
+        if (retour == JFileChooser.APPROVE_OPTION) {
+            // un fichier a été choisi (sortie par OK)
+            // nom du fichier  choisi
+            //            jFileChooser1.getSelectedFile().getName();
+            // chemin absolu du fichier choisi 
+            jTextFieldVerifyFile.setText(jFileChooserFileOnly.getSelectedFile().getAbsolutePath());
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseVerifyFileActionPerformed
+
+    private void jButtonValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonValidateActionPerformed
+
+    }//GEN-LAST:event_jButtonValidateActionPerformed
+
+    private void jCheckBoxCustomVerifyTryAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxCustomVerifyTryAllActionPerformed
+        JCheckBox cbLog = (JCheckBox) evt.getSource();
+        if (cbLog.isSelected()) {
+            jComboBoxVerifyCert.setEnabled(true);
+        } else {
+            jComboBoxVerifyCert.setEnabled(false);
+        }
+    }//GEN-LAST:event_jCheckBoxCustomVerifyTryAllActionPerformed
+
+    private void jCheckBoxCustomVerifyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxCustomVerifyActionPerformed
+        JCheckBox cbLog = (JCheckBox) evt.getSource();
+        if (cbLog.isSelected()) {
+            jTextFieldVerifyOutputFilename.setEnabled(true);
+        } else {
+            jTextFieldVerifyOutputFilename.setEnabled(false);
+            jTextFieldVerifyOutputFilename.setText(getFileName(jTextFieldVerifyOutputFilename.getText()) + ".sig");
+        }
+    }//GEN-LAST:event_jCheckBoxCustomVerifyActionPerformed
+
+    private void jButtonVerifyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonVerifyActionPerformed
+        CryptoGenerator cg = new CryptoGenerator();
+        String outRet = cg.verifyFile(jTextFieldVerifyFile.getText(), (String) jComboBoxVerifyCert.getSelectedItem(), jTextFieldGlobalOutput.getText(), jTextFieldVerifyOutputFilename.getText(), jCheckBoxCustomVerifyTryAll.isSelected());
+        ((DefaultListModel) jListEvents.getModel()).addElement(outRet);
+    }//GEN-LAST:event_jButtonVerifyActionPerformed
+
+    private void jTextFieldSignFile1InputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jTextFieldSignFile1InputMethodTextChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldSignFile1InputMethodTextChanged
+
+    private void jTextFieldSignFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldSignFile1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldSignFile1ActionPerformed
+
+    private void jButtonBrowseSignFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseSignFile1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBrowseSignFile1ActionPerformed
+
+    private void jTextFieldDecryptOutputFilenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDecryptOutputFilenameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldDecryptOutputFilenameActionPerformed
+
+    private void jCheckBoxCustomDecryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxCustomDecryptActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jCheckBoxCustomDecryptActionPerformed
+
+    private void jButtonDecryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonDecryptActionPerformed
 
     /**
      * @param args the command line arguments
@@ -3654,6 +4013,8 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonBrowseP10PubK;
     private javax.swing.JButton jButtonBrowsePubPk;
     private javax.swing.JButton jButtonBrowseSignFile;
+    private javax.swing.JButton jButtonBrowseSignFile1;
+    private javax.swing.JButton jButtonBrowseVerifyFile;
     private javax.swing.JButton jButtonCSRGenerate;
     private javax.swing.JButton jButtonCertGenerate;
     private javax.swing.JButton jButtonCipher;
@@ -3665,11 +4026,11 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonDashConvert;
     private javax.swing.JButton jButtonDashGenerate;
     private javax.swing.JButton jButtonDashPGP;
-    private javax.swing.JButton jButtonDashPGP1;
     private javax.swing.JButton jButtonDashScenarios;
     private javax.swing.JButton jButtonDashTransform;
     private javax.swing.JButton jButtonDashX509;
     private javax.swing.JButton jButtonDecodeBase64;
+    private javax.swing.JButton jButtonDecrypt;
     private javax.swing.JButton jButtonEncodeBase64;
     private javax.swing.JButton jButtonImportKey;
     private javax.swing.JButton jButtonImportKey1;
@@ -3679,8 +4040,13 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JButton jButtonPkGenerate;
     private javax.swing.JButton jButtonPubGenerate;
     private javax.swing.JButton jButtonSign;
+    private javax.swing.JButton jButtonValidate;
+    private javax.swing.JButton jButtonVerify;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBoxCustomCipher;
+    private javax.swing.JCheckBox jCheckBoxCustomDecrypt;
+    private javax.swing.JCheckBox jCheckBoxCustomVerify;
+    private javax.swing.JCheckBox jCheckBoxCustomVerifyTryAll;
     private javax.swing.JCheckBox jCheckBoxP10PubKey;
     private javax.swing.JCheckBox jCheckBoxP12Certainty;
     private javax.swing.JCheckBox jCheckBoxP12Expo;
@@ -3701,7 +4067,9 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> jComboBoxCipherCert;
     private javax.swing.JComboBox<String> jComboBoxPubPK;
     private javax.swing.JComboBox<String> jComboBoxSignPK;
+    private javax.swing.JComboBox<String> jComboBoxSignPK1;
     private javax.swing.JComboBox<String> jComboBoxSignSignerCert;
+    private javax.swing.JComboBox<String> jComboBoxVerifyCert;
     private com.toedter.calendar.JDateChooser jDateChooserExpiry;
     private com.toedter.calendar.JDateChooser jDateChooserP12Expiry;
     private javax.swing.JDialog jDialogFileImport;
@@ -3730,6 +4098,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
@@ -3748,10 +4117,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
     private javax.swing.JLabel jLabel44;
+    private javax.swing.JLabel jLabel45;
     private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel48;
     private javax.swing.JLabel jLabel49;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel50;
     private javax.swing.JLabel jLabel51;
     private javax.swing.JLabel jLabel52;
@@ -3771,14 +4142,19 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel65;
     private javax.swing.JLabel jLabel66;
     private javax.swing.JLabel jLabel67;
+    private javax.swing.JLabel jLabel68;
     private javax.swing.JLabel jLabel69;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel70;
+    private javax.swing.JLabel jLabel71;
+    private javax.swing.JLabel jLabel72;
+    private javax.swing.JLabel jLabel73;
+    private javax.swing.JLabel jLabel74;
+    private javax.swing.JLabel jLabel75;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JList<String> jListEvents;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
@@ -3845,6 +4221,7 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldCipherFile;
     private javax.swing.JTextField jTextFieldCipherOutputFilename;
     private javax.swing.JTextField jTextFieldConvertSourceFile;
+    private javax.swing.JTextField jTextFieldDecryptOutputFilename;
     private javax.swing.JTextField jTextFieldDrop;
     private javax.swing.JTextField jTextFieldGlobalOutput;
     private javax.swing.JTextField jTextFieldImportKeyFile;
@@ -3865,8 +4242,12 @@ public class EnigmaIHM extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldPubTargetFilename;
     private javax.swing.JTextField jTextFieldPubTargetKeyName;
     private javax.swing.JTextField jTextFieldSignFile;
+    private javax.swing.JTextField jTextFieldSignFile1;
     private javax.swing.JTextField jTextFieldSignOutputFilename;
     private javax.swing.JTextField jTextFieldSignPkPassword;
+    private javax.swing.JTextField jTextFieldSignPkPassword1;
+    private javax.swing.JTextField jTextFieldVerifyFile;
+    private javax.swing.JTextField jTextFieldVerifyOutputFilename;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private org.netbeans.swing.outline.Outline outline;
