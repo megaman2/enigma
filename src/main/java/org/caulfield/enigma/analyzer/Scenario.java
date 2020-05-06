@@ -51,7 +51,9 @@ public class Scenario {
         Method method = null;
         try {
             method = step.getClazz().getMethod(step.getMethod(), File.class);
+            
             out = method.invoke(step.getObj(), step.getParam());
+            System.out.println("====================== Invoking "+step.getMethod()+" returns:"+out);
         } catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
         }

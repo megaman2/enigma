@@ -32,9 +32,17 @@ public class FileAnalyzer {
     private List<String> results;
 
     public FileAnalyzer(String file) {
+    	
         results = new ArrayList<>();
         long startTime = System.nanoTime();
         File f = new File(file);
+        long fileSize = f.length();
+        long fileSizeMB = fileSize/1024/1024;
+        if(fileSizeMB>10) 
+        	{
+        	 results.add("File is too big : "+fileSizeMB+" MB (Max 10 MB).");
+        	}
+        else {
         results.add("------------------------------------");
         results.add("Starting analysis of " + f.getName() + "...");
         results.add("Java File Type Detection : " + identifyFileTypeUsingFilesProbeContentType(f));
@@ -45,6 +53,7 @@ public class FileAnalyzer {
         long endTime = System.nanoTime();
         results.add("Analysis completed in " + (endTime - startTime) / 1000000 + " ms.");
         results.add("------------------------------------");
+        }
     }
 
     /**

@@ -56,7 +56,7 @@ public class PKCS7Reader {
 //        String output = null;
 //        PKCS10CertificationRequest csr = null;
         FileInputStream fis = null;
-        String output = null;
+        String output = "Not a PKCS7 file";
         File f = new File(fileName);
         try {
             fis = new FileInputStream(f);
@@ -91,7 +91,7 @@ public class PKCS7Reader {
 
         } catch (IOException | NullPointerException ex) {
             Logger.getLogger(PublicKeyReader.class.getName()).log(Level.SEVERE, null, ex);
-            return "Not a X509 file";
+            return "Not a PKCS7 file";
         }
         return output;
     }
@@ -131,6 +131,6 @@ public class PKCS7Reader {
     }
 
     private String tryLegacyPKCS7(byte[] encoded) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    	return "Not a Legacy PKCS7 file";
     }
 }
